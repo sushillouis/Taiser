@@ -53,21 +53,21 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 	// The malicious packet for this starting point (NetworkSynced)
-	public Packet.Details spawnedMaliciousPacketDetails = Packet.Details.Default;
+	public PacketRule.Details spawnedMaliciousPacketDetails = PacketRule.Details.Default;
 	// The likelihood that a packet coming from this starting point will be malicious (Network Synced)
 	public float maliciousPacketProbability = .33333f;
 
 	// Generates a random set of details, ensuring that the returned values aren't considered malicious
-	public Packet.Details randomNonMaliciousDetails() {
-		Packet.Details details = new Packet.Details(Utilities.randomEnum<Packet.Color>(), Utilities.randomEnum<Packet.Size>(), Utilities.randomEnum<Packet.Shape>());
-		if(details == spawnedMaliciousPacketDetails) details = randomNonMaliciousDetails();
+	public PacketRule.Details randomNonMaliciousPacketDetails() {
+		PacketRule.Details details = new PacketRule.Details(Utilities.randomEnum<PacketRule.Color>(), Utilities.randomEnum<PacketRule.Size>(), Utilities.randomEnum<PacketRule.Shape>());
+		if(details == spawnedMaliciousPacketDetails) details = randomNonMaliciousPacketDetails();
 		return details;
 	}
 
 
 	// Update the starting point's malicious packet details (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
-	public bool SetMaliciousPacketDetails(Packet.Color color, Packet.Size size, Packet.Shape shape) {
+	public bool SetMaliciousPacketDetails(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape) {
 		// Only update the settings if we have updates remaining
 		if(updatesRemaining > 0){
 			// Take away an update if something actually changed
@@ -77,9 +77,9 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 			return true;
 		} else return false;
 	}
-	public bool SetMaliciousPacketDetails(Packet.Details details) { return SetMaliciousPacketDetails(details.color, details.size, details.shape); }
-	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketDetails(Packet.Color color, Packet.Size size, Packet.Shape shape){
-		spawnedMaliciousPacketDetails = new Packet.Details(color, size, shape);
+	public bool SetMaliciousPacketDetails(PacketRule.Details details) { return SetMaliciousPacketDetails(details.color, details.size, details.shape); }
+	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketDetails(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape){
+		spawnedMaliciousPacketDetails = new PacketRule.Details(color, size, shape);
 	}
 
 

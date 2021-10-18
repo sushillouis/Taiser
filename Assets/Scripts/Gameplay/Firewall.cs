@@ -15,7 +15,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 	public Color[] colors;
 
 	// The details of packets that should be filtered
-	public Packet.Details filterRules = Packet.Details.Default;
+	public PacketRule.Details filterRules = PacketRule.Details.Default;
 
 	// The number of updates gained after each wave (based on difficulty)
 	public int[] updatesGrantedPerWave = new int[3] {/*easy*/4, /*medium*/4, /*hard*/4};
@@ -46,7 +46,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 
 	// When the firewall is created make sure its filter rules are defaulted
 	void Start(){
-		SetFilterRules(Packet.Details.Default); // Make sure that the base filter rules are applied
+		SetFilterRules(PacketRule.Details.Default); // Make sure that the base filter rules are applied
 		OnWaveStart();
 	}
 
@@ -57,7 +57,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 
 	// Update the packet rules (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
-	public bool SetFilterRules(Packet.Color color, Packet.Size size, Packet.Shape shape){
+	public bool SetFilterRules(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape){
 		// Only update the settings if we have updates remaining
 		if(updatesRemaining > 0){
 			// Take away an update if something actually changed
@@ -67,16 +67,16 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 			return true;
 		} else return false;
 	}
-	public bool SetFilterRules(Packet.Details details){ return SetFilterRules(details.color, details.size, details.shape); }
-	[PunRPC] void RPC_Firewall_SetFilterRules(Packet.Color color, Packet.Size size, Packet.Shape shape){
-		filterRules = new Packet.Details(color, size, shape);
+	public bool SetFilterRules(PacketRule.Details details){ return SetFilterRules(details.color, details.size, details.shape); }
+	[PunRPC] void RPC_Firewall_SetFilterRules(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape){
+		filterRules = new PacketRule.Details(color, size, shape);
 
 		SetGateColor(color);
 	}
 
 	// Function which sets the firewall's gate color (network synced)
-	public void SetGateColor(Packet.Color color, bool _default = false){ photonView.RPC("RPC_Firewall_SetGateColor", RpcTarget.AllBuffered, color, _default); }
-	[PunRPC] void RPC_Firewall_SetGateColor(Packet.Color color, bool _default){
+	public void SetGateColor(PacketRule.Color color, bool _default = false){ photonView.RPC("RPC_Firewall_SetGateColor", RpcTarget.AllBuffered, color, _default); }
+	[PunRPC] void RPC_Firewall_SetGateColor(PacketRule.Color color, bool _default){
 		// Get the list of materials off the mesh
 		Material[] mats = renderer.materials;
 		// Replace the second one with a new instance of the gate material

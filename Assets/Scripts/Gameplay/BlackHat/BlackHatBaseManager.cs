@@ -27,7 +27,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 
 
 	// Function which updates all of the starting points to have the specified malicious packet details
-	public bool ChangeAllStartPointsMalciousPacketDetails(Packet.Details details){
+	public bool ChangeAllStartPointsMalciousPacketDetails(PacketRule.Details details){
 		bool success = true;
 		foreach(StartingPoint p in StartingPoint.startingPoints)
 			success &= ChangeStartPointMalciousPacketDetails(p, details);
@@ -36,7 +36,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 	}
 
 	// Function which updates the specified starting point to have the specified malicious packet details
-	public bool ChangeStartPointMalciousPacketDetails(StartingPoint toModify, Packet.Details details){
+	public bool ChangeStartPointMalciousPacketDetails(StartingPoint toModify, PacketRule.Details details){
 		// Error if the starting point to destroy is null
 		if(toModify == null){
 			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");

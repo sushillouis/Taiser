@@ -105,17 +105,17 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 		if(selected == null) return;
 
 		// Set the correct spawning rules based on the given input
-		Packet.Details rules = selected.spawnedMaliciousPacketDetails;
+		PacketRule.Details rules = selected.spawnedMaliciousPacketDetails;
 		switch(deltaNumber){
-			case 0: rules.size = Packet.Size.Small; break;
-			case 1: rules.size = Packet.Size.Medium; break;
-			case 2: rules.size = Packet.Size.Large; break;
-			case 3: rules.shape = Packet.Shape.Cube; break;
-			case 4: rules.shape = Packet.Shape.Sphere; break;
-			case 5: rules.shape = Packet.Shape.Cone; break;
-			case 6: rules.color = Packet.Color.Blue; break;
-			case 7: rules.color = Packet.Color.Green; break;
-			case 8: rules.color = Packet.Color.Pink; break;
+			case 0: rules.size = PacketRule.Size.Small; break;
+			case 1: rules.size = PacketRule.Size.Medium; break;
+			case 2: rules.size = PacketRule.Size.Large; break;
+			case 3: rules.shape = PacketRule.Shape.Cube; break;
+			case 4: rules.shape = PacketRule.Shape.Sphere; break;
+			case 5: rules.shape = PacketRule.Shape.Cone; break;
+			case 6: rules.color = PacketRule.Color.Blue; break;
+			case 7: rules.color = PacketRule.Color.Green; break;
+			case 8: rules.color = PacketRule.Color.Pink; break;
 		}
 
 		if(!ChangeStartPointMalciousPacketDetails(selected, rules))
@@ -140,15 +140,15 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 			t.interactable = false;
 
 		// Set the correct toggle states
-		packetStartPanelToggles[0].isOn = p.details.size == Packet.Size.Small;
-		packetStartPanelToggles[1].isOn = p.details.size == Packet.Size.Medium;
-		packetStartPanelToggles[2].isOn = p.details.size == Packet.Size.Large;
-		packetStartPanelToggles[3].isOn = p.details.shape == Packet.Shape.Cube;
-		packetStartPanelToggles[4].isOn = p.details.shape == Packet.Shape.Sphere;
-		packetStartPanelToggles[5].isOn = p.details.shape == Packet.Shape.Cone;
-		packetStartPanelToggles[6].isOn = p.details.color == Packet.Color.Blue;
-		packetStartPanelToggles[7].isOn = p.details.color == Packet.Color.Green;
-		packetStartPanelToggles[8].isOn = p.details.color == Packet.Color.Pink;
+		packetStartPanelToggles[0].isOn = p.details.size == PacketRule.Size.Small;
+		packetStartPanelToggles[1].isOn = p.details.size == PacketRule.Size.Medium;
+		packetStartPanelToggles[2].isOn = p.details.size == PacketRule.Size.Large;
+		packetStartPanelToggles[3].isOn = p.details.shape == PacketRule.Shape.Cube;
+		packetStartPanelToggles[4].isOn = p.details.shape == PacketRule.Shape.Sphere;
+		packetStartPanelToggles[5].isOn = p.details.shape == PacketRule.Shape.Cone;
+		packetStartPanelToggles[6].isOn = p.details.color == PacketRule.Color.Blue;
+		packetStartPanelToggles[7].isOn = p.details.color == PacketRule.Color.Green;
+		packetStartPanelToggles[8].isOn = p.details.color == PacketRule.Color.Pink;
 
 		// Display the correct header
 		packetStartPanelPacketHeader.gameObject.SetActive(true);
@@ -168,15 +168,15 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 			else t.interactable = false;
 
 		// Set the correct toggle states
-		packetStartPanelToggles[0].isOn = p.spawnedMaliciousPacketDetails.size == Packet.Size.Small;
-		packetStartPanelToggles[1].isOn = p.spawnedMaliciousPacketDetails.size == Packet.Size.Medium;
-		packetStartPanelToggles[2].isOn = p.spawnedMaliciousPacketDetails.size == Packet.Size.Large;
-		packetStartPanelToggles[3].isOn = p.spawnedMaliciousPacketDetails.shape == Packet.Shape.Cube;
-		packetStartPanelToggles[4].isOn = p.spawnedMaliciousPacketDetails.shape == Packet.Shape.Sphere;
-		packetStartPanelToggles[5].isOn = p.spawnedMaliciousPacketDetails.shape == Packet.Shape.Cone;
-		packetStartPanelToggles[6].isOn = p.spawnedMaliciousPacketDetails.color == Packet.Color.Blue;
-		packetStartPanelToggles[7].isOn = p.spawnedMaliciousPacketDetails.color == Packet.Color.Green;
-		packetStartPanelToggles[8].isOn = p.spawnedMaliciousPacketDetails.color == Packet.Color.Pink;
+		packetStartPanelToggles[0].isOn = p.spawnedMaliciousPacketDetails.size == PacketRule.Size.Small;
+		packetStartPanelToggles[1].isOn = p.spawnedMaliciousPacketDetails.size == PacketRule.Size.Medium;
+		packetStartPanelToggles[2].isOn = p.spawnedMaliciousPacketDetails.size == PacketRule.Size.Large;
+		packetStartPanelToggles[3].isOn = p.spawnedMaliciousPacketDetails.shape == PacketRule.Shape.Cube;
+		packetStartPanelToggles[4].isOn = p.spawnedMaliciousPacketDetails.shape == PacketRule.Shape.Sphere;
+		packetStartPanelToggles[5].isOn = p.spawnedMaliciousPacketDetails.shape == PacketRule.Shape.Cone;
+		packetStartPanelToggles[6].isOn = p.spawnedMaliciousPacketDetails.color == PacketRule.Color.Blue;
+		packetStartPanelToggles[7].isOn = p.spawnedMaliciousPacketDetails.color == PacketRule.Color.Green;
+		packetStartPanelToggles[8].isOn = p.spawnedMaliciousPacketDetails.color == PacketRule.Color.Pink;
 
 		// Display the correct header
 		packetStartPanelPacketHeader.gameObject.SetActive(false);

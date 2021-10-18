@@ -27,6 +27,9 @@ public class TestBench : MonoBehaviour {
 		(WhiteHatPlayerManager.instance as WhiteHatPlayerManager).OnEnable();
 
 		Debug.Log(NetworkingManager.isWhiteHatPrimary);
+
+
+		PacketRule.Parse("pink & cube & !medium | (cone | sphere)");
 	}
 
 }

@@ -134,7 +134,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	}
 
 	// Function which updates the settings of the given firewall
-	protected virtual bool SetFirewallFilterRules(Firewall toModify, Packet.Details filterRules){
+	protected virtual bool SetFirewallFilterRules(Firewall toModify, PacketRule.Details filterRules){
 		// Error if the firewall to destroy is null
 		if(toModify == null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to modify must be selected!");

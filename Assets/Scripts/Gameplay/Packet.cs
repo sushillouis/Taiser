@@ -5,81 +5,6 @@ using UnityEngine;
 using Photon.Pun;
 
 public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
-	// -- Types --
-
-	// Enum defining a packet's color
-	[Serializable]
-	public enum Color {
-		Blue,
-		Pink,
-		Green
-	}
-
-	// Enum defining a packet's size
-	[Serializable]
-	public enum Size {
-		Invalid = 0,
-		Small = 1,
-		Medium = 4,
-		Large = 6,
-	}
-
-	// Enum defining a packet's shape
-	[Serializable]
-	public enum Shape {
-		Cube,
-		Sphere,
-		Cone
-	}
-
-	// Structure which stores the details (color, size, and shape) of a packet
-	[Serializable]
-	public struct Details {
-		public Color color;
-		public Size size;
-		public Shape shape;
-
-		public static readonly Details Default = new Details(Color.Blue, Size.Small, Shape.Cube);
-
-		public Details(Color _color, Size _size, Shape _shape){
-			color = _color;
-			size = _size == Size.Invalid ? Size.Small : _size;
-			shape = _shape;
-		}
-
-		// Object equality (Required to override ==)
-		public override bool Equals(System.Object obj) {
-			if (obj == null)
-				return false;
-			Details? o = obj as Details?;
-			return Equals(o.Value);
-		}
-
-		// Details equality
-		public bool Equals(Details o){
-			return color == o.color
-				&& size == o.size
-				&& shape == o.shape;
-		}
-
-		// Required to override Equals
-		public override int GetHashCode() { return base.GetHashCode(); }
-
-		// Equality Operator
-		public static bool operator ==(Details a, Details b){ return a.Equals(b); }
-		// Inequality Operator (Required if == is overridden)
-		public static bool operator !=(Details a, Details b){ return !a.Equals(b); }
-
-		// To string method used for selection debugging
-		public override string ToString(){
-			return "Color: " + color + ", Size: " + size + ", Shape: " + shape;
-		}
-	}
-
-
-	// -- Settings --
-
-
 	// This packet's mesh filter
 	public MeshFilter filter;
 	// This packet's mesh renderer
@@ -105,8 +30,8 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Property defining the packet's details (color, size, shape) (automatically network synced)
 	[SerializeField]
-	Details _details;
-	public Details details {
+	PacketRule.Details _details;
+	public PacketRule.Details details {
 		get => _details;
 		set => SetProperties(value, _isMalicious);
 	}
@@ -183,7 +108,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		}
 
 		// Set the packet details (if the packed is malicious the network property synchronizer will load the correct settings from the starting point)
-		details = startPoint.randomNonMaliciousDetails();
+		details = startPoint.randomNonMaliciousPacketDetails();
 	}
 
 
@@ -280,12 +205,12 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Synchronizes the properties across the network
 	// NOTE: The starting point must be set before this function can properly do its job
-	public void SetProperties(Color color, Size size, Shape shape, bool isMalicious){ SetProperties(new Details(color, size, shape), isMalicious); }
-	public void SetProperties(Details details, bool isMalicious){ photonView.RPC("RPC_Packet_SetProperties", RpcTarget.AllBuffered, details.color, details.size, details.shape, isMalicious); }
-	[PunRPC] void RPC_Packet_SetProperties(Color color, Size size, Shape shape, bool isMalicious){
+	public void SetProperties(PacketRule.Color color,PacketRule. Size size, PacketRule.Shape shape, bool isMalicious){ SetProperties(new PacketRule.Details(color, size, shape), isMalicious); }
+	public void SetProperties(PacketRule.Details details, bool isMalicious){ photonView.RPC("RPC_Packet_SetProperties", RpcTarget.AllBuffered, details.color, details.size, details.shape, isMalicious); }
+	[PunRPC] void RPC_Packet_SetProperties(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape, bool isMalicious){
 		// Ensure the local properties match the remote ones
 		_isMalicious = isMalicious;
-		if(!_isMalicious) _details = new Details(color, size, shape);
+		if(!_isMalicious) _details = new PacketRule.Details(color, size, shape);
 		else _details = startPoint.spawnedMaliciousPacketDetails;
 
 		// Set the mesh based on the shape
@@ -302,9 +227,9 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		// Set the size of the packet
 		selectionCylinder.transform.parent = null;
 		switch(details.size){
-			case Size.Small: transform.localScale = Utilities.toVec(.1f); break;
-			case Size.Medium: transform.localScale = Utilities.toVec(.2f); break;
-			case Size.Large: transform.localScale = Utilities.toVec(.3f); break;
+			case PacketRule.Size.Small: transform.localScale = Utilities.toVec(.1f); break;
+			case PacketRule.Size.Medium: transform.localScale = Utilities.toVec(.2f); break;
+			case PacketRule.Size.Large: transform.localScale = Utilities.toVec(.3f); break;
 		}
 
 		// Ensure that the malicious packet indicator is properly positioned
