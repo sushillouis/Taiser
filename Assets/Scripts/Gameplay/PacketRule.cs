@@ -112,6 +112,14 @@ public partial class PacketRule : List<PacketRule.Details> {
 			for(int i = 0; i < children.Length; i++)
 				children[i].DebugDump(indent, i == children.Length - 1);
 		}
+
+		// Function which checks if all of the provided nodes have the same type
+		public static bool allHaveType(Node[] nodes, Node.Type type){
+			foreach(Node node in nodes)
+				if(node.type != type)
+					return false;
+			return true;
+		}
 	}
 
 	// Or Node
@@ -417,10 +425,14 @@ public partial class PacketRule : List<PacketRule.Details> {
 		// Make a deep copy of the tree so that we manipulate it without worying about the integrity of the original
 		Node treeCopy = ObjectExtensions.Copy(treeRoot); // Code found in Utilities/ObjectExtensions.cs
 
-		// Remove nots from the copied tree
+		// Remove NOTs from the copied tree
 		treeCopy = optimizeAllNots(treeCopy);
 
+		// Distrubte ANDs over ORs (move ANDs to the bottom of the tree)
 		treeCopy = distributeAllAnd(treeCopy);
+
+		// Merge nodes together and remove duplicate children
+		treeCopy = consolidateAll(treeCopy);
 
 		Debug.Log("Optimized:");
 		treeCopy.DebugDump();
@@ -585,6 +597,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 		throw new System.ArgumentException("Unsupported Not-Optimiztion case!");
 	}
 
+
+
 	// Function which repeatedly distributes until nothing is changed
 	Node distributeAllAnd(Node node) {
 		// While something has changed...
@@ -593,8 +607,6 @@ public partial class PacketRule : List<PacketRule.Details> {
 			changed = false;
 			// Take another pass at distributing ANDs
 			node = distributeAllAnd(node, ref changed);
-
-			Debug.Log(changed);
 		}
 
 		return node;
@@ -655,5 +667,151 @@ public partial class PacketRule : List<PacketRule.Details> {
 		}
 
 		return input;
+	}
+
+
+	// Function which repeatedly consolidates until nothing is changed
+	Node consolidateAll(Node node){
+		// While something has changed, consolidate the whole tree
+		bool changed = true;
+		while(changed){
+			changed = false;
+			node = consolidateAll(node, ref changed);
+		}
+
+		return node;
+	}
+
+
+	// Function which recursively consolidates nodes in the tree
+	Node consolidateAll(Node node, ref bool changed){
+		// Consolidate this node
+		node = consolidate(node, ref changed);
+		// Recursively consolidate the children
+		if(node.children is object)
+			 for(int i = 0; i < node.children.Length; i++)
+				node.children[i] = consolidateAll(node.children[i], ref changed);
+
+		return node;
+	}
+
+	// class LiteralNodeDetailsComparer : IEqualityComparer<PacketRule.LiteralNode>{
+	// 	public bool Equals(PacketRule.LiteralNode x, PacketRule.LiteralNode y) {
+	// 		if (System.Object.ReferenceEquals(x, y)) return true;
+	//
+	// 		return x.details == y.details;
+	// 	}
+	//
+	// 	public int GetHashCode(PacketRule.LiteralNode n){
+	// 		return n.details.GetHashCode();
+	// 	}
+	// }
+
+	// Function which consolidates a single node (removed duplicate literals, combines A AND A and A OR A into A, and merges chains of AND/ORs into a single node)
+	Node consolidate(Node node, ref bool changed){
+		// Returned node
+		Node ret = node;
+
+		// If this node is an OR node...
+		if(node.type == Node.Type.Or){
+			ORNode orNode = node as ORNode;
+
+			// If all of the children are literals... remove any children of this node that are the same
+			if(Node.allHaveType(orNode.children, Node.Type.Literal) && orNode.children is object){
+				List<Node> children = new List<Node>(orNode.children);
+
+				// Remove duplicates
+				for(int i = 0; i < children.Count; i++)
+					for(int j = i + 1; j < children.Count; j++)
+						if((children[i] as LiteralNode).details == (children[j] as LiteralNode).details)
+							children.RemoveAt(j);
+
+				// If only a single child is remaining, this node just becomes the child
+				if(children.Count == 1)
+					ret = children[0];
+				// Otherwise update the list of children
+				else {
+					orNode.children = children.ToArray();
+					ret = orNode;
+				}
+
+				// If the number of children changed... mark that a change has occurred
+				if(children.Count != orNode.children.Length)
+					changed |= true;
+
+			// If all of the children are OR nodes
+			} else if(Node.allHaveType(orNode.children, Node.Type.Or) && orNode.children is object){
+				// Create a list of all of the children's children
+				List<Node> children = new List<Node>();
+				foreach(Node child in orNode.children)
+					foreach(Node childsChild in child.children)
+						children.Add(childsChild);
+
+				// Our children become the children's children
+				orNode.children = children.ToArray();
+				ret = orNode;
+				changed |= true; // Mark that a change has occurred
+			}
+
+		// If this node is an AND node...
+		} else if(node.type == Node.Type.And){
+			ANDNode andNode = node as ANDNode;
+
+			// If all of the children are literals... remove any children of this node that are the same
+			if(Node.allHaveType(andNode.children, Node.Type.Literal) && andNode.children is object){
+			// if(andNode.getLeft().type == Node.Type.Literal && andNode.getRight().type == Node.Type.Literal){
+				List<Node> children = new List<Node>(andNode.children);
+
+				// Remove duplicates
+				for(int i = 0; i < children.Count; i++)
+					for(int j = i + 1; j < children.Count; j++)
+						if((children[i] as LiteralNode).details == (children[j] as LiteralNode).details)
+							children.RemoveAt(j);
+
+				// If only a single child is remaining, this node just becomes the child
+				if(children.Count == 1)
+					ret = children[0];
+				// Otherwise update the list of children
+				else {
+					andNode.children = children.ToArray();
+					ret = andNode;
+				}
+
+				// If the number of children changed... mark that a change has occurred
+				if(children.Count != andNode.children.Length)
+					changed |= true;
+
+				// OLD version
+				// Details left = (andNode.getLeft() as LiteralNode).details;
+				// Details right = (andNode.getRight() as LiteralNode).details;
+				//
+				// if(left == right)
+				// 	ret = andNode.getLeft();
+			} else if(Node.allHaveType(andNode.children, Node.Type.And) && andNode.children is object){
+			// } else if(andNode.getLeft().type == Node.Type.And && andNode.getRight().type == Node.Type.And){
+				// Create a list of all of the children's children
+				List<Node> children = new List<Node>();
+				foreach(Node child in andNode.children)
+					foreach(Node childsChild in child.children)
+						children.Add(childsChild);
+
+				// Our children become the children's children
+				andNode.children = children.ToArray();
+				ret = andNode;
+				changed |= true; // Mark that a change has occurred
+
+				// Old Version
+				// ANDNode left = andNode.getLeft() as ANDNode;
+				// ANDNode right = andNode.getRight() as ANDNode;
+				// ret = new ANDNode();
+				// ret.children = new Node[4];
+				// ret.children[0] = left.getLeft();
+				// ret.children[1] = left.getRight();
+				// ret.children[2] = right.getLeft();
+				// ret.children[3] = right.getRight();
+			}
+		}
+
+		return ret;
 	}
 }
