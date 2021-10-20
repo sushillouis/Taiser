@@ -420,6 +420,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 		// Remove nots from the copied tree
 		treeCopy = optimizeAllNots(treeCopy);
 
+		treeCopy = distributeAllAnd(treeCopy);
+
 		Debug.Log("Optimized:");
 		treeCopy.DebugDump();
 	}
@@ -577,14 +579,81 @@ public partial class PacketRule : List<PacketRule.Details> {
 		}
 
 		// If there is a double not, simply remove them
-		else if(input.getChild().type == Node.Type.Not){
+		else if(input.getChild().type == Node.Type.Not)
 			return (input.getChild() as NotNode).getChild();
-		}
 
 		throw new System.ArgumentException("Unsupported Not-Optimiztion case!");
 	}
 
-	// Node expand(Node node){
-	//
-	// }
+	// Function which repeatedly distributes until nothing is changed
+	Node distributeAllAnd(Node node) {
+		// While something has changed...
+		bool changed = true;
+		while(changed){
+			changed = false;
+			// Take another pass at distributing ANDs
+			node = distributeAllAnd(node, ref changed);
+
+			Debug.Log(changed);
+		}
+
+		return node;
+	}
+
+	// Function which recursively distributes ANDs over ORs in the whole tree
+	Node distributeAllAnd(Node node, ref bool changed){
+		// If this node is an and node... distribute over it
+		if(node.type == Node.Type.And)
+			node = distributeAnd(node as ANDNode, ref changed);
+
+		// Recursively call for each child
+		if(node.children is object)
+			for(int i = 0; i < node.children.Length; i++)
+				node.children[i] = distributeAllAnd(node.children[i], ref changed);
+
+		return node;
+	}
+
+	// Function which distributes an AND over an OR (tracks if a change occurred)
+	Node distributeAnd(ANDNode input, ref bool changed){
+		// If the left node of the AND is an OR, distribute
+		if(input.getLeft().type == Node.Type.Or){
+			ORNode child = input.getLeft() as ORNode;
+			// Create a new OR node
+			ORNode ret = new ORNode();
+
+			// Create an AND node on the left (it has the OR's left and the original right)
+			ret.getLeft() = new ANDNode();
+			(ret.getLeft() as ANDNode).getLeft() = child.getLeft();
+			(ret.getLeft() as ANDNode).getRight() = ObjectExtensions.Copy(input.getRight());
+
+			// Create an AND node on the right (it has the OR's right and the original right)
+			ret.getRight() = new ANDNode();
+			(ret.getRight() as ANDNode).getLeft() = child.getRight();
+			(ret.getRight() as ANDNode).getRight() = ObjectExtensions.Copy(input.getRight());
+
+			changed |= true; // Mark that a change occurred
+			return ret;
+		// If the right node of the AND is an OR, distribute
+		} else if(input.getRight().type == Node.Type.Or){
+			ORNode child = input.getRight() as ORNode;
+			// Create a new OR node
+			ORNode ret = new ORNode();
+
+			// Create an AND node on the left (it has the original left and the OR's left)
+			ret.getLeft() = new ANDNode();
+			(ret.getLeft() as ANDNode).getLeft() = ObjectExtensions.Copy(input.getLeft());
+			(ret.getLeft() as ANDNode).getRight() = child.getLeft();
+
+			// Create an AND node on the right (it has the original left and the OR's right)
+			ret.getRight() = new ANDNode();
+			(ret.getRight() as ANDNode).getLeft() = ObjectExtensions.Copy(input.getLeft());
+			(ret.getRight() as ANDNode).getRight() = child.getRight();
+
+			changed |= true; // Mark that a change occurred
+			return ret;
+		}
+
+		return input;
+	}
 }
