@@ -179,7 +179,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 
 	// Parses a string into a packet rule
-	public static PacketRule Parse(string s){
+	// Includes an option to automatically optimize the parsed result and create the list out of it
 	public static PacketRule Parse(string s, bool autoCommit = true){
 		Debug.Log("Input: " + s);
 
@@ -190,11 +190,14 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 		// Parse the lexed tokens into a tree
 		int index = 0;
-		ParseNode tree = ParseExpression(s, ref index);
-		tree.DebugDump();
+		PacketRule ret = new PacketRule();
+		ret.treeRoot = ParseExpression(s, ref index);
 
+		// Apply optimizations and list conversion to the tree if autoCommitting is requested
+		if(autoCommit)
+			ret.Commit();
 
-		return null;
+		return ret;
 	}
 
 	// Sizes: b = blue, p = pink, g = green
@@ -372,5 +375,184 @@ public partial class PacketRule : List<PacketRule.Details> {
 		}
 
 		return ret;
+	}
+
+
+	// -- Optimizer
+
+
+	// Function which commits the changes to the parse tree
+	public void Commit() {
+		// Make sure that we are no longer storing any values
+		Clear();
+
+		// Make a deep copy of the tree so that we manipulate it without worying about the integrity of the original
+		Node treeCopy = ObjectExtensions.Copy(treeRoot); // Code found in Utilities/ObjectExtensions.cs
+
+		// Remove nots from the copied tree
+		treeCopy = optimizeAllNots(treeCopy);
+
+		Debug.Log("Optimized:");
+		treeCopy.DebugDump();
+	}
+
+	// Function which ensures that all nots are removed from the tree
+	Node optimizeAllNots(Node node){
+		// If a node is a NOT, optimize it and then recursively call on the result
+		if(node.type == Node.Type.Not){
+			return optimizeAllNots( optimizeNot(node as NotNode) );
+		// If the node is an AND, recursively call on its children
+		} else if (node.type == Node.Type.And){
+			ANDNode andNode = node as ANDNode;
+			andNode.left = optimizeAllNots(andNode.left);
+			andNode.right = optimizeAllNots(andNode.right);
+			return andNode;
+		// If the node is an OR, recursively call on its children
+		} else if (node.type == Node.Type.Or){
+		   ORNode orNode = node as ORNode;
+		   orNode.left = optimizeAllNots(orNode.left);
+		   orNode.right = optimizeAllNots(orNode.right);
+		   return orNode;
+	   }
+
+	   return node;
+	}
+
+	// Function which optimizes away nots
+	Node optimizeNot(NotNode input){
+		if(input.child.type == Node.Type.Literal){
+			LiteralNode child = input.child as LiteralNode;
+
+			// Single literal rule
+
+			// Color
+			if(child.details.color != PacketRule.Color.Any && child.details.shape == PacketRule.Shape.Any && child.details.size == PacketRule.Size.Any){
+				ORNode ret = new ORNode();
+
+				switch(child.details.color){
+					case PacketRule.Color.Blue:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Pink, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Green, PacketRule.Size.Any, PacketRule.Shape.Any);
+						break;
+					case PacketRule.Color.Pink:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Blue, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Green, PacketRule.Size.Any, PacketRule.Shape.Any);
+						break;
+					case PacketRule.Color.Green:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Pink, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Blue, PacketRule.Size.Any, PacketRule.Shape.Any);
+						break;
+				}
+
+				return ret;
+			}
+
+			// Shape
+			if (child.details.shape != PacketRule.Shape.Any && child.details.color == PacketRule.Color.Any && child.details.size == PacketRule.Size.Any){
+				ORNode ret = new ORNode();
+
+				switch(child.details.shape){
+					case PacketRule.Shape.Sphere:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cube);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cone);
+						break;
+					case PacketRule.Shape.Cone:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Sphere);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cube);
+						break;
+					case PacketRule.Shape.Cube:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Sphere);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cone);
+						break;
+				}
+
+				return ret;
+			}
+
+			// Size
+			if (child.details.size != PacketRule.Size.Any && child.details.shape == PacketRule.Shape.Any && child.details.color == PacketRule.Color.Any){
+				ORNode ret = new ORNode();
+
+				switch(child.details.size){
+					case PacketRule.Size.Small:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Medium, PacketRule.Shape.Any);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Large, PacketRule.Shape.Any);
+						break;
+					case PacketRule.Size.Medium:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Small, PacketRule.Shape.Any);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Large, PacketRule.Shape.Any);
+						break;
+					case PacketRule.Size.Large:
+						ret.left = new LiteralNode();
+						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Small, PacketRule.Shape.Any);
+						ret.right = new LiteralNode();
+						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Medium, PacketRule.Shape.Any);
+						break;
+				}
+
+				return ret;
+			}
+
+			throw new System.ArgumentException("Not Optimization of multi-rule literals not supported");
+		}
+
+		// Apply De'Morgans on child AND nodes
+		else if(input.child.type == Node.Type.And){
+			ANDNode child = input.child as ANDNode;
+			ORNode ret = new ORNode();
+
+			NotNode left = new NotNode();
+			left.child = child.left;
+			// Recusrively optimize the not
+			ret.left = optimizeNot(left);
+
+			NotNode right = new NotNode();
+			right.child = child.right;
+			// Recursively optimize the not
+			ret.right = optimizeNot(right);
+
+			return ret;
+		}
+
+		// Apply De'Morgans on child OR nodes
+		else if(input.child.type == Node.Type.Or){
+			ORNode child = input.child as ORNode;
+			ANDNode ret = new ANDNode();
+
+			NotNode left = new NotNode();
+			left.child = child.left;
+			// Recusrively optimize the not
+			ret.left = optimizeNot(left);
+
+			NotNode right = new NotNode();
+			right.child = child.right;
+			// Recusrively optimize the not
+			ret.right = optimizeNot(right);
+
+			return ret;
+		}
+
+		// If there is a double not, simply remove them
+		else if(input.child.type == Node.Type.Not){
+			return (input.child as NotNode).child;
+		}
+
+		throw new System.ArgumentException("Unsupported Not-Optimiztion case!");
 	}
 }
