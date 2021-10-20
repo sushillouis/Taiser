@@ -96,63 +96,91 @@ public partial class PacketRule : List<PacketRule.Details> {
 		public Type type;
 		// Parent of this node
 		public Node parent;
+		// List of child nodes
+		public Node[] children;
 
-		public Node() { parent = null; }
+		public Node() {
+			parent = null;
+			children = null;
+		}
 
 		// Function used to dump tree nodes
 		public virtual void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- emptyNode");
 		    indent += last ? "   " : "|  ";
+
+			for(int i = 0; i < children.Length; i++)
+				children[i].DebugDump(indent, i == children.Length - 1);
 		}
 	}
 
 	// Or Node
 	public class ORNode : Node {
 		// Subnodes
-		public Node left, right;
+		public static uint left = 0;
+		public static uint right = 1;
 
-		public ORNode() { type = Node.Type.Or; }
+		public ref Node getLeft() => ref children[left];
+		public ref Node getRight() => ref children[right];
+
+		public ORNode() {
+			type = Node.Type.Or;
+			children = new Node[2];
+		}
 
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- OR");
 		    indent += last ? "   " : "|  ";
 
-		   	left.DebugDump(indent, false);
-			right.DebugDump(indent, true);
+			for(int i = 0; i < children.Length; i++)
+				children[i].DebugDump(indent, i == children.Length - 1);
 		}
 	}
 
 	// And Nodes
 	public class ANDNode: Node {
 		// Subnodes
-		public Node left, right;
+		public static uint left = 0;
+		public static uint right = 1;
 
-		public ANDNode() { type = Node.Type.And; }
+		public ref Node getLeft() => ref children[left];
+		public ref Node getRight() => ref children[right];
+
+		public ANDNode() {
+			type = Node.Type.And;
+			children = new Node[2];
+		}
 
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- AND");
 		    indent += last ? "   " : "|  ";
 
-		   	left.DebugDump(indent, false);
-			right.DebugDump(indent, true);
+			for(int i = 0; i < children.Length; i++)
+				children[i].DebugDump(indent, i == children.Length - 1);
 		}
 	}
 
 	// Not Nodes
 	public class NotNode : Node {
 		// Subnodes
-		public Node child;
+		public static uint child = 0;
 
-		public NotNode() { type = Node.Type.Not; }
+		public ref Node getChild() => ref children[child];
+
+		public NotNode() {
+			type = Node.Type.Not;
+			children = new Node[1];
+		}
 
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- NOT");
 		    indent += last ? "   " : "|  ";
 
-		   	child.DebugDump(indent, true);
+			for(int i = 0; i < children.Length; i++)
+				children[i].DebugDump(indent, i == children.Length - 1);
 		}
 	}
 
@@ -260,11 +288,11 @@ public partial class PacketRule : List<PacketRule.Details> {
 		if(index < tokens.Length && tokens[index] == '|'){
 			index++;
 			ret = new ORNode();
-			(ret as ORNode).left = left;
-			(ret as ORNode).right = ParseExpression(tokens, ref index);
+			(ret as ORNode).getLeft() = left;
+			(ret as ORNode).getRight() = ParseExpression(tokens, ref index);
 			// Mark the output node as the parent to the parsed sub-nodes
-			(ret as ORNode).left.parent = ret;
-			(ret as ORNode).right.parent = ret;
+			(ret as ORNode).getLeft().parent = ret;
+			(ret as ORNode).getRight().parent = ret;
 		// Otherwise return the subexpression we paresed
 		} else
 			ret = left;
@@ -284,8 +312,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 		if(tokens[index] == '!'){
 			index++;
 			ret = new NotNode();
-			(ret as NotNode).child = ParseSubexpression(tokens, ref index);
-			(ret as NotNode).child.parent = ret;
+			(ret as NotNode).getChild() = ParseSubexpression(tokens, ref index);
+			(ret as NotNode).getChild().parent = ret;
 			return ret;
 		}
 
@@ -296,11 +324,11 @@ public partial class PacketRule : List<PacketRule.Details> {
 		if(index < tokens.Length && tokens[index] == '&'){
 			index++;
 			ret = new ANDNode();
-			(ret as ANDNode).left = left;
-			(ret as ANDNode).right = ParseSubexpression(tokens, ref index);
+			(ret as ANDNode).getLeft() = left;
+			(ret as ANDNode).getRight() = ParseSubexpression(tokens, ref index);
 			// Mark the output node as the parent to the parsed sub-nodes
-			(ret as ANDNode).left.parent = ret;
-			(ret as ANDNode).right.parent = ret;
+			(ret as ANDNode).getLeft().parent = ret;
+			(ret as ANDNode).getRight().parent = ret;
 		// Otherwise, return the parsed extended literal
 		} else
 			ret = left;
@@ -404,14 +432,14 @@ public partial class PacketRule : List<PacketRule.Details> {
 		// If the node is an AND, recursively call on its children
 		} else if (node.type == Node.Type.And){
 			ANDNode andNode = node as ANDNode;
-			andNode.left = optimizeAllNots(andNode.left);
-			andNode.right = optimizeAllNots(andNode.right);
+			andNode.getLeft() = optimizeAllNots(andNode.getLeft());
+			andNode.getRight() = optimizeAllNots(andNode.getRight());
 			return andNode;
 		// If the node is an OR, recursively call on its children
 		} else if (node.type == Node.Type.Or){
 		   ORNode orNode = node as ORNode;
-		   orNode.left = optimizeAllNots(orNode.left);
-		   orNode.right = optimizeAllNots(orNode.right);
+		   orNode.getLeft() = optimizeAllNots(orNode.getLeft());
+		   orNode.getRight() = optimizeAllNots(orNode.getRight());
 		   return orNode;
 	   }
 
@@ -420,8 +448,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 	// Function which optimizes away nots
 	Node optimizeNot(NotNode input){
-		if(input.child.type == Node.Type.Literal){
-			LiteralNode child = input.child as LiteralNode;
+		if(input.getChild().type == Node.Type.Literal){
+			LiteralNode child = input.getChild() as LiteralNode;
 
 			// Single literal rule
 
@@ -431,22 +459,22 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 				switch(child.details.color){
 					case PacketRule.Color.Blue:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Pink, PacketRule.Size.Any, PacketRule.Shape.Any);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Green, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Pink, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Green, PacketRule.Size.Any, PacketRule.Shape.Any);
 						break;
 					case PacketRule.Color.Pink:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Blue, PacketRule.Size.Any, PacketRule.Shape.Any);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Green, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Blue, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Green, PacketRule.Size.Any, PacketRule.Shape.Any);
 						break;
 					case PacketRule.Color.Green:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Pink, PacketRule.Size.Any, PacketRule.Shape.Any);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Blue, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Pink, PacketRule.Size.Any, PacketRule.Shape.Any);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Blue, PacketRule.Size.Any, PacketRule.Shape.Any);
 						break;
 				}
 
@@ -459,22 +487,22 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 				switch(child.details.shape){
 					case PacketRule.Shape.Sphere:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cube);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cone);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cube);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cone);
 						break;
 					case PacketRule.Shape.Cone:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Sphere);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cube);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Sphere);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cube);
 						break;
 					case PacketRule.Shape.Cube:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Sphere);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cone);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Sphere);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Any, PacketRule.Shape.Cone);
 						break;
 				}
 
@@ -487,22 +515,22 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 				switch(child.details.size){
 					case PacketRule.Size.Small:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Medium, PacketRule.Shape.Any);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Large, PacketRule.Shape.Any);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Medium, PacketRule.Shape.Any);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Large, PacketRule.Shape.Any);
 						break;
 					case PacketRule.Size.Medium:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Small, PacketRule.Shape.Any);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Large, PacketRule.Shape.Any);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Small, PacketRule.Shape.Any);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Large, PacketRule.Shape.Any);
 						break;
 					case PacketRule.Size.Large:
-						ret.left = new LiteralNode();
-						(ret.left as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Small, PacketRule.Shape.Any);
-						ret.right = new LiteralNode();
-						(ret.right as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Medium, PacketRule.Shape.Any);
+						ret.getLeft() = new LiteralNode();
+						(ret.getLeft() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Small, PacketRule.Shape.Any);
+						ret.getRight() = new LiteralNode();
+						(ret.getRight() as LiteralNode).details = new PacketRule.Details(PacketRule.Color.Any, PacketRule.Size.Medium, PacketRule.Shape.Any);
 						break;
 				}
 
@@ -513,46 +541,50 @@ public partial class PacketRule : List<PacketRule.Details> {
 		}
 
 		// Apply De'Morgans on child AND nodes
-		else if(input.child.type == Node.Type.And){
-			ANDNode child = input.child as ANDNode;
+		else if(input.getChild().type == Node.Type.And){
+			ANDNode child = input.getChild() as ANDNode;
 			ORNode ret = new ORNode();
 
 			NotNode left = new NotNode();
-			left.child = child.left;
+			left.getChild() = child.getLeft();
 			// Recusrively optimize the not
-			ret.left = optimizeNot(left);
+			ret.getLeft() = optimizeNot(left);
 
 			NotNode right = new NotNode();
-			right.child = child.right;
+			right.getChild() = child.getRight();
 			// Recursively optimize the not
-			ret.right = optimizeNot(right);
+			ret.getRight() = optimizeNot(right);
 
 			return ret;
 		}
 
 		// Apply De'Morgans on child OR nodes
-		else if(input.child.type == Node.Type.Or){
-			ORNode child = input.child as ORNode;
+		else if(input.getChild().type == Node.Type.Or){
+			ORNode child = input.getChild() as ORNode;
 			ANDNode ret = new ANDNode();
 
 			NotNode left = new NotNode();
-			left.child = child.left;
+			left.getChild() = child.getLeft();
 			// Recusrively optimize the not
-			ret.left = optimizeNot(left);
+			ret.getLeft() = optimizeNot(left);
 
 			NotNode right = new NotNode();
-			right.child = child.right;
+			right.getChild() = child.getRight();
 			// Recusrively optimize the not
-			ret.right = optimizeNot(right);
+			ret.getRight() = optimizeNot(right);
 
 			return ret;
 		}
 
 		// If there is a double not, simply remove them
-		else if(input.child.type == Node.Type.Not){
-			return (input.child as NotNode).child;
+		else if(input.getChild().type == Node.Type.Not){
+			return (input.getChild() as NotNode).getChild();
 		}
 
 		throw new System.ArgumentException("Unsupported Not-Optimiztion case!");
 	}
+
+	// Node expand(Node node){
+	//
+	// }
 }
