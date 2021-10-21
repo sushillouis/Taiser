@@ -120,6 +120,16 @@ public partial class PacketRule : List<PacketRule.Details> {
 					return false;
 			return true;
 		}
+
+		// Function which checks if all of the provided nodes have the same type in a list of types
+		public static bool allHaveTypes(Node[] nodes, Node.Type[] types){
+			bool has = false;
+			foreach(Node node in nodes)
+				foreach(Node.Type type in types)
+					has |= (node.type == type);
+
+			return has;
+		}
 	}
 
 	// Or Node
@@ -204,6 +214,30 @@ public partial class PacketRule : List<PacketRule.Details> {
 		    Debug.Log(indent + "+- " + details);
 		    indent += last ? "   " : "|  ";
 		}
+
+		// Create a list of Literal Nodes from a list of Details
+		public static LiteralNode[] fromDetails(IEnumerable<Details> input){
+			List<LiteralNode> ret = new List<LiteralNode>();
+			foreach(Details d in input){
+				LiteralNode node = new LiteralNode();
+				node.details = d;
+				ret.Add(node);
+			}
+
+			return ret.ToArray();
+		}
+
+		// Create a list of Details from a list of Literal Nodes
+		public static Details[] detailsFromNodes(IEnumerable<LiteralNode> input){
+			List<Details> ret = new List<Details>();
+			foreach(LiteralNode node in input){
+				Details d = new Details();
+				d = node.details;
+				ret.Add(d);
+			}
+
+			return ret.ToArray();
+		}
 	}
 
 
@@ -242,6 +276,9 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Operations: () = parenthesis, & = and, | = or, ! = not
 	static char[] validTokens = new char[] {'b', 'p', 'g', 's', 'c', 'r', 't', 'm', 'l', '&', '|', '!', '(', ')'}; // List of valid tokens
  	static string lex(string s){
+		// Add a space to the end of the input to ensure that the last token is found
+		s = s + " ";
+
 		// Color
 		s = Regex.Replace(s, @"(blue|b)([ &|\(\)])", "b$+", RegexOptions.IgnoreCase);
 		s = Regex.Replace(s, @"(pink|red|p|r)([ &|\(\)])", "p$+", RegexOptions.IgnoreCase);
@@ -418,6 +455,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 
 	// Function which commits the changes to the parse tree
+	// Converts the parse tree into a fully expanded sum of products form
 	public void Commit() {
 		// Make sure that we are no longer storing any values
 		Clear();
@@ -431,11 +469,33 @@ public partial class PacketRule : List<PacketRule.Details> {
 		// Distrubte ANDs over ORs (move ANDs to the bottom of the tree)
 		treeCopy = distributeAllAnd(treeCopy);
 
-		// Merge nodes together and remove duplicate children
-		treeCopy = consolidateAll(treeCopy);
+		// Repeatedly consildate the tree then expand literals until the tree is a single OR node with Literal children
+		bool bothChanged = true;
+		while(bothChanged){
+			bothChanged = false;
 
-		Debug.Log("Optimized:");
-		treeCopy.DebugDump();
+			// Consolidate until no changes occure
+			bool changed = true;
+			while(changed){
+				changed = false;
+				treeCopy = consolidateAll(treeCopy, ref changed);
+				bothChanged |= changed;
+			}
+
+			// Combine and Expand until no chnages occure
+			changed = true;
+			while(changed){
+				changed = false;
+				treeCopy = combineAndExpandAllLiterals(treeCopy, ref changed);
+				bothChanged |= changed;
+			}
+		}
+
+		// Debug.Log("Optimized:");
+		// treeCopy.DebugDump();
+
+		// Update ourselves to be the list of children of the single OR node left remainig in the parse tree
+		AddRange( LiteralNode.detailsFromNodes(treeCopy.children as LiteralNode[]) );
 	}
 
 	// Function which ensures that all nots are removed from the tree
@@ -551,6 +611,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 				return ret;
 			}
 
+			// TODO: Possibly... if needed rules could be added for generating additional not cases
 			throw new System.ArgumentException("Not Optimization of multi-rule literals not supported");
 		}
 
@@ -670,6 +731,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 	}
 
 
+
 	// Function which repeatedly consolidates until nothing is changed
 	Node consolidateAll(Node node){
 		// While something has changed, consolidate the whole tree
@@ -682,7 +744,6 @@ public partial class PacketRule : List<PacketRule.Details> {
 		return node;
 	}
 
-
 	// Function which recursively consolidates nodes in the tree
 	Node consolidateAll(Node node, ref bool changed){
 		// Consolidate this node
@@ -694,18 +755,6 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 		return node;
 	}
-
-	// class LiteralNodeDetailsComparer : IEqualityComparer<PacketRule.LiteralNode>{
-	// 	public bool Equals(PacketRule.LiteralNode x, PacketRule.LiteralNode y) {
-	// 		if (System.Object.ReferenceEquals(x, y)) return true;
-	//
-	// 		return x.details == y.details;
-	// 	}
-	//
-	// 	public int GetHashCode(PacketRule.LiteralNode n){
-	// 		return n.details.GetHashCode();
-	// 	}
-	// }
 
 	// Function which consolidates a single node (removed duplicate literals, combines A AND A and A OR A into A, and merges chains of AND/ORs into a single node)
 	Node consolidate(Node node, ref bool changed){
@@ -751,6 +800,24 @@ public partial class PacketRule : List<PacketRule.Details> {
 				orNode.children = children.ToArray();
 				ret = orNode;
 				changed |= true; // Mark that a change has occurred
+
+			// If all child nodes are OR nodes and Literal Nodes...
+			} else if (Node.allHaveTypes(orNode.children, new Node.Type[]{Node.Type.Or, Node.Type.Literal})){
+				// Create a list of all of the literal children combined with the children's children
+				List<Node> children = new List<Node>();
+				foreach(Node child in orNode.children){
+					if(child.type == Node.Type.Literal)
+						children.Add(child);
+					else if(child.type == Node.Type.Or){
+						foreach(Node childsChild in child.children)
+							children.Add(childsChild);
+					}
+				}
+
+				// Our children become the new list of children
+				orNode.children = children.ToArray();
+				ret = orNode;
+				changed |= true; // Mark that a change occured
 			}
 
 		// If this node is an AND node...
@@ -759,7 +826,6 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 			// If all of the children are literals... remove any children of this node that are the same
 			if(Node.allHaveType(andNode.children, Node.Type.Literal) && andNode.children is object){
-			// if(andNode.getLeft().type == Node.Type.Literal && andNode.getRight().type == Node.Type.Literal){
 				List<Node> children = new List<Node>(andNode.children);
 
 				// Remove duplicates
@@ -781,14 +847,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 				if(children.Count != andNode.children.Length)
 					changed |= true;
 
-				// OLD version
-				// Details left = (andNode.getLeft() as LiteralNode).details;
-				// Details right = (andNode.getRight() as LiteralNode).details;
-				//
-				// if(left == right)
-				// 	ret = andNode.getLeft();
+			// If all child nodes are AND nodes...
 			} else if(Node.allHaveType(andNode.children, Node.Type.And) && andNode.children is object){
-			// } else if(andNode.getLeft().type == Node.Type.And && andNode.getRight().type == Node.Type.And){
 				// Create a list of all of the children's children
 				List<Node> children = new List<Node>();
 				foreach(Node child in andNode.children)
@@ -800,18 +860,158 @@ public partial class PacketRule : List<PacketRule.Details> {
 				ret = andNode;
 				changed |= true; // Mark that a change has occurred
 
-				// Old Version
-				// ANDNode left = andNode.getLeft() as ANDNode;
-				// ANDNode right = andNode.getRight() as ANDNode;
-				// ret = new ANDNode();
-				// ret.children = new Node[4];
-				// ret.children[0] = left.getLeft();
-				// ret.children[1] = left.getRight();
-				// ret.children[2] = right.getLeft();
-				// ret.children[3] = right.getRight();
+			// If all child nodes are AND nodes and Literal Nodes...
+			} else if (Node.allHaveTypes(andNode.children, new Node.Type[]{Node.Type.And, Node.Type.Literal})){
+				// Create a list of all of the literal children combined with the children's children
+				List<Node> children = new List<Node>();
+				foreach(Node child in andNode.children){
+					if(child.type == Node.Type.Literal)
+						children.Add(child);
+					else if(child.type == Node.Type.Or){
+						foreach(Node childsChild in child.children)
+							children.Add(childsChild);
+					}
+				}
+
+				// Our children become the new list of children
+				andNode.children = children.ToArray();
+				ret = andNode;
+				changed |= true; // Mark that a change has occured
 			}
 		}
 
 		return ret;
+	}
+
+
+
+	// Function which combines all literal nodes in the tree (passes out if a change occured)
+	Node combineAndExpandAllLiterals(Node node, ref bool changed){
+		node = combineAndExpandLiterals(node, ref changed);
+		if(node.children is object)
+			 for(int i = 0; i < node.children.Length; i++)
+				node.children[i] = combineAndExpandAllLiterals(node.children[i], ref changed);
+
+		return node;
+	}
+
+	// Function which combines and expands all child literanl nodes
+	Node combineAndExpandLiterals(Node input, ref bool changed){
+		// If the input node is an AND node...
+		if(input.type == Node.Type.And){
+			// If all of the children are literal nodes
+			if(Node.allHaveType(input.children, Node.Type.Literal)){
+				// Options of the new input node
+				Color outColor = Color.Any;
+				Size outSize = Size.Any;
+				Shape outShape = Shape.Any;
+
+				// For each child... check the details of the node for any matching rules
+				foreach(Node child in input.children){
+					Details details = (child as LiteralNode).details;
+
+					// If there is a color mark it as this node's color (if a color has already been marked error)
+					if(details.color != Color.Any){
+						if(outColor != Color.Any)
+							throw new System.ArgumentException("Input resulted in a combination of multiple conflicting color values.");
+						else outColor = details.color;
+					}
+
+					// If there is a size mark it as this node's size (if a size has already been marked error)
+					if(details.size != Size.Any){
+						if(outSize != Size.Any)
+							throw new System.ArgumentException("Input resulted in a combination of multiple conflicting size values.");
+						else outSize = details.size;
+					}
+
+					// If there is a shape mark it as this node's shape (if a shape has already been marked error)
+					if(details.shape != Shape.Any){
+						if(outShape != Shape.Any)
+							throw new System.ArgumentException("Input resulted in a combination of multiple conflicting shape values.");
+						else outShape = details.shape;
+					}
+				}
+
+				// Return a new node with the combined rules
+				LiteralNode ret = new LiteralNode();
+				ret.details = new Details(outColor, outSize, outShape);
+				changed |= true; // Mark that a change has occured
+				return ret;
+			}
+
+		// If the input node is an OR node...
+		} else if(input.type == Node.Type.Or){
+			// If all of the children are literels
+			if(Node.allHaveType(input.children, Node.Type.Literal)){
+				// Create a list of all the expanded literals in the children
+				List<Details> childrenDetails = new List<Details>();
+
+				// For each child
+				foreach(Node c in input.children){
+					// Get its details
+					Details details = (c as LiteralNode).details;
+					// Create a list of all of its expanded rules
+					List<Details> dList = new List<Details>();
+
+					// Expand color
+					if(details.color != Color.Any)
+						dList.Add(new Details(details.color, Size.Any, Shape.Any));
+					else {
+						dList.Add(new Details(Color.Pink, Size.Any, Shape.Any));
+						dList.Add(new Details(Color.Blue, Size.Any, Shape.Any));
+						dList.Add(new Details(Color.Green, Size.Any, Shape.Any));
+					}
+
+					// Expand size
+					if(details.size != Size.Any){
+						for(int i = 0; i < dList.Count; i++){
+							Details d = dList[i];
+							d.size = details.size;
+							dList[i] = d;
+						}
+					} else {
+						List<Details> oldDList = dList;
+						dList = new List<Details>();
+
+						foreach(Details d in oldDList){
+							dList.Add(new Details(d.color, Size.Small, Shape.Any));
+							dList.Add(new Details(d.color, Size.Medium, Shape.Any));
+							dList.Add(new Details(d.color, Size.Large, Shape.Any));
+						}
+					}
+
+					// Expand shape
+					if(details.shape != Shape.Any){
+						for(int i = 0; i < dList.Count; i++){
+							Details d = dList[i];
+							d.shape = details.shape;
+							dList[i] = d;
+						}
+					} else {
+						List<Details> oldDList = dList;
+						dList = new List<Details>();
+
+						foreach(Details d in oldDList){
+							dList.Add(new Details(d.color, d.size, Shape.Sphere));
+							dList.Add(new Details(d.color, d.size, Shape.Cone));
+							dList.Add(new Details(d.color, d.size, Shape.Cube));
+						}
+					}
+
+					// Add the created list for this node to the total list
+					childrenDetails.AddRange(dList);
+				}
+
+				// Convert the list of details to a list of distinct literal nodes
+				LiteralNode[] _new = LiteralNode.fromDetails(childrenDetails.Distinct());
+				// If the new list of children is a different size from the old list of children... mark that an change has occured
+				if(_new.Length != input.children.Length)
+					changed |= true;
+				// Update our children with the new list of children
+				input.children = _new;
+			}
+		}
+
+		return input;
 	}
 }
