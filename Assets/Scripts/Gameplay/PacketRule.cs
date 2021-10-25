@@ -351,12 +351,12 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Parses a string into a packet rule
 	// Includes an option to automatically optimize the parsed result and create the list out of it
 	public static PacketRule Parse(string s, bool autoCommit = true){
-		Debug.Log("Input: " + s);
+		// Debug.Log("Input: " + s);
 
 		// Lex the input string down to single characters
 		s = lex(s);
 
-		Debug.Log("Lexed: " + s);
+		// Debug.Log("Lexed: " + s);
 
 		// Parse the lexed tokens into a tree
 		int index = 0;
@@ -374,7 +374,6 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Shapes: s = sphere, c = cone, r = rectangle
 	// Sizes: t = small, m = medium, l = large
 	// Operations: () = parenthesis, & = and, | = or, ! = not
-	static char[] validTokens = new char[] {'b', 'p', 'g', 's', 'c', 'r', 't', 'm', 'l', '&', '|', '!', '(', ')'}; // List of valid tokens
  	static string lex(string s){
 		// Add a space to the end of the input to ensure that the last token is found
 		s = s + " ";
@@ -403,6 +402,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 		s = s.Replace(" ", "");
 
 		// Ensure that only valid tokens remain in the string
+		char[] validTokens = new char[] {'b', 'p', 'g', 's', 'c', 'r', 't', 'm', 'l', '&', '|', '!', '(', ')'}; // List of valid tokens
 		for(int i = 0; i < s.Length; i++)
 			if(!validTokens.Contains(s[i]))
 				throw new System.ArgumentException("Found unsupported toxen: `" + s[i] + "`");
@@ -560,39 +560,57 @@ public partial class PacketRule : List<PacketRule.Details> {
 		// Make sure that we are no longer storing any values
 		Clear();
 
-		// Make a deep copy of the tree so that we manipulate it without worying about the integrity of the original
+		// Make a deep copy of the tree so that we can manipulate it without worying about the integrity of the original
 		Node treeCopy = ObjectExtensions.Copy(treeRoot); // Code found in Utilities/ObjectExtensions.cs
 
-		// Remove NOTs from the copied tree
-		treeCopy = optimizeAllNots(treeCopy);
+		// If the tree is just a single literal then expand that literal
+		if(treeCopy.type == Node.Type.Literal){
+			ORNode ret = new ORNode();
+			ret.children = LiteralNode.fromDetails(expandSingleLiteralNode(treeCopy as LiteralNode));
+			treeCopy = ret;
 
-		// Distrubte ANDs over ORs (move ANDs to the bottom of the tree)
-		treeCopy = distributeAllAnd(treeCopy);
+		// Otherwise manipulate the tree into its final form
+		} else {
+			// Remove NOTs from the copied tree
+			treeCopy = optimizeAllNots(treeCopy);
 
-		// Repeatedly consildate the tree then expand literals until the tree is a single OR node with Literal children
-		bool bothChanged = true;
-		while(bothChanged){
-			bothChanged = false;
+			// Distrubte ANDs over ORs (move ANDs to the bottom of the tree)
+			treeCopy = distributeAllAnd(treeCopy);
 
-			// Consolidate until no changes occure
-			bool changed = true;
-			while(changed){
-				changed = false;
-				treeCopy = consolidateAll(treeCopy, ref changed);
-				bothChanged |= changed;
-			}
+			// Repeatedly consildate the tree then expand literals until the tree is a single OR node with Literal children
+			bool bothChanged = true;
+			while(bothChanged){
+				bothChanged = false;
 
-			// Combine and Expand until no chnages occure
-			changed = true;
-			while(changed){
-				changed = false;
-				treeCopy = combineAndExpandAllLiterals(treeCopy, ref changed);
-				bothChanged |= changed;
+				// Consolidate until no changes occure
+				bool changed = true;
+				while(changed){
+					changed = false;
+					treeCopy = consolidateAll(treeCopy, ref changed);
+					bothChanged |= changed;
+				}
+
+				// Combine and Expand until no chnages occure
+				changed = true;
+				while(changed){
+					changed = false;
+					treeCopy = combineAndExpandAllLiterals(treeCopy, ref changed);
+					bothChanged |= changed;
+				}
+
+				// If the tree is just a single literal then expand that literal and we are done
+				if(treeCopy.type == Node.Type.Literal){
+					ORNode ret = new ORNode();
+					ret.children = LiteralNode.fromDetails(expandSingleLiteralNode(treeCopy as LiteralNode));
+					treeCopy = ret;
+
+					bothChanged = false;
+				}
 			}
 		}
 
-		Debug.Log("Optimized:");
-		treeCopy.DebugDump();
+		// Debug.Log("Optimized:");
+		// treeCopy.DebugDump();
 
 		// Update ourselves to be the list of children of the single OR node left remainig in the parse tree
 		AddRange( LiteralNode.detailsFromNodes(treeCopy.children as LiteralNode[]) );
@@ -1047,60 +1065,9 @@ public partial class PacketRule : List<PacketRule.Details> {
 				List<Details> childrenDetails = new List<Details>();
 
 				// For each child
-				foreach(Node c in input.children){
-					// Get its details
-					Details details = (c as LiteralNode).details;
-					// Create a list of all of its expanded rules
-					List<Details> dList = new List<Details>();
-
-					// Expand color
-					if(details.color != Color.Any)
-						dList.Add(new Details(details.color, Size.Any, Shape.Any));
-					else {
-						dList.Add(new Details(Color.Pink, Size.Any, Shape.Any));
-						dList.Add(new Details(Color.Blue, Size.Any, Shape.Any));
-						dList.Add(new Details(Color.Green, Size.Any, Shape.Any));
-					}
-
-					// Expand size
-					if(details.size != Size.Any){
-						for(int i = 0; i < dList.Count; i++){
-							Details d = dList[i];
-							d.size = details.size;
-							dList[i] = d;
-						}
-					} else {
-						List<Details> oldDList = dList;
-						dList = new List<Details>();
-
-						foreach(Details d in oldDList){
-							dList.Add(new Details(d.color, Size.Small, Shape.Any));
-							dList.Add(new Details(d.color, Size.Medium, Shape.Any));
-							dList.Add(new Details(d.color, Size.Large, Shape.Any));
-						}
-					}
-
-					// Expand shape
-					if(details.shape != Shape.Any){
-						for(int i = 0; i < dList.Count; i++){
-							Details d = dList[i];
-							d.shape = details.shape;
-							dList[i] = d;
-						}
-					} else {
-						List<Details> oldDList = dList;
-						dList = new List<Details>();
-
-						foreach(Details d in oldDList){
-							dList.Add(new Details(d.color, d.size, Shape.Sphere));
-							dList.Add(new Details(d.color, d.size, Shape.Cone));
-							dList.Add(new Details(d.color, d.size, Shape.Cube));
-						}
-					}
-
+				foreach(Node c in input.children)
 					// Add the created list for this node to the total list
-					childrenDetails.AddRange(dList);
-				}
+					childrenDetails.AddRange(expandSingleLiteralNode(c as LiteralNode));
 
 				// Convert the list of details to a list of distinct literal nodes
 				LiteralNode[] _new = LiteralNode.fromDetails(childrenDetails.Distinct());
@@ -1113,5 +1080,60 @@ public partial class PacketRule : List<PacketRule.Details> {
 		}
 
 		return input;
+	}
+
+	// Function which expands a singular LiteralNode
+	List<Details> expandSingleLiteralNode(LiteralNode node){
+		// Get its details
+		Details details = node.details;
+		// Create a list of all of its expanded rules
+		List<Details> dList = new List<Details>();
+
+		// Expand color
+		if(details.color != Color.Any)
+			dList.Add(new Details(details.color, Size.Any, Shape.Any));
+		else {
+			dList.Add(new Details(Color.Pink, Size.Any, Shape.Any));
+			dList.Add(new Details(Color.Blue, Size.Any, Shape.Any));
+			dList.Add(new Details(Color.Green, Size.Any, Shape.Any));
+		}
+
+		// Expand size
+		if(details.size != Size.Any){
+			for(int i = 0; i < dList.Count; i++){
+				Details d = dList[i];
+				d.size = details.size;
+				dList[i] = d;
+			}
+		} else {
+			List<Details> oldDList = dList;
+			dList = new List<Details>();
+
+			foreach(Details d in oldDList){
+				dList.Add(new Details(d.color, Size.Small, Shape.Any));
+				dList.Add(new Details(d.color, Size.Medium, Shape.Any));
+				dList.Add(new Details(d.color, Size.Large, Shape.Any));
+			}
+		}
+
+		// Expand shape
+		if(details.shape != Shape.Any){
+			for(int i = 0; i < dList.Count; i++){
+				Details d = dList[i];
+				d.shape = details.shape;
+				dList[i] = d;
+			}
+		} else {
+			List<Details> oldDList = dList;
+			dList = new List<Details>();
+
+			foreach(Details d in oldDList){
+				dList.Add(new Details(d.color, d.size, Shape.Sphere));
+				dList.Add(new Details(d.color, d.size, Shape.Cone));
+				dList.Add(new Details(d.color, d.size, Shape.Cube));
+			}
+		}
+
+		return dList;
 	}
 }
