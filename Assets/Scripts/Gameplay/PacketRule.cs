@@ -4,12 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.IO;
 using UnityEngine;
 
 public partial class PacketRule : List<PacketRule.Details> {
 	// Enum defining a packet's color
 	[Serializable]
-	public enum Color {
+	public enum Color : byte {
 		Blue,
 		Pink,
 		Green,
@@ -18,7 +19,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 	// Enum defining a packet's size
 	[Serializable]
-	public enum Size {
+	public enum Size : byte {
 		Invalid = 0,
 		Small = 1,
 		Medium = 4,
@@ -28,7 +29,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 	// Enum defining a packet's shape
 	[Serializable]
-	public enum Shape {
+	public enum Shape : byte {
 		Cube,
 		Sphere,
 		Cone,
@@ -53,7 +54,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 		// Object equality (Required to override ==)
 		public override bool Equals(System.Object obj) {
-			if (obj == null)
+			if (obj is null)
 				return false;
 			Details? o = obj as Details?;
 			return Equals(o.Value);
@@ -140,8 +141,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Or Node
 	public class ORNode : Node {
 		// Subnodes
-		public static uint left = 0;
-		public static uint right = 1;
+		public static readonly uint left = 0;
+		public static readonly uint right = 1;
 
 		public ref Node getLeft() => ref children[left];
 		public ref Node getRight() => ref children[right];
@@ -149,6 +150,10 @@ public partial class PacketRule : List<PacketRule.Details> {
 		public ORNode() {
 			type = Node.Type.Or;
 			children = new Node[2];
+		}
+		public ORNode(Node _left, Node _right) : this() {
+			children[left] = _left;
+			children[right] = _right;
 		}
 
 		// Recursively generate the OR node's string
@@ -184,8 +189,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// And Nodes
 	public class ANDNode: Node {
 		// Subnodes
-		public static uint left = 0;
-		public static uint right = 1;
+		public static readonly uint left = 0;
+		public static readonly uint right = 1;
 
 		public ref Node getLeft() => ref children[left];
 		public ref Node getRight() => ref children[right];
@@ -193,6 +198,10 @@ public partial class PacketRule : List<PacketRule.Details> {
 		public ANDNode() {
 			type = Node.Type.And;
 			children = new Node[2];
+		}
+		public ANDNode(Node _left, Node _right) : this() {
+			children[left] = _left;
+			children[right] = _right;
 		}
 
 		// Recursively generate the AND node's string
@@ -228,13 +237,16 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Not Nodes
 	public class NotNode : Node {
 		// Subnodes
-		public static uint child = 0;
+		public static readonly uint child = 0;
 
 		public ref Node getChild() => ref children[child];
 
 		public NotNode() {
 			type = Node.Type.Not;
 			children = new Node[1];
+		}
+		public NotNode(Node child) : this() {
+			children[0] = child;
 		}
 
 		// Recursively generate the NOT node's string
@@ -341,8 +353,21 @@ public partial class PacketRule : List<PacketRule.Details> {
 	}
 
 
+	// -- Class Storage --
+
+
 	// Parse node representing the unoptimized tree;
 	public Node treeRoot;
+	// Constant representing a rule with every possible packet in it
+	public static readonly PacketRule All = Parse("pink | blue | green | small | medium | large | sphere | cone | cube");
+	public static readonly PacketRule Default = Parse("Blue & Cube & Small");
+
+	// Converts the rule into a string representation (if that string representation is parsed it results in the same rule)
+	public string RuleString() => treeRoot.RuleString();
+	// Converts the rule into its lexed form (if that representation is parsed it results in the same rule)
+	public string CompressedRuleString() => Lex(RuleString());
+	// Override of ToString which simply returns the rule string
+	public override string ToString() => RuleString();
 
 
 	// -- Parser --
@@ -351,11 +376,13 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Parses a string into a packet rule
 	// Includes an option to automatically optimize the parsed result and create the list out of it
 	public static PacketRule Parse(string s, bool autoCommit = true){
+		// // Debugging
 		// Debug.Log("Input: " + s);
 
 		// Lex the input string down to single characters
-		s = lex(s);
+		s = Lex(s);
 
+		// // Debugging
 		// Debug.Log("Lexed: " + s);
 
 		// Parse the lexed tokens into a tree
@@ -374,22 +401,22 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Shapes: s = sphere, c = cone, r = rectangle
 	// Sizes: t = small, m = medium, l = large
 	// Operations: () = parenthesis, & = and, | = or, ! = not
- 	static string lex(string s){
+ 	static string Lex(string s){
 		// Add a space to the end of the input to ensure that the last token is found
 		s = s + " ";
 
 		// Color
 		s = Regex.Replace(s, @"(blue|b)([ &|\(\)])", "b$+", RegexOptions.IgnoreCase);
-		s = Regex.Replace(s, @"(pink|red|p|r)([ &|\(\)])", "p$+", RegexOptions.IgnoreCase);
+		s = Regex.Replace(s, @"(pink|red|p)([ &|\(\)])", "p$+", RegexOptions.IgnoreCase);
 		s = Regex.Replace(s, @"(green|g)([ &|\(\)])", "g$+", RegexOptions.IgnoreCase);
 
 		// Shape
 		s = Regex.Replace(s, @"(circle|sphere|cir|sp|s)([ &|\(\)])", "s$+", RegexOptions.IgnoreCase);
-		s = Regex.Replace(s, @"(cone|triangle|co|tri|c|t)([ &|\(\)])", "c$+", RegexOptions.IgnoreCase);
-		s = Regex.Replace(s, @"(square|rectangle|cube|box|rect|sq)([ &|\(\)])", "r$+", RegexOptions.IgnoreCase);
+		s = Regex.Replace(s, @"(cone|triangle|co|tri|c)([ &|\(\)])", "c$+", RegexOptions.IgnoreCase);
+		s = Regex.Replace(s, @"(square|rectangle|cube|box|rect|sq|r)([ &|\(\)])", "r$+", RegexOptions.IgnoreCase);
 
 		// Size
-		s = Regex.Replace(s, @"(small|sm)([ &|\(\)])", "t$+", RegexOptions.IgnoreCase); // S already taken so using the next letter (t)
+		s = Regex.Replace(s, @"(small|sm|t)([ &|\(\)])", "t$+", RegexOptions.IgnoreCase); // S already taken so using the next letter (t)
 		s = Regex.Replace(s, @"(medium|med|m)([ &|\(\)])", "m$+", RegexOptions.IgnoreCase);
 		s = Regex.Replace(s, @"(large|lg|l)([ &|\(\)])", "l$+", RegexOptions.IgnoreCase);
 
@@ -574,6 +601,9 @@ public partial class PacketRule : List<PacketRule.Details> {
 			// Remove NOTs from the copied tree
 			treeCopy = optimizeAllNots(treeCopy);
 
+			// Try to combine literals (if there are a bunch of literals anded together then they should be easy to expand)
+			treeCopy = combineAndExpandAllLiterals(treeCopy);
+
 			// Distrubte ANDs over ORs (move ANDs to the bottom of the tree)
 			treeCopy = distributeAllAnd(treeCopy);
 
@@ -582,7 +612,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 			while(bothChanged){
 				bothChanged = false;
 
-				// Consolidate until no changes occure
+				// Consolidate until no changes occurred
 				bool changed = true;
 				while(changed){
 					changed = false;
@@ -590,7 +620,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 					bothChanged |= changed;
 				}
 
-				// Combine and Expand until no chnages occure
+				// Combine and Expand until no changes occurred
 				changed = true;
 				while(changed){
 					changed = false;
@@ -609,10 +639,11 @@ public partial class PacketRule : List<PacketRule.Details> {
 			}
 		}
 
+		// // Debugging
 		// Debug.Log("Optimized:");
 		// treeCopy.DebugDump();
 
-		// Update ourselves to be the list of children of the single OR node left remainig in the parse tree
+		// Update ourselves to be the list of children of the single OR node left remaining in the parse tree
 		AddRange( LiteralNode.detailsFromNodes(treeCopy.children as LiteralNode[]) );
 	}
 
@@ -1002,8 +1033,18 @@ public partial class PacketRule : List<PacketRule.Details> {
 	}
 
 
+	// functions which repeatedly combines and expands literals until no change has occurred
+	Node combineAndExpandAllLiterals(Node node){
+		bool changed = true;
+		while(changed){
+			changed = false;
+			node = combineAndExpandAllLiterals(node, ref changed);
+		}
 
-	// Function which combines all literal nodes in the tree (passes out if a change occured)
+		return node;
+	}
+
+	// Function which combines all literal nodes in the tree (passes out if a change occurred)
 	Node combineAndExpandAllLiterals(Node node, ref bool changed){
 		node = combineAndExpandLiterals(node, ref changed);
 		if(node.children is object)
@@ -1053,7 +1094,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 				// Return a new node with the combined rules
 				LiteralNode ret = new LiteralNode();
 				ret.details = new Details(outColor, outSize, outShape);
-				changed |= true; // Mark that a change has occured
+				changed |= true; // Mark that a change has occurred
 				return ret;
 			}
 
@@ -1071,7 +1112,7 @@ public partial class PacketRule : List<PacketRule.Details> {
 
 				// Convert the list of details to a list of distinct literal nodes
 				LiteralNode[] _new = LiteralNode.fromDetails(childrenDetails.Distinct());
-				// If the new list of children is a different size from the old list of children... mark that an change has occured
+				// If the new list of children is a different size from the old list of children... mark that an change has occurred
 				if(_new.Length != input.children.Length)
 					changed |= true;
 				// Update our children with the new list of children

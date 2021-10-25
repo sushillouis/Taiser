@@ -100,16 +100,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickAction: {fileID: 3001919216989983466, guid: a26318101696cb248921fa709202c4d2, type: 3}
+  mousePositionAction: {fileID: -1654692200621890270, guid: a26318101696cb248921fa709202c4d2, type: 3}
   renderer: {fileID: 8525423662930362161}
   gateMaterial: {fileID: 2100000, guid: ce415d45ae8ddd04f8d8d648dcf6d397, type: 2}
   colors:
   - {r: 0.062745094, g: 0.31855258, b: 0.4392157, a: 1}
   - {r: 0.8784314, g: 0.1254902, b: 0.8627451, a: 1}
   - {r: 0.15686275, g: 0.8784314, b: 0.1254902, a: 1}
-  filterRules:
-    color: 0
-    size: 0
-    shape: 0
   updatesGrantedPerWave: 040000000400000004000000
   updatesRemaining: 1
   gradualMoveFirewallTimeTaken: 0.33333334

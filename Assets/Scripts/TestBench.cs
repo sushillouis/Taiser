@@ -29,10 +29,13 @@ public class TestBench : MonoBehaviour {
 		Debug.Log(NetworkingManager.isWhiteHatPrimary);
 
 
-		PacketRule rule = PacketRule.Parse("pink & cube & !medium | !(cone | !!sphere)", false);
-		rule.treeRoot.DebugDump();
+		// PacketRule rule = PacketRule.Parse("pink & cube & !medium | !(cone | !!sphere)", false);
+		PacketRule rule = PacketRule.Parse("((pink | sphere) & (sphere | large)) | cone", false);
+		// rule.treeRoot.DebugDump();
 
 		rule.Commit();
+
+		Debug.Log(rule.treeRoot.RuleString());
 	}
 
 }

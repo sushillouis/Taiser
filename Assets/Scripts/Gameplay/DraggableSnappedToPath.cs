@@ -8,6 +8,7 @@ using Photon.Pun;
 public class DraggableSnappedToPath : MonoBehaviourPun {
 	// Reference to the click action
 	public InputActionReference clickAction;
+	public InputActionReference mousePositionAction;
 
 	// Boolean tracking if we are currently being dragged
 	bool isDragging = false;
@@ -31,6 +32,10 @@ public class DraggableSnappedToPath : MonoBehaviourPun {
 			isDragging = true;
 		// Otherwise... mark that we aren't dragging
 		} else
+			isDragging = false;
+
+		// If our mouse is now over a UI element... we are no longer dragging
+		if(Utilities.isPointerOverUIObject(mousePositionAction.action.ReadValue<Vector2>()))
 			isDragging = false;
 
 		// If we are dragging but weren't dragging last frame... then begin dragging

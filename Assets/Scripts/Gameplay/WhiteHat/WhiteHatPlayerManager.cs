@@ -61,6 +61,8 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 			removeFirewallButton.interactable = true;
 			makeHoneypotButton.interactable = true;
 		}
+
+		Debug.Log(firewallCursor);
 	}
 	void OnDisable(){
 		leftClickAction.action.performed -= OnClickPressed;
@@ -126,7 +128,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 
 	// Callback which handles when the currently hovered grid piece changes
 	void OnHoverChanged(GameObject newHover){
-		if( newHover == null 					// If there isn't a new hover...
+		if( newHover is null 					// If there isn't a new hover...
 		  || newHover.tag != "FirewallTarget"	// Or the hover target can't host a firewall...
 		  // Or we aren't in a state where we need the firewall placement indicator...
 		  || !(clickState == ClickState.SpawningFirewall || clickState == ClickState.MovingFirewall || (clickState == ClickState.SelectingFirewallToMove && SelectionManager.instance.selected?.GetComponent<Firewall>() != null))
@@ -146,26 +148,31 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	public void OnFirewallToggleSelected(int deltaNumber){
 		// Disable filter settings when we are just opening the panel for the first time
 		if(firewallJustSelected) return;
+		// Don't do anything if we switched off a toggle
+		if(!firewallPacketPanelToggles[deltaNumber].isOn) return;
+
 		// Don't bother with this function if we don't have a firewall selected
 		Firewall selected = getSelected<Firewall>();
 		if(selected == null) return;
 
-		PacketRule.Details rules = selected.filterRules;
+		PacketRule rules = selected.filterRules;
+		PacketRule.Details d = rules[0];
 
 		// Set the correct filter rules based on the given input
 		switch(deltaNumber){
-			case 0: rules.size = PacketRule.Size.Small; break;
-			case 1: rules.size = PacketRule.Size.Medium; break;
-			case 2: rules.size = PacketRule.Size.Large; break;
-			case 3: rules.shape = PacketRule.Shape.Cube; break;
-			case 4: rules.shape = PacketRule.Shape.Sphere; break;
-			case 5: rules.shape = PacketRule.Shape.Cone; break;
-			case 6: rules.color = PacketRule.Color.Blue; break;
-			case 7: rules.color = PacketRule.Color.Green; break;
-			case 8: rules.color = PacketRule.Color.Pink; break;
+			case 0: d.size = PacketRule.Size.Small; break;
+			case 1: d.size = PacketRule.Size.Medium; break;
+			case 2: d.size = PacketRule.Size.Large; break;
+			case 3: d.shape = PacketRule.Shape.Cube; break;
+			case 4: d.shape = PacketRule.Shape.Sphere; break;
+			case 5: d.shape = PacketRule.Shape.Cone; break;
+			case 6: d.color = PacketRule.Color.Blue; break;
+			case 7: d.color = PacketRule.Color.Green; break;
+			case 8: d.color = PacketRule.Color.Pink; break;
 		}
 
-		if(!SetFirewallFilterRules(selected, rules))
+		string newRule = new PacketRule.LiteralNode(d).RuleString();
+		if(!SetFirewallFilterRules(selected, PacketRule.Parse(newRule)))
 			showFirewallPanel(selected); // Reload the firewall panel if we failed to update the settings
 	}
 
@@ -295,15 +302,15 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 			else t.interactable = false;
 
 		// Set the correct toggle states
-		firewallPacketPanelToggles[0].isOn = f.filterRules.size == PacketRule.Size.Small;
-		firewallPacketPanelToggles[1].isOn = f.filterRules.size == PacketRule.Size.Medium;
-		firewallPacketPanelToggles[2].isOn = f.filterRules.size == PacketRule.Size.Large;
-		firewallPacketPanelToggles[3].isOn = f.filterRules.shape == PacketRule.Shape.Cube;
-		firewallPacketPanelToggles[4].isOn = f.filterRules.shape == PacketRule.Shape.Sphere;
-		firewallPacketPanelToggles[5].isOn = f.filterRules.shape == PacketRule.Shape.Cone;
-		firewallPacketPanelToggles[6].isOn = f.filterRules.color == PacketRule.Color.Blue;
-		firewallPacketPanelToggles[7].isOn = f.filterRules.color == PacketRule.Color.Green;
-		firewallPacketPanelToggles[8].isOn = f.filterRules.color == PacketRule.Color.Pink;
+		firewallPacketPanelToggles[0].isOn = f.filterRules[0].size == PacketRule.Size.Small;
+		firewallPacketPanelToggles[1].isOn = f.filterRules[0].size == PacketRule.Size.Medium;
+		firewallPacketPanelToggles[2].isOn = f.filterRules[0].size == PacketRule.Size.Large;
+		firewallPacketPanelToggles[3].isOn = f.filterRules[0].shape == PacketRule.Shape.Cube;
+		firewallPacketPanelToggles[4].isOn = f.filterRules[0].shape == PacketRule.Shape.Sphere;
+		firewallPacketPanelToggles[5].isOn = f.filterRules[0].shape == PacketRule.Shape.Cone;
+		firewallPacketPanelToggles[6].isOn = f.filterRules[0].color == PacketRule.Color.Blue;
+		firewallPacketPanelToggles[7].isOn = f.filterRules[0].color == PacketRule.Color.Green;
+		firewallPacketPanelToggles[8].isOn = f.filterRules[0].color == PacketRule.Color.Pink;
 
 		// Update the text to represent the number of updates remaining
 		FirewallSettingsUpdated(f);

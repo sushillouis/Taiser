@@ -196,5 +196,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickAction: {fileID: 3001919216989983466, guid: a26318101696cb248921fa709202c4d2, type: 3}
+  mousePositionAction: {fileID: -1654692200621890270, guid: a26318101696cb248921fa709202c4d2, type: 3}
   gradualMoveSuggestedFirewallTimeTaken: 0.33333334
   gradualMoveSuggestedFirewallIsMoving: 0

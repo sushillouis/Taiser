@@ -84,7 +84,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		} else if(collider.transform.tag == "Firewall") {
 			Firewall firewall = collider.gameObject.GetComponent<Firewall>();
 
-			if(firewall.filterRules == details){
+			if(firewall.filterRules.Contains(details) ){
 				// Process scoring
 				ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
 				// Play a sound depending on if the packet is malicious or not
@@ -205,13 +205,13 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Synchronizes the properties across the network
 	// NOTE: The starting point must be set before this function can properly do its job
-	public void SetProperties(PacketRule.Color color,PacketRule. Size size, PacketRule.Shape shape, bool isMalicious){ SetProperties(new PacketRule.Details(color, size, shape), isMalicious); }
-	public void SetProperties(PacketRule.Details details, bool isMalicious){ photonView.RPC("RPC_Packet_SetProperties", RpcTarget.AllBuffered, details.color, details.size, details.shape, isMalicious); }
-	[PunRPC] void RPC_Packet_SetProperties(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape, bool isMalicious){
+	public void SetProperties(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape, bool isMalicious){ SetProperties(new PacketRule.Details(color, size, shape), isMalicious); }
+	public void SetProperties(PacketRule.Details details, bool isMalicious){ photonView.RPC("RPC_Packet_SetProperties", RpcTarget.AllBuffered, details.color, details.size, details.shape, isMalicious, UnityEngine.Random.Range(0, startPoint.spawnedMaliciousPacketRules.Count) ); }
+	[PunRPC] void RPC_Packet_SetProperties(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape, bool isMalicious, int maliciousPacketRuleIndex){
 		// Ensure the local properties match the remote ones
 		_isMalicious = isMalicious;
 		if(!_isMalicious) _details = new PacketRule.Details(color, size, shape);
-		else _details = startPoint.spawnedMaliciousPacketDetails;
+		else _details = startPoint.spawnedMaliciousPacketRules[maliciousPacketRuleIndex];
 
 		// Set the mesh based on the shape
 		filter.mesh = meshes[(int)details.shape];

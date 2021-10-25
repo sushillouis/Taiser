@@ -53,33 +53,36 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 	// The malicious packet for this starting point (NetworkSynced)
-	public PacketRule.Details spawnedMaliciousPacketDetails = PacketRule.Details.Default;
+	public PacketRule spawnedMaliciousPacketRules = System.ObjectExtensions.Copy(PacketRule.Default);
 	// The likelihood that a packet coming from this starting point will be malicious (Network Synced)
 	public float maliciousPacketProbability = .33333f;
 
 	// Generates a random set of details, ensuring that the returned values aren't considered malicious
 	public PacketRule.Details randomNonMaliciousPacketDetails() {
 		PacketRule.Details details = new PacketRule.Details(Utilities.randomEnum<PacketRule.Color>(), Utilities.randomEnum<PacketRule.Size>(), Utilities.randomEnum<PacketRule.Shape>());
-		if(details == spawnedMaliciousPacketDetails) details = randomNonMaliciousPacketDetails();
+		// Keep generating new details until we get one which doesn't have an invalid property and isn't on the malicious list
+		while(details.color == PacketRule.Color.Any || details.size == PacketRule.Size.Any || details.size == PacketRule.Size.Invalid || details.shape == PacketRule.Shape.Any || spawnedMaliciousPacketRules.Contains(details))
+			details = randomNonMaliciousPacketDetails();
 		return details;
 	}
 
 
 	// Update the starting point's malicious packet details (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
-	public bool SetMaliciousPacketDetails(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape) {
+	public bool SetMaliciousPacketRules(PacketRule rule) {
 		// Only update the settings if we have updates remaining
 		if(updatesRemaining > 0){
 			// Take away an update if something actually changed
-			if(color != spawnedMaliciousPacketDetails.color || size != spawnedMaliciousPacketDetails.size || shape != spawnedMaliciousPacketDetails.shape)
+			if(rule != spawnedMaliciousPacketRules)
 				updatesRemaining--;
-			photonView.RPC("RPC_StartingPoint_SetspawnedMaliciousPacketDetails", RpcTarget.AllBuffered, color, size, shape);
+			photonView.RPC("RPC_StartingPoint_SetMaliciousPacketRules", RpcTarget.AllBuffered, rule.CompressedRuleString() );
 			return true;
 		} else return false;
 	}
-	public bool SetMaliciousPacketDetails(PacketRule.Details details) { return SetMaliciousPacketDetails(details.color, details.size, details.shape); }
-	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketDetails(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape){
-		spawnedMaliciousPacketDetails = new PacketRule.Details(color, size, shape);
+	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketRules(string rules){
+		spawnedMaliciousPacketRules = PacketRule.Parse(rules);
+
+		Debug.Log(spawnedMaliciousPacketRules.treeRoot.RuleString());
 	}
 
 

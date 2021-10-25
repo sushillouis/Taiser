@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Utilities {
 
@@ -70,5 +71,14 @@ public class Utilities {
 		foreach (Renderer r in obj.GetComponentsInChildren<Renderer>())
 		 	bounds.Encapsulate(r.bounds);
 		return bounds;
+	}
+
+	// Function which checks if the pointer is over a UI object
+	public static bool isPointerOverUIObject(Vector2 mousePosition) {
+		PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+		eventDataCurrentPosition.position = mousePosition;
+		List<RaycastResult> results = new List<RaycastResult>();
+		EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+		return results.Count > 0;
 	}
 }

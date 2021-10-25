@@ -27,18 +27,18 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 
 
 	// Function which updates all of the starting points to have the specified malicious packet details
-	public bool ChangeAllStartPointsMalciousPacketDetails(PacketRule.Details details){
+	public bool ChangeAllStartPointsMalciousPacketRules(PacketRule rules){
 		bool success = true;
 		foreach(StartingPoint p in StartingPoint.startingPoints)
-			success &= ChangeStartPointMalciousPacketDetails(p, details);
+			success &= ChangeStartPointMalciousPacketRules(p, rules);
 
 		return success;
 	}
 
 	// Function which updates the specified starting point to have the specified malicious packet details
-	public bool ChangeStartPointMalciousPacketDetails(StartingPoint toModify, PacketRule.Details details){
+	public bool ChangeStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules){
 		// Error if the starting point to destroy is null
-		if(toModify == null){
+		if(toModify is null){
 			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");
 			return false;
 		}
@@ -53,7 +53,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return false;
 		}
 
-		if(toModify.SetMaliciousPacketDetails(details))
+		if(toModify.SetMaliciousPacketRules(rules))
 			StartingPointSettingsUpdated(toModify);
 		return true;
 	}
@@ -70,7 +70,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 	// Function which changes the probability of a spawned packet being malicious for the specified starting point
 	public bool ChangeStartPointMaliciousPacketProbability(StartingPoint toModify, float probability){
 		// Error if the starting point to modify is null
-		if(toModify == null){
+		if(toModify is null){
 			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");
 			return false;
 		}
@@ -98,7 +98,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 	// Function which changes the likelihood that a malicious packet will target the specified destination
 	public bool ChangeDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood){
 		// Error if the destination to modify is null
-		if(toModify == null){
+		if(toModify is null){
 			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
 			return false;
 		}

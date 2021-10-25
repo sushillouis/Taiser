@@ -100,25 +100,30 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 	public void OnStartingPointToggleSelected(int deltaNumber){
 		// Disable adjusting settings when we are just opening the panel for the first time
 		if(startingPointJustSelected) return;
+		// Don't do anything if we switched off a toggle
+		if(!packetStartPanelToggles[deltaNumber].isOn) return;
+
 		// Don't bother with this function if we don't have a starting point selected
 		StartingPoint selected = getSelected<StartingPoint>();
 		if(selected == null) return;
 
 		// Set the correct spawning rules based on the given input
-		PacketRule.Details rules = selected.spawnedMaliciousPacketDetails;
+		PacketRule rules = selected.spawnedMaliciousPacketRules;
+		PacketRule.Details d = rules[0];
 		switch(deltaNumber){
-			case 0: rules.size = PacketRule.Size.Small; break;
-			case 1: rules.size = PacketRule.Size.Medium; break;
-			case 2: rules.size = PacketRule.Size.Large; break;
-			case 3: rules.shape = PacketRule.Shape.Cube; break;
-			case 4: rules.shape = PacketRule.Shape.Sphere; break;
-			case 5: rules.shape = PacketRule.Shape.Cone; break;
-			case 6: rules.color = PacketRule.Color.Blue; break;
-			case 7: rules.color = PacketRule.Color.Green; break;
-			case 8: rules.color = PacketRule.Color.Pink; break;
+			case 0: d.size = PacketRule.Size.Small; break;
+			case 1: d.size = PacketRule.Size.Medium; break;
+			case 2: d.size = PacketRule.Size.Large; break;
+			case 3: d.shape = PacketRule.Shape.Cube; break;
+			case 4: d.shape = PacketRule.Shape.Sphere; break;
+			case 5: d.shape = PacketRule.Shape.Cone; break;
+			case 6: d.color = PacketRule.Color.Blue; break;
+			case 7: d.color = PacketRule.Color.Green; break;
+			case 8: d.color = PacketRule.Color.Pink; break;
 		}
 
-		if(!ChangeStartPointMalciousPacketDetails(selected, rules))
+		string newRule = new PacketRule.LiteralNode(d).RuleString();
+		if(!ChangeStartPointMalciousPacketRules(selected, PacketRule.Parse(newRule)))
 			showStartingPointPanel(selected); // Reload the starting point panel if we failed to update the settings
 	}
 
@@ -168,15 +173,15 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 			else t.interactable = false;
 
 		// Set the correct toggle states
-		packetStartPanelToggles[0].isOn = p.spawnedMaliciousPacketDetails.size == PacketRule.Size.Small;
-		packetStartPanelToggles[1].isOn = p.spawnedMaliciousPacketDetails.size == PacketRule.Size.Medium;
-		packetStartPanelToggles[2].isOn = p.spawnedMaliciousPacketDetails.size == PacketRule.Size.Large;
-		packetStartPanelToggles[3].isOn = p.spawnedMaliciousPacketDetails.shape == PacketRule.Shape.Cube;
-		packetStartPanelToggles[4].isOn = p.spawnedMaliciousPacketDetails.shape == PacketRule.Shape.Sphere;
-		packetStartPanelToggles[5].isOn = p.spawnedMaliciousPacketDetails.shape == PacketRule.Shape.Cone;
-		packetStartPanelToggles[6].isOn = p.spawnedMaliciousPacketDetails.color == PacketRule.Color.Blue;
-		packetStartPanelToggles[7].isOn = p.spawnedMaliciousPacketDetails.color == PacketRule.Color.Green;
-		packetStartPanelToggles[8].isOn = p.spawnedMaliciousPacketDetails.color == PacketRule.Color.Pink;
+		packetStartPanelToggles[0].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Small;
+		packetStartPanelToggles[1].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Medium;
+		packetStartPanelToggles[2].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Large;
+		packetStartPanelToggles[3].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cube;
+		packetStartPanelToggles[4].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Sphere;
+		packetStartPanelToggles[5].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cone;
+		packetStartPanelToggles[6].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Blue;
+		packetStartPanelToggles[7].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Green;
+		packetStartPanelToggles[8].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Pink;
 
 		// Display the correct header
 		packetStartPanelPacketHeader.gameObject.SetActive(false);

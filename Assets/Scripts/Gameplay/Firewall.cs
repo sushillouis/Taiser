@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
+public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	public static Firewall[] firewalls = null;
 
 	// Reference to the attached mesh renderer
@@ -15,7 +15,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 	public Color[] colors;
 
 	// The details of packets that should be filtered
-	public PacketRule.Details filterRules = PacketRule.Details.Default;
+	public PacketRule filterRules = PacketRule.Default;
 
 	// The number of updates gained after each wave (based on difficulty)
 	public int[] updatesGrantedPerWave = new int[3] {/*easy*/4, /*medium*/4, /*hard*/4};
@@ -46,7 +46,8 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 
 	// When the firewall is created make sure its filter rules are defaulted
 	void Start(){
-		SetFilterRules(PacketRule.Details.Default); // Make sure that the base filter rules are applied
+		// SetFilterRules(PacketRule.Default); // Make sure that the base filter rules are applied
+		SetGateColor(filterRules[0].color);
 		OnWaveStart();
 	}
 
@@ -57,21 +58,21 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable{
 
 	// Update the packet rules (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
-	public bool SetFilterRules(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape){
+	public bool SetFilterRules(PacketRule rule){
 		// Only update the settings if we have updates remaining
 		if(updatesRemaining > 0){
 			// Take away an update if something actually changed
-			if(color != filterRules.color || size != filterRules.size || shape != filterRules.shape)
+			if(filterRules != rule)
 				updatesRemaining--;
-			photonView.RPC("RPC_Firewall_SetFilterRules", RpcTarget.AllBuffered, color, size, shape);
+			photonView.RPC("RPC_Firewall_SetFilterRules", RpcTarget.AllBuffered, rule.CompressedRuleString() );
 			return true;
 		} else return false;
 	}
-	public bool SetFilterRules(PacketRule.Details details){ return SetFilterRules(details.color, details.size, details.shape); }
-	[PunRPC] void RPC_Firewall_SetFilterRules(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape){
-		filterRules = new PacketRule.Details(color, size, shape);
+	[PunRPC] void RPC_Firewall_SetFilterRules(string rules){
+		filterRules = PacketRule.Parse(rules);
 
-		SetGateColor(color);
+		// TODO: The logic for determining the gate color will need to change
+		SetGateColor(filterRules[0].color);
 	}
 
 	// Function which sets the firewall's gate color (network synced)

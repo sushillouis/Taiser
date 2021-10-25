@@ -48,7 +48,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	// Function which spawns and returns a firewall on the given path piece (network synced)
 	protected Firewall SpawnFirewall(GameObject targetPathPiece){
 		// Error on invalid path piece
-		if(targetPathPiece == null){
+		if(targetPathPiece is null){
 			ErrorHandler(ErrorCodes.TargetNotSelected, "A location to place the firewall at must be selected!");
 			return null;
 		}
@@ -76,7 +76,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	// The function by default causes the firewall to be smoothly moved to its new location over the course of half a second (this behavior can be disabled by passing false to animated)
 	public virtual bool MoveFirewall(Firewall toMove, GameObject targetPathPiece, bool animated = true){
 		// Error if the firewall to move is null
-		if(toMove == null){
+		if(toMove is null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to move must be selected!");
 			return false;
 		}
@@ -86,7 +86,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return false;
 		}
 		// Error if the path piece to move too is null
-		if(targetPathPiece == null){
+		if(targetPathPiece is null){
 			ErrorHandler(ErrorCodes.TargetNotSelected, "A location to move to must be selected!");
 			return false;
 		}
@@ -116,7 +116,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	// Function which destroys the given firewall
 	protected virtual bool DestroyFirewall(Firewall toDestroy){
 		// Error if the firewall to destroy is null
-		if(toDestroy == null){
+		if(toDestroy is null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to destroy must be selected!");
 			return false;
 		}
@@ -134,9 +134,9 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	}
 
 	// Function which updates the settings of the given firewall
-	protected virtual bool SetFirewallFilterRules(Firewall toModify, PacketRule.Details filterRules){
+	protected virtual bool SetFirewallFilterRules(Firewall toModify, PacketRule filterRules){
 		// Error if the firewall to destroy is null
-		if(toModify == null){
+		if(toModify is null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to modify must be selected!");
 			return false;
 		}
@@ -159,7 +159,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	// Function which marks the specified destination as a honeypot
 	public bool MakeDestinationHoneypot(Destination toModify){
 		// Error if the destination to modify is null
-		if(toModify == null){
+		if(toModify is null){
 			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
 			return false;
 		}
