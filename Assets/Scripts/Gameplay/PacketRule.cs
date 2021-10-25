@@ -104,6 +104,11 @@ public partial class PacketRule : List<PacketRule.Details> {
 			children = null;
 		}
 
+		// Base function which returns a rule string for the whole tree
+		public virtual string RuleString(){
+			return "";
+		}
+
 		// Function used to dump tree nodes
 		public virtual void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- emptyNode");
@@ -146,6 +151,26 @@ public partial class PacketRule : List<PacketRule.Details> {
 			children = new Node[2];
 		}
 
+		// Recursively generate the OR node's string
+		public override string RuleString(){
+			string ret = "";
+
+			if(children is object){
+				if(children[0].children is object && children[0].children.Length > 1)
+					ret = "(" + children[0].RuleString() + ")";
+				else
+					ret = children[0].RuleString();
+
+				for(int i = 1; i < children.Length; i++)
+					if(children[i].children is object && children[i].children.Length > 1)
+						ret += " | (" + children[i].RuleString() + ")";
+					else
+						ret += " | " + children[i].RuleString();
+			}
+
+			return ret;
+		}
+
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- OR");
@@ -170,6 +195,26 @@ public partial class PacketRule : List<PacketRule.Details> {
 			children = new Node[2];
 		}
 
+		// Recursively generate the AND node's string
+		public override string RuleString(){
+			string ret = "";
+
+			if(children is object){
+				if(children[0].children is object && children[0].children.Length > 1)
+					ret = "(" + children[0].RuleString() + ")";
+				else
+					ret = children[0].RuleString();
+
+				for(int i = 1; i < children.Length; i++)
+					if(children[i].children is object && children[i].children.Length > 1)
+						ret += " & (" + children[i].RuleString() + ")";
+					else
+						ret += " & " + children[i].RuleString();
+			}
+
+			return ret;
+		}
+
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- AND");
@@ -192,10 +237,24 @@ public partial class PacketRule : List<PacketRule.Details> {
 			children = new Node[1];
 		}
 
+		// Recursively generate the NOT node's string
+		public override string RuleString(){
+			string ret = "";
+
+			if(children is object){
+				if(children[0].children is object && children[0].children.Length > 1)
+					ret = " !(" + children[0].RuleString() + ")";
+				else
+					ret = " !" + children[0].RuleString();
+			}
+
+			return ret;
+		}
+
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
 		    Debug.Log(indent + "+- NOT");
-		    indent += last ? "   " : "|  ";
+		    indent += last ? "   " : " |  ";
 
 			for(int i = 0; i < children.Length; i++)
 				children[i].DebugDump(indent, i == children.Length - 1);
@@ -208,6 +267,47 @@ public partial class PacketRule : List<PacketRule.Details> {
 		public Details details;
 
 		public LiteralNode() { type = Node.Type.Literal; }
+		public LiteralNode(Details d) {
+			type = Node.Type.Literal;
+			details = d;
+		}
+
+		// Constants providing easy access to all of the nodes holding a specific individual rule
+		public static readonly LiteralNode Pink = new LiteralNode(new Details(Color.Pink, Size.Any, Shape.Any));
+		public static readonly LiteralNode Blue = new LiteralNode(new Details(Color.Blue, Size.Any, Shape.Any));
+		public static readonly LiteralNode Green = new LiteralNode(new Details(Color.Green, Size.Any, Shape.Any));
+		public static readonly LiteralNode Small = new LiteralNode(new Details(Color.Any, Size.Small, Shape.Any));
+		public static readonly LiteralNode Medium = new LiteralNode(new Details(Color.Any, Size.Medium, Shape.Any));
+		public static readonly LiteralNode Large = new LiteralNode(new Details(Color.Any, Size.Large, Shape.Any));
+		public static readonly LiteralNode Sphere = new LiteralNode(new Details(Color.Any, Size.Any, Shape.Sphere));
+		public static readonly LiteralNode Cone = new LiteralNode(new Details(Color.Any, Size.Any, Shape.Cone));
+		public static readonly LiteralNode Cube = new LiteralNode(new Details(Color.Any, Size.Any, Shape.Cube));
+
+		// Generate the Literal nodes's string
+		public override string RuleString(){
+			string ret = "";
+
+			if(details.color != Color.Any)
+				ret += System.Enum.GetName(typeof(PacketRule.Color), details.color);
+
+			if(details.size != Size.Any){
+				if(details.color != Color.Any)
+					ret += " & ";
+				ret += System.Enum.GetName(typeof(PacketRule.Size), details.size);
+			}
+
+			if(details.shape != Shape.Any){
+				if(details.color != Color.Any || details.size != Size.Any)
+					ret += " & ";
+				ret += System.Enum.GetName(typeof(PacketRule.Shape), details.shape);
+			}
+
+
+			if(ret.Contains("&"))
+				ret = "(" + ret + ")";
+
+			return ret;
+		}
 
 		// Function used to dump tree nodes
 		public override void DebugDump(string indent = "", bool last = false) {
@@ -491,8 +591,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 			}
 		}
 
-		// Debug.Log("Optimized:");
-		// treeCopy.DebugDump();
+		Debug.Log("Optimized:");
+		treeCopy.DebugDump();
 
 		// Update ourselves to be the list of children of the single OR node left remainig in the parse tree
 		AddRange( LiteralNode.detailsFromNodes(treeCopy.children as LiteralNode[]) );
