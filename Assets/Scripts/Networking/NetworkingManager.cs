@@ -78,7 +78,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	protected override void Awake(){
 		base.Awake();
 
-		ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(Networking.Player), /*Can't be registerd as P or Q since they are reserved by photon*/(byte)'P' + 2, Networking.Player.PhotonSerialize, Networking.Player.PhotonDeserialize);
+		ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(Networking.Player), /*Can't be registered as P or Q since they are reserved by photon*/(byte)'P' + 2, Networking.Player.PhotonSerialize, Networking.Player.PhotonDeserialize);
 	}
 
 	// When enabled we setup the singleton and make sure we are connected to the PhotonNetwork
