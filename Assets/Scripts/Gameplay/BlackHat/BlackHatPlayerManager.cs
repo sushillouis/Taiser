@@ -123,7 +123,7 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 		}
 
 		string newRule = new PacketRule.LiteralNode(d).RuleString();
-		if(!ChangeStartPointMalciousPacketRules(selected, PacketRule.Parse(newRule)))
+		if(ChangeStartPointMalciousPacketRules(selected, PacketRule.Parse(newRule)) != ErrorCodes.NoError)
 			showStartingPointPanel(selected); // Reload the starting point panel if we failed to update the settings
 	}
 

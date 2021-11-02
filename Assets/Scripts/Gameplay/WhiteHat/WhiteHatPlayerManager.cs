@@ -172,7 +172,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		}
 
 		string newRule = new PacketRule.LiteralNode(d).RuleString();
-		if(!SetFirewallFilterRules(selected, PacketRule.Parse(newRule)))
+		if(SetFirewallFilterRules(selected, PacketRule.Parse(newRule)) != ErrorCodes.NoError)
 			showFirewallPanel(selected); // Reload the firewall panel if we failed to update the settings
 	}
 
@@ -185,7 +185,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		}
 
 		// If the selection is a destination, make it a honeypot
-		if(MakeDestinationHoneypot(getSelected<Destination>()))
+		if(MakeDestinationHoneypot(getSelected<Destination>()) == ErrorCodes.NoError)
 			// Play a sound to indicate that settings were updated
 			AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated", .5f);
 
@@ -231,7 +231,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 				AudioManager.instance.soundFXPlayer.PlayTrackImmediate("FirewallSpawn", .5f);
 			}
 		// If we are an advisor... simply suggest where a firewall should be placed
-		} else if(SpawnSuggestedFirewall(SelectionManager.instance.hovered))
+		} else if(SpawnSuggestedFirewall(SelectionManager.instance.hovered) == ErrorCodes.NoError)
  			clickState = ClickState.Selecting;
 	}
 
@@ -258,7 +258,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 
 	// Function which handles clicks when we are supposed to be moving firewalls
 	void OnClick_MovingFirewall(){
-		if(MoveFirewall(getSelected<Firewall>(), SelectionManager.instance.hovered)){
+		if(MoveFirewall(getSelected<Firewall>(), SelectionManager.instance.hovered) != ErrorCodes.NoError){
 			clickState = ClickState.Selecting;
 
 			// Make sure the placement cursor is hidden

@@ -6,9 +6,9 @@ using Photon.Pun;
 public class BlackHatBaseManager : BaseSharedBetweenHats {
 	// Error codes used by the error handling system
 	public new class ErrorCodes : BaseSharedBetweenHats.ErrorCodes {
-		public static readonly int StartingPointNotSelected = 4;	// Error code indicating that a starting point was not selected
-		public static readonly int DestinationNotSelected = 5;		// Error code indicating that a destination was not selected
-		public static readonly int InvalidProbability = 6;			// Error code indicating that the provided probability is invalid
+		public static readonly int StartingPointNotSelected = 5;	// Error code indicating that a starting point was not selected
+		public static readonly int DestinationNotSelected = 6;		// Error code indicating that a destination was not selected
+		public static readonly int InvalidProbability = 7;			// Error code indicating that the provided probability is invalid
 
 		// Required function to get the class up to par
 		public ErrorCodes() {}
@@ -27,95 +27,97 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 
 
 	// Function which updates all of the starting points to have the specified malicious packet details
-	public bool ChangeAllStartPointsMalciousPacketRules(PacketRule rules){
-		bool success = true;
-		foreach(StartingPoint p in StartingPoint.startingPoints)
-			success &= ChangeStartPointMalciousPacketRules(p, rules);
+	public ErrorCodes ChangeAllStartPointsMalciousPacketRules(PacketRule rules){
+		foreach(StartingPoint p in StartingPoint.startingPoints){
+			ErrorCodes ret = ChangeStartPointMalciousPacketRules(p, rules);
+			if(ret != ErrorCodes.NoError) return ret;
+		}
 
-		return success;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which updates the specified starting point to have the specified malicious packet details
-	public bool ChangeStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules){
+	public ErrorCodes ChangeStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules){
 		// Error if the starting point to destroy is null
 		if(toModify is null){
 			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");
-			return false;
+			return ErrorCodes.StartingPointNotSelected;
 		}
 		// Error if we don't own the starting point
 		if(NetworkingManager.isPrimary && toModify.photonView.Controller != NetworkingManager.localPlayer){
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify Starting Points you don't own!");
-			return false;
+			return ErrorCodes.WrongPlayer;
 		}
 		// Error if the starting point doesn't have any updates remaining
 		if(toModify.updatesRemaining <= 0){
 			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
-			return false;
+			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		if(toModify.SetMaliciousPacketRules(rules))
 			StartingPointSettingsUpdated(toModify);
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which changes the probability of a spawned packet being malicious for of all the starting points
-	public bool ChangeAllStartPointsMaliciousPacketProbabilities(float probability){
-		bool success = true;
-		foreach(StartingPoint p in StartingPoint.startingPoints)
-			success &= ChangeStartPointMaliciousPacketProbability(p, probability);
+	public ErrorCodes ChangeAllStartPointsMaliciousPacketProbabilities(float probability){
+		foreach(StartingPoint p in StartingPoint.startingPoints){
+			ErrorCodes ret = ChangeStartPointMaliciousPacketProbability(p, probability);
+			if(ret != ErrorCodes.NoError) return ret;
+		}
 
-		return success;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which changes the probability of a spawned packet being malicious for the specified starting point
-	public bool ChangeStartPointMaliciousPacketProbability(StartingPoint toModify, float probability){
+	public ErrorCodes ChangeStartPointMaliciousPacketProbability(StartingPoint toModify, float probability){
 		// Error if the starting point to modify is null
 		if(toModify is null){
 			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");
-			return false;
+			return ErrorCodes.StartingPointNotSelected;
 		}
 		// Error if we don't own the starting point
 		if(NetworkingManager.isPrimary && toModify.photonView.Controller != NetworkingManager.localPlayer){
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify Starting Points you don't own!");
-			return false;
+			return ErrorCodes.WrongPlayer;
 		}
 		// Error if the provided probability is invalid
 		if(probability < 0 || probability > 1){
 			ErrorHandler(ErrorCodes.InvalidProbability, "The probability " + probability + " is invalid!");
-			return false;
+			return ErrorCodes.InvalidProbability;
 		}
 		// Error if the starting point doesn't have any updates remaining
 		if(toModify.updatesRemaining <= 0){
 			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
-			return false;
+			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		if(toModify.SetMaliciousPacketProbability(probability))
 			StartingPointSettingsUpdated(toModify);
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which changes the likelihood that a malicious packet will target the specified destination
-	public bool ChangeDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood){
+	public ErrorCodes ChangeDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood){
 		// Error if the destination to modify is null
 		if(toModify is null){
 			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
-			return false;
+			return ErrorCodes.DestinationNotSelected;
 		}
 		// Error if we don't own the destination
 		if(NetworkingManager.isPrimary && toModify.photonView.Controller != NetworkingManager.localPlayer){
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify Destinations you don't own!");
-			return false;
+			return ErrorCodes.WrongPlayer;
 		}
 		// Error if the destination doesn't have any updates remaining
 		if(toModify.updatesRemainingBlack <= 0){
 			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
-			return false;
+			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		if(toModify.SetMaliciousPacketDestinationLikelihood(likelihood))
 			DestinationSettingsUpdated(toModify);
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 

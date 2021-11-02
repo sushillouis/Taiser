@@ -38,7 +38,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	protected override void OnEndDrag(){
 		base.OnEndDrag();
 
-		if(!WhiteHatPlayerManager.instance.MoveFirewall(this, SelectionManager.instance.hovered)){
+		if(WhiteHatPlayerManager.instance.MoveFirewall(this, SelectionManager.instance.hovered) != WhiteHatBaseManager.ErrorCodes.NoError){
 			transform.position = savedDraggingPosition;
 			transform.rotation = savedDraggingRotation;
 		}
