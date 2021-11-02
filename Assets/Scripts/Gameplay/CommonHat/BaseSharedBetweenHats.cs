@@ -6,10 +6,11 @@ using UnityEngine;
 public class BaseSharedBetweenHats : Core.Utilities.Singleton<BaseSharedBetweenHats> {
 	// Error codes used by the error handling system
 	public class ErrorCodes {
-		public static readonly int Generic = 0;
-		public static readonly int WrongPlayer = 1;			// Error code stating that the wrong player tried to interact with the object
-		public static readonly int InvalidTarget = 2;		// Error code stating that the selected target is invalid
-		public static readonly int NoUpdatesRemaining = 3;	// Error code stating that the selected target doesn't have any updates left
+		public static readonly int NoError = 0;
+		public static readonly int Generic = 1;
+		public static readonly int WrongPlayer = 2;			// Error code stating that the wrong player tried to interact with the object
+		public static readonly int InvalidTarget = 3;		// Error code stating that the selected target is invalid
+		public static readonly int NoUpdatesRemaining = 4;	// Error code stating that the selected target doesn't have any updates left
 
 		public int value = Generic;
 
@@ -45,6 +46,20 @@ public class BaseSharedBetweenHats : Core.Utilities.Singleton<BaseSharedBetweenH
 
 	}
 
+	// Register ourselves as a listener for events
+	void OnEnable(){
+		GameManager.waveStartEvent += OnWaveStart;
+		GameManager.waveEndEvent += OnWaveEnd;
+		GameManager.gameEndEvent += OnGameEnd;
+		ScoreManager.scoreEvent += OnScoreEvent;
+	}
+	void OnDisable(){
+		GameManager.waveStartEvent -= OnWaveStart;
+		GameManager.waveEndEvent -= OnWaveEnd;
+		GameManager.gameEndEvent -= OnGameEnd;
+		ScoreManager.scoreEvent -= OnScoreEvent;
+	}
+
 
 	// -- GameState Accessors --
 
@@ -58,6 +73,46 @@ public class BaseSharedBetweenHats : Core.Utilities.Singleton<BaseSharedBetweenH
 
 	public static GameObject[] getFirewallTargets(){ return GameObject.FindGameObjectsWithTag("FirewallTarget"); }
 	public static GameObject[] getSwitchTargets(){ return GameObject.FindGameObjectsWithTag("SwitchTarget"); }
+
+	// Access the lists of relevant objects
+	public static Firewall[] getFirewalls() => Firewall.firewalls;
+	public static StartingPoint[] getStartingPoints() => StartingPoint.startingPoints;
+	public static Destination[] getDestinations() => Destination.destinations;
+	public static PathNodeBase[] getPathNodes(bool removeStartDestination = false) {
+		PathNodeBase[] _ret = FindObjectsOfType<PathNodeBase>();
+		if(!removeStartDestination) return _ret;
+
+		// Create a list with all of the starting points and destinations removed
+		List<PathNodeBase> ret = new List<PathNodeBase>();
+		foreach(PathNodeBase node in _ret){
+			if(node is StartingPoint || node is Destination)
+				continue;
+
+			ret.Add(node);
+		}
+
+		return ret.ToArray();
+	}
+
+	// Access score information
+	public static ScoreManager.WaveMetrics getCurrentWaveMetrics() => ScoreManager.instance.getCurrentWaveMetrics();
+	public static ScoreManager.WaveMetrics getAllWavesMetrics() => ScoreManager.instance.getAllWavesMetrics();
+	public static float getBlackHatScore() => ScoreManager.instance.blackHatScore;
+	public static float getWhiteHatScore() => ScoreManager.instance.whiteHatScore;
+
+	// Access game information
+	public static GameManager.Difficulty getDifficulty() => GameManager.difficulty;
+	public static int getCurrentWave() => GameManager.instance.currentWave;
+	public static bool isWaveStarted() => GameManager.instance.waveStarted;
+
+
+	// -- Virtual Event Handlers --
+
+
+	public virtual void OnWaveStart() {}
+	public virtual void OnWaveEnd() {}
+	public virtual void OnGameEnd() {}
+	public virtual void OnScoreEvent(float whiteHatDerivative, float whiteHatScore, float blackHatDerivative, float blackHatScore) {}
 
 
 	// -- Error Handling --

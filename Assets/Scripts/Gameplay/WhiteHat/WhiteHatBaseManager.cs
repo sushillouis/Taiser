@@ -6,11 +6,11 @@ using Photon.Pun;
 public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	// Error codes used by the error handling system
 	new public class ErrorCodes : BaseSharedBetweenHats.ErrorCodes {
-		public static readonly int FirewallIsMoving = 4;		// Error code stating that the firewall is still moving
-		public static readonly int FirewallNotSelected = 5;		// Error code stating that no firewall has been selected
-		public static readonly int DestinationNotSelected = 6;	// Error code stating that no destination has been selected
-		public static readonly int TooManyFirewalls = 7;		// Error code stating there are too many firewalls to place another
-		public static readonly int TargetNotSelected = 8;		// Error code stating that no target has been selected
+		public static readonly int FirewallIsMoving = 5;		// Error code stating that the firewall is still moving
+		public static readonly int FirewallNotSelected = 6;		// Error code stating that no firewall has been selected
+		public static readonly int DestinationNotSelected = 7;	// Error code stating that no destination has been selected
+		public static readonly int TooManyFirewalls = 8;		// Error code stating there are too many firewalls to place another
+		public static readonly int TargetNotSelected = 9;		// Error code stating that no target has been selected
 
 		// Required function to get the class up to par
 		public ErrorCodes() {}
@@ -74,26 +74,26 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 	// Function which moves a firewall to the targetedPathPiece
 	// This function returns true if the move was successful, and false if any errors occurred
 	// The function by default causes the firewall to be smoothly moved to its new location over the course of half a second (this behavior can be disabled by passing false to animated)
-	public virtual bool MoveFirewall(Firewall toMove, GameObject targetPathPiece, bool animated = true){
+	public virtual ErrorCodes MoveFirewall(Firewall toMove, GameObject targetPathPiece, bool animated = true){
 		// Error if the firewall to move is null
 		if(toMove is null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to move must be selected!");
-			return false;
+			return ErrorCodes.FirewallNotSelected;
 		}
 		// Error if we don't own the firewall
 		if(NetworkingManager.isPrimary && toMove.photonView.Controller != NetworkingManager.localPlayer){
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't move firewalls you don't own!");
-			return false;
+			return ErrorCodes.WrongPlayer;
 		}
 		// Error if the path piece to move too is null
 		if(targetPathPiece is null){
 			ErrorHandler(ErrorCodes.TargetNotSelected, "A location to move to must be selected!");
-			return false;
+			return ErrorCodes.TargetNotSelected;
 		}
 		// Error if the path piece can't have firewalls on it
 		if(targetPathPiece.tag != "FirewallTarget"){
 			ErrorHandler(ErrorCodes.InvalidTarget, "Firewalls can't be moved to the selected location!");
-			return false;
+			return ErrorCodes.InvalidTarget;
 		}
 
 		// If we should be animating the movement...
@@ -101,7 +101,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			// Try to start the movement and return an error if it is already moving
 			if(!toMove.StartGradualMove(targetPathPiece.transform.position, targetPathPiece.transform.rotation)){
 				ErrorHandler(ErrorCodes.FirewallIsMoving, "Wait until it is done moving!");
-				return false;
+				return ErrorCodes.FirewallIsMoving;
 			}
 		// If we shouldn't be animating, simply snap the path piece to its destination
 		} else {
@@ -110,68 +110,68 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 		}
 
 		// We have successfully moved the path piece, so return true
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which destroys the given firewall
-	protected virtual bool DestroyFirewall(Firewall toDestroy){
+	protected virtual ErrorCodes DestroyFirewall(Firewall toDestroy){
 		// Error if the firewall to destroy is null
 		if(toDestroy is null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to destroy must be selected!");
-			return false;
+			return ErrorCodes.FirewallNotSelected;
 		}
 		// Error if we don't own the firewall
 		if(NetworkingManager.isPrimary && toDestroy.photonView.Controller != NetworkingManager.localPlayer){
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't destroy firewalls you don't own!");
-			return false;
+			return ErrorCodes.WrongPlayer;
 		}
 
 		// TODO: Possibly add a particle system!
 
 		// Network destroy the firewall
 		PhotonNetwork.Destroy(toDestroy.gameObject);
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which updates the settings of the given firewall
-	protected virtual bool SetFirewallFilterRules(Firewall toModify, PacketRule filterRules){
+	protected virtual ErrorCodes SetFirewallFilterRules(Firewall toModify, PacketRule filterRules){
 		// Error if the firewall to destroy is null
 		if(toModify is null){
 			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to modify must be selected!");
-			return false;
+			return ErrorCodes.FirewallNotSelected;
 		}
 		// Error if we don't own the firewall
 		if(NetworkingManager.isPrimary && toModify.photonView.Controller != NetworkingManager.localPlayer){
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify firewalls you don't own!");
-			return false;
+			return ErrorCodes.WrongPlayer;
 		}
 		// Error if the firewall doesn't have any updates remaining
 		if(toModify.updatesRemaining <= 0){
 			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Firewall doesn't have any updates remaining!");
-			return false;
+			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		if(toModify.SetFilterRules(filterRules))
 			FirewallSettingsUpdated(toModify);
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 	// Function which marks the specified destination as a honeypot
-	public bool MakeDestinationHoneypot(Destination toModify){
+	public ErrorCodes MakeDestinationHoneypot(Destination toModify){
 		// Error if the destination to modify is null
 		if(toModify is null){
 			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
-			return false;
+			return ErrorCodes.DestinationNotSelected;
 		}
 		// Error if the destination doesn't have any updates remaining
 		if(toModify.updatesRemainingWhite <= 0){
 			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
-			return false;
+			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		if(toModify.SetIsHoneypot(true))
 			DestinationSettingsUpdated(toModify);
-		return true;
+		return ErrorCodes.NoError;
 	}
 
 
@@ -179,16 +179,16 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 
 
 	// Function which spawns or moves the suggested firewall to the selected path piece
-	protected bool SpawnSuggestedFirewall(GameObject targetPathPiece){
+	protected ErrorCodes SpawnSuggestedFirewall(GameObject targetPathPiece){
 		// Error on invalid path piece
 		if(targetPathPiece is null){
 			ErrorHandler(ErrorCodes.TargetNotSelected, "A location to place the suggested firewall at must be selected!");
-			return false;
+			return ErrorCodes.TargetNotSelected;
 		}
 		// Error if the path piece can't have firewalls on it
 		if(targetPathPiece.tag != "FirewallTarget"){
 			ErrorHandler(ErrorCodes.InvalidTarget, "Suggested firewalls can't be placed on the selected location!");
-			return false;
+			return ErrorCodes.InvalidTarget;
 		}
 
 		// If the suggested firewall doesn't exist spawn it (and start a timer which will delete it after 5 seconds)
@@ -200,7 +200,10 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 
 		// Reset the deletion timer of the selected firewall and gradually move it to its new location
 		suggestedFirewall.ResetDeleteTimer();
-		return suggestedFirewall.StartGradualMove(targetPathPiece.transform.position, targetPathPiece.transform.rotation);
+		suggestedFirewall.StartGradualMove(targetPathPiece.transform.position, targetPathPiece.transform.rotation);
+
+		// TODO: should we return firewall already moving if the start gradual move returns false?
+		return ErrorCodes.NoError;
 	}
 
 	// -- Derived Class Callbacks --
