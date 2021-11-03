@@ -4141,7 +4141,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -11.268555, y: 19.5318}
+  m_AnchoredPosition: {x: -11.268555, y: 19.53186}
   m_SizeDelta: {x: -503.3191, y: -225.3667}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6189335886573215115
@@ -4614,7 +4614,6 @@ MonoBehaviour:
   - {fileID: 6189335886503927001}
   - {fileID: 6189335886572684793}
   - {fileID: 6189335885905100728}
-  moveFirewallButton: {fileID: 0}
   removeFirewallButton: {fileID: 6189335887070925433}
   makeHoneypotButton: {fileID: 147147570014329875}
 --- !u!1 &6189335886744270036
@@ -6621,6 +6620,7 @@ MonoBehaviour:
   endGameScreen: {fileID: 6189335886573215118}
   winText: {fileID: 6189335885998447653}
   loseText: {fileID: 6189335886756303988}
+  gameEndText: {fileID: 0}
 --- !u!1 &6189335887375929143
 GameObject:
   m_ObjectHideFlags: 0

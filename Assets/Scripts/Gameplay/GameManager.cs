@@ -178,8 +178,10 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		try{
 			// TODO: Need to take spectators into account (right now they always lose)
 			// Show the win text if the player's side won
-			if(winningSide == NetworkingManager.localPlayer.side)
+			if (winningSide == NetworkingManager.localPlayer.side)
 				BaseUI.instance.winText.SetActive(true);
+			else if (NetworkingManager.localPlayer.role == Networking.Player.Role.Spectator) // Is Spectator
+				BaseUI.instance.gameEndText.SetActive(true);
 			else BaseUI.instance.loseText.SetActive(true);
 		// If we fail to find the index then assume that we lost
 		} catch (System.IndexOutOfRangeException) { BaseUI.instance.loseText.SetActive(true); }
