@@ -75,6 +75,9 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	}
 
 	void Start(){
+		// Make sure that the graph is rebuilt before we start
+		PathNodeBase.UpdateGraphConnections();
+
 		// When we load into the scene make sure that every player is not readied
 		if(NetworkingManager.instance) NetworkingManager.instance.setReady(false);
 

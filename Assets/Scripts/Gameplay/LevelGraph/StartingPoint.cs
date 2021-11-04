@@ -32,10 +32,7 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 	// Whenever a new starting point is added update the list of starting points
-	protected override void Awake() {
-		base.Awake();
-		startingPoints = FindObjectsOfType<StartingPoint>();
-	}
+	protected void Awake() { startingPoints = FindObjectsOfType<StartingPoint>(); }
 
 
 	// All of the likelihoods are added together, then the probability of spawning a packet at this point is <likelihood>/<totalLikelihood>
