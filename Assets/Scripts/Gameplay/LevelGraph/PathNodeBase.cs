@@ -72,14 +72,19 @@ public class PathNodeBase : MonoBehaviour {
     public PathNodeBase[] connectedNodes = new PathNodeBase[4];
 
 
-	// On awake make sure that the graph connections are updated
-	virtual protected void Awake(){
-		UpdateLocalGraphConnections();
-	}
+	// // On awake make sure that the graph connections are updated
+	// virtual protected void Awake(){
+	// 	UpdateLocalGraphConnections();
+	// }
 
 
 	// Function which updates the graph connections for this particular node
 	protected virtual void UpdateLocalGraphConnections(){
+		// Update the connections
+#if UNITY_EDITOR
+		Undo.RecordObject(this, "Updated Local Graph Connections");
+#endif
+
 		PathNodeBase[] allNodes = FindObjectsOfType<PathNodeBase>(); // List of PathNodeBase's
 		Directions[] toLoopThrough = new Directions[]{ Directions.North, Directions.East, Directions.South, Directions.West }; // List of directions to loop through
 
@@ -203,8 +208,10 @@ public class PathNodeBase : MonoBehaviour {
 #if UNITY_EDITOR
 	// Menu item which updates the links in the graph
 	[MenuItem("CONTEXT/PathNodeBase/Update Graph Connections")]
-	public static void UpdateGraphConnections(MenuCommand command){
-		ClearGraphConnections(command);
+	public static void UpdateGraphConnections(MenuCommand command) => UpdateGraphConnections();
+#endif //UNITY_EDITOR
+	public static void UpdateGraphConnections(){
+		ClearGraphConnections();
 
 		PathNodeBase[] allNodes = FindObjectsOfType<PathNodeBase>();
 
@@ -212,13 +219,19 @@ public class PathNodeBase : MonoBehaviour {
 			node.UpdateLocalGraphConnections();
 	}
 
+#if UNITY_EDITOR
 	// Menu item which clears the links in the graph
 	[MenuItem("CONTEXT/PathNodeBase/Clear Graph Connections")]
-	public static void ClearGraphConnections(MenuCommand command){
+	public static void ClearGraphConnections(MenuCommand command) => ClearGraphConnections();
+#endif //UNITY_EDITOR
+	public static void ClearGraphConnections(){
 		PathNodeBase[] allNodes = FindObjectsOfType<PathNodeBase>();
 		// Clear the current graph
-		foreach(PathNodeBase node in allNodes)
-			node.connectedNodes = new PathNodeBase[4];
-	}
+		foreach(PathNodeBase node in allNodes){
+#if UNITY_EDITOR
+			Undo.RecordObject(node, "Clear Graph Connections");
 #endif
+			node.connectedNodes = new PathNodeBase[4];
+		}
+	}
 }
