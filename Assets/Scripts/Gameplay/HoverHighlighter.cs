@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class HoverHighlighter : MonoBehaviour, SelectionManager.IHoverable /* It has to be IHoverable so that the SelectionManager can detect it*/ {
 
 	// Object which is enabled when we hover over this object

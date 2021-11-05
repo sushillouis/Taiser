@@ -56,11 +56,26 @@ public class DraggableSnappedToPath : MonoBehaviourPun {
 	// Function which snaps our current position while we are dragging
 	protected virtual void OnDrag(){
 		try{
-			transform.position = SelectionManager.instance.hovered.transform.position;
-			transform.rotation = SelectionManager.instance.hovered.transform.rotation;
+			Vector3 position;
+			Quaternion rotation;
+			PathToPositionRotation(SelectionManager.instance.hovered, out position, out rotation);
+			transform.position = position;
+			transform.rotation = rotation;
 		} catch (System.NullReferenceException) {}
 	}
 
 	// Function which can be overridden to provide behavior when we end dragging
 	protected virtual void OnEndDrag(){ }
+
+
+	// Function which converts a path piece to a position and rotation for the dragable element to be placed at
+	public static void PathToPositionRotation(GameObject targetPathPiece, out Vector3 position, out Quaternion rotation){
+		position = targetPathPiece.transform.position;
+		rotation = targetPathPiece.transform.rotation;
+		BoxCollider collider = targetPathPiece.GetComponent<BoxCollider>();
+		if(collider is object){
+			position += collider.center;
+			rotation = Quaternion.LookRotation(Utilities.positionNoY(collider.center), Vector3.up);
+		}
+	}
 }

@@ -140,8 +140,11 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 
 		// Otherwise enable the firewall cursor and snap it to the hovered point
 		firewallCursor.SetActive(true);
-		firewallCursor.transform.position = newHover.transform.position;
-		firewallCursor.transform.rotation = newHover.transform.rotation;
+		Vector3 position;
+		Quaternion rotation;
+		Firewall.PathToPositionRotation(newHover, out position, out rotation);
+		firewallCursor.transform.position = position;
+		firewallCursor.transform.rotation = rotation;
 	}
 
 	// Callback which handles when one of the toggles in the firewall panel is adjusted
