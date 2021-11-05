@@ -98,17 +98,21 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.InvalidTarget;
 		}
 
+		Vector3 position;
+		Quaternion rotation;
+		Firewall.PathToPositionRotation(targetPathPiece, out position, out rotation);
+
 		// If we should be animating the movement...
 		if(animated){
 			// Try to start the movement and return an error if it is already moving
-			if(!toMove.StartGradualMove(targetPathPiece.transform.position, targetPathPiece.transform.rotation)){
+			if(!toMove.StartGradualMove(position, rotation)){
 				ErrorHandler(ErrorCodes.FirewallIsMoving, "Wait until it is done moving!");
 				return ErrorCodes.FirewallIsMoving;
 			}
 		// If we shouldn't be animating, simply snap the path piece to its destination
 		} else {
-			toMove.transform.position = targetPathPiece.transform.position;
-			toMove.transform.rotation = targetPathPiece.transform.rotation;
+			toMove.transform.position = position;
+			toMove.transform.rotation = rotation;
 		}
 
 		// We have successfully moved the path piece, so return true
