@@ -196,4 +196,37 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	[PunRPC] void RPC_GameManager_SetDifficulty(Difficulty diff) {
 		_difficulty = diff;
 	}
+
+
+	// -- Hat Specific RPC Forwarding --
+
+
+	// -- WhiteHat --
+
+	[PunRPC] void RPC_WhiteHatBaseManager_ProposeNewFirewallFilterRules(int firewallID, string rules){
+		if(WhiteHatBaseManager.instance is null) return;
+		WhiteHatBaseManager.instance.OnProposedNewFirewallFilterRules(Firewall.GetFromID((uint) firewallID), PacketRule.Parse(rules));
+	}
+
+	[PunRPC] void RPC_WhiteHatBaseManager_ProposeMakeDestinationHoneypot(int destinationID){
+		if(WhiteHatBaseManager.instance is null) return;
+		WhiteHatBaseManager.instance.OnProposedMakeDestinationHoneypot(Destination.GetFromID((uint) destinationID));
+	}
+
+	// -- BlackHat --
+
+	[PunRPC] void RPC_BlackHatBaseManager_ProposeNewStartPointMalciousPacketRules(int startPointID, string rules){
+		if(BlackHatBaseManager.instance is null) return;
+		BlackHatBaseManager.instance.OnProposedNewStartPointMalciousPacketRules(StartingPoint.GetFromID((uint) startPointID), PacketRule.Parse(rules));
+	}
+
+	[PunRPC] void RPC_BlackHatBaseManager_ProposeNewStartPointMaliciousPacketProbability(int startPointID, float probability){
+		if(BlackHatBaseManager.instance is null) return;
+		BlackHatBaseManager.instance.OnProposedNewStartPointMaliciousPacketProbability(StartingPoint.GetFromID((uint) startPointID), probability);
+	}
+
+	[PunRPC] void RPC_BlackHatBaseManager_ProposeNewDestinationMaliciousPacketTargetLikelihood(int destinationID, int likelihood){
+		if(BlackHatBaseManager.instance is null) return;
+		BlackHatBaseManager.instance.OnProposedNewDestinationMaliciousPacketTargetLikelihood(Destination.GetFromID((uint) destinationID), likelihood);
+	}
 }

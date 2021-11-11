@@ -59,6 +59,32 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 		return ErrorCodes.NoError;
 	}
 
+	// Function proposes an update to the specified starting point to have the specified malicious packet details
+	public ErrorCodes ProposeNewStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules){
+		// Error if the starting point to destroy is null
+		if(toModify is null){
+			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");
+			return ErrorCodes.StartingPointNotSelected;
+		}
+		// Error if we aren't an advisor
+		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
+			return ErrorCodes.WrongPlayer;
+		}
+		// Error if the starting point doesn't have any updates remaining
+		if(toModify.updatesRemaining <= 0){
+			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
+			return ErrorCodes.NoUpdatesRemaining;
+		}
+
+		// Syncronize the call through the game manager
+		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMalciousPacketRules", RpcTarget.AllBuffered, (int) toModify.ID, rules.CompressedRuleString());
+		return ErrorCodes.NoError;
+	}
+
+	// Callback when we are proposed new rules for a starting point
+	public virtual void OnProposedNewStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules) {}
+
 	// Function which changes the probability of a spawned packet being malicious for of all the starting points
 	public ErrorCodes ChangeAllStartPointsMaliciousPacketProbabilities(float probability){
 		foreach(StartingPoint p in StartingPoint.startingPoints){
@@ -97,6 +123,37 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 		return ErrorCodes.NoError;
 	}
 
+	// Function which proposes a new change to a starting point's probability
+	public ErrorCodes ProposeNewStartPointMaliciousPacketProbability(StartingPoint toModify, float probability){
+		// Error if the starting point to modify is null
+		if(toModify is null){
+			ErrorHandler(ErrorCodes.StartingPointNotSelected, "A Starting Point to modify must be selected!");
+			return ErrorCodes.StartingPointNotSelected;
+		}
+		// Error if we aren't an advisor
+		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
+			return ErrorCodes.WrongPlayer;
+		}
+		// Error if the provided probability is invalid
+		if(probability < 0 || probability > 1){
+			ErrorHandler(ErrorCodes.InvalidProbability, "The probability " + probability + " is invalid!");
+			return ErrorCodes.InvalidProbability;
+		}
+		// Error if the starting point doesn't have any updates remaining
+		if(toModify.updatesRemaining <= 0){
+			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
+			return ErrorCodes.NoUpdatesRemaining;
+		}
+
+		// Syncronize the call through the game manager
+		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMaliciousPacketProbability", RpcTarget.AllBuffered, (int) toModify.ID, probability);
+		return ErrorCodes.NoError;
+	}
+
+	// Callback called when we recieve a proposal for a new malicious packet probability
+	public virtual void OnProposedNewStartPointMaliciousPacketProbability(StartingPoint toModify, float probability) {}
+
 	// Function which changes the likelihood that a malicious packet will target the specified destination
 	public ErrorCodes ChangeDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood){
 		// Error if the destination to modify is null
@@ -119,6 +176,32 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			DestinationSettingsUpdated(toModify);
 		return ErrorCodes.NoError;
 	}
+
+	// Function which proposes a new likelihood that a malicious packet will target the specified destination
+	public ErrorCodes ProposeNewDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood){
+		// Error if the destination to modify is null
+		if(toModify is null){
+			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
+			return ErrorCodes.DestinationNotSelected;
+		}
+		// Error if we aren't an advisor
+		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
+			return ErrorCodes.WrongPlayer;
+		}
+		// Error if the destination doesn't have any updates remaining
+		if(toModify.updatesRemainingBlack <= 0){
+			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
+			return ErrorCodes.NoUpdatesRemaining;
+		}
+
+		// Syncronize the call through the game manager
+		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewDestinationMaliciousPacketTargetLikelihood", RpcTarget.AllBuffered, (int) toModify.ID, likelihood);
+		return ErrorCodes.NoError;
+	}
+
+	// Callback called when we recieve a proposal for a new malicious packet likelihood
+	public virtual void OnProposedNewDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood) {}
 
 
 	// -- Derived Class Callbacks --

@@ -35,11 +35,16 @@ MonoBehaviour:
   RpcList:
   - ClickRpc
   - DestroyRpc
+  - RPC_BlackHatBaseManager_ProposeNewDestinationMaliciousPacketTargetLikelihood
+  - RPC_BlackHatBaseManager_ProposeNewStartPointMalciousPacketRules
+  - RPC_BlackHatBaseManager_ProposeNewStartPointMaliciousPacketProbability
   - RPC_Destination_PlayParticleSimulation
+  - RPC_Destination_SetID
   - RPC_Destination_SetIsHoneypot
   - RPC_Destination_SetMaliciousPacketDestinationLikelihood
   - RPC_Firewall_SetFilterRules
   - RPC_Firewall_SetGateColor
+  - RPC_Firewall_SetID
   - RPC_GameManager_EndGame
   - RPC_GameManager_EndWave
   - RPC_GameManager_SetDifficulty
@@ -58,8 +63,11 @@ MonoBehaviour:
   - RPC_Packet_SetProperties
   - RPC_Packet_SetStartPoint
   - RPC_ScoreManager_ProcessScoreEvent
+  - RPC_StartingPoint_SetID
   - RPC_StartingPoint_SetMaliciousPacketProbability
   - RPC_StartingPoint_SetMaliciousPacketRules
+  - RPC_WhiteHatBaseManager_ProposeMakeDestinationHoneypot
+  - RPC_WhiteHatBaseManager_ProposeNewFirewallFilterRules
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

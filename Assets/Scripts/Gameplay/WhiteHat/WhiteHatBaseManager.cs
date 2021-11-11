@@ -156,6 +156,32 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 		return ErrorCodes.NoError;
 	}
 
+	// Function which proposes new settings for the given firewall
+	protected virtual ErrorCodes ProposeNewFirewallFilterRules(Firewall toModify, PacketRule filterRules){
+		// Error if the firewall to destroy is null
+		if(toModify is null){
+			ErrorHandler(ErrorCodes.FirewallNotSelected, "A Firewall to modify must be selected!");
+			return ErrorCodes.FirewallNotSelected;
+		}
+		// Error if we aren't an advisor
+		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
+			return ErrorCodes.WrongPlayer;
+		}
+		// Error if the firewall doesn't have any updates remaining
+		if(toModify.updatesRemaining <= 0){
+			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Firewall doesn't have any updates remaining!");
+			return ErrorCodes.NoUpdatesRemaining;
+		}
+
+		// Syncronize the call through the game manager
+		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeNewFirewallFilterRules", RpcTarget.AllBuffered, (int) toModify.ID, filterRules.CompressedRuleString());
+		return ErrorCodes.NoError;
+	}
+
+	// Callback when we are proposed new firewall filter ules
+	public virtual void OnProposedNewFirewallFilterRules(Firewall toModify, PacketRule filterRules) {}
+
 	// Function which marks the specified destination as a honeypot
 	public ErrorCodes MakeDestinationHoneypot(Destination toModify){
 		// Error if the destination to modify is null
@@ -173,6 +199,27 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			DestinationSettingsUpdated(toModify);
 		return ErrorCodes.NoError;
 	}
+
+	// Function which proposes that we mark the specified destination as a honeypot
+	public ErrorCodes ProposeMakeDestinationHoneypot(Destination toModify){
+		// Error if the destination to modify is null
+		if(toModify is null){
+			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
+			return ErrorCodes.DestinationNotSelected;
+		}
+		// Error if the destination doesn't have any updates remaining
+		if(toModify.updatesRemainingWhite <= 0){
+			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
+			return ErrorCodes.NoUpdatesRemaining;
+		}
+
+		// Syncronize the call through the game manager
+		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeMakeDestinationHoneypot", RpcTarget.AllBuffered, (int) toModify.ID);
+		return ErrorCodes.NoError;
+	}
+
+	// Callback when we are proposed that we should make a destination a honeypot
+	public virtual void OnProposedMakeDestinationHoneypot(Destination toModify) {}
 
 
 	// -- Suggested Firewall --
