@@ -15,6 +15,8 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 		public ErrorCodes(int _value) : base(_value) {}
 		public static implicit operator int(ErrorCodes e) => e.value;
 		public static implicit operator ErrorCodes(int value) => new ErrorCodes(value);
+		// Implicit conversion to a bool (true if an error occured, false otherwise)
+		public static implicit operator bool(ErrorCodes e) => e != NoError;
 	}
 
 	// Override instance to represent the BlackkHat type
