@@ -2590,6 +2590,7 @@ MonoBehaviour:
   _currentWave: 0
   whiteHatPrefab: {fileID: 6189335887329274821, guid: 9d9f3c32dd15a484ba26d46ef5d5ff7b, type: 3}
   blackHatPrefab: {fileID: 9059785588090466832, guid: d15f60bc19df34b40915ddf5f64ca0b5, type: 3}
+  observerPrefab: {fileID: 6189335887329274821, guid: 7363fed080f876e4393a4cd0d0b4ee5c, type: 3}
 --- !u!114 &1858544223
 MonoBehaviour:
   m_ObjectHideFlags: 0
