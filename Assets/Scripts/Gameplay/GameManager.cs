@@ -48,7 +48,7 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	}
 
 	// Prefabs to spawn containing the managers specific to each side
-	public GameObject whiteHatPrefab, blackHatPrefab;
+	public GameObject whiteHatPrefab, blackHatPrefab, observerPrefab;
 
 
 	// When the scene starts spawn the correct side
@@ -56,8 +56,8 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		base.Awake();
 
 		if(NetworkingManager.isSpectator){
-			 Instantiate(blackHatPrefab).name = "BlackHat Managers";
-			 Instantiate(whiteHatPrefab).name = "WhiteHat Managers";
+			 Debug.Log("Instantiating prefabs for Spectator...");
+			 Instantiate(observerPrefab).name = "Observer Managers";
 		} else if(NetworkingManager.isBlackHat) Instantiate(blackHatPrefab).name = "BlackHat Managers";
 		else Instantiate(whiteHatPrefab).name = "WhiteHat Managers";
 	}

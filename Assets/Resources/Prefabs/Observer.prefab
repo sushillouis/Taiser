@@ -160,7 +160,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -702,7 +702,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -934,7 +934,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -1143,7 +1143,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnClosePacketFirewallPanel
         m_Mode: 1
@@ -2232,7 +2232,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -2989,7 +2989,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -3502,7 +3502,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -3679,7 +3679,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -3969,7 +3969,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6189335886742332031}
-  - component: {fileID: 6189335886742332030}
+  - component: {fileID: 6985150311389478027}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -3992,7 +3992,7 @@ Transform:
   m_Father: {fileID: 6189335887329274820}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6189335886742332030
+--- !u!114 &6985150311389478027
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4001,13 +4001,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 6189335886742332289}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f98c69dae0b20ea499486bbafd9b0f45, type: 3}
+  m_Script: {fileID: 11500000, guid: 9211078df5df1ea4198457bc93c78c88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firewallPrefabPath: Assets/Resources/Prefabs/SpawnedAtRuntime/Firewall.prefab
-  suggestedFirewallPrefabPath: Assets/Resources/Prefabs/SpawnedAtRuntime/SuggestedFirewall.prefab
-  maximumPlaceableFirewalls: 2
-  suggestedFirewall: {fileID: 0}
   leftClickAction: {fileID: 3001919216989983466, guid: a26318101696cb248921fa709202c4d2, type: 3}
   rightClickAction: {fileID: -4090225696740746782, guid: a26318101696cb248921fa709202c4d2, type: 3}
   cancelAction: {fileID: 7727032971491509709, guid: a26318101696cb248921fa709202c4d2, type: 3}
@@ -4517,7 +4513,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
@@ -4901,7 +4897,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6189335886742332030}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: WhiteHatPlayerManager, Assembly-CSharp
         m_MethodName: OnFirewallToggleSelected
         m_Mode: 3
