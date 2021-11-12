@@ -37,10 +37,6 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 		startingPoints = FindObjectsOfType<StartingPoint>();
 	}
 
-	// The number of updates gained after each wave (based on difficulty)
-	public int[] updatesGrantedPerWave = new int[3] {/*easy*/5, /*medium*/5, /*hard*/5};
-	// Property representing the number of updates currently available
-	public int updatesRemaining = 1; // Starts at 1 to account for initial settings
 
 	// All of the likelihoods are added together, then the probability of spawning a packet at this point is <likelihood>/<totalLikelihood>
 	public int packetSourceLikelihood = 0;
@@ -53,15 +49,8 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 
-	// De/register the start function on wave ends
-	void OnEnable(){ GameManager.waveEndEvent += Start; }
-	void OnDisable(){ GameManager.waveEndEvent -= Start; }
-
-	// When the this is created or a wave starts grant its updates per wave
-	void Start(){
-		SetID();
-		updatesRemaining += updatesGrantedPerWave[(int)GameManager.difficulty];
-	}
+	// When the this is created set its ID
+	void Start(){ SetID(); }
 
 	// The malicious packet for this starting point (NetworkSynced)
 	public PacketRule spawnedMaliciousPacketRules = System.ObjectExtensions.Copy(PacketRule.Default);
@@ -96,14 +85,8 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	// Update the starting point's malicious packet details (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
 	public bool SetMaliciousPacketRules(PacketRule rule) {
-		// Only update the settings if we have updates remaining
-		if(updatesRemaining > 0){
-			// Take away an update if something actually changed
-			if(rule != spawnedMaliciousPacketRules)
-				updatesRemaining--;
-			photonView.RPC("RPC_StartingPoint_SetMaliciousPacketRules", RpcTarget.AllBuffered, rule.CompressedRuleString() );
-			return true;
-		} else return false;
+		photonView.RPC("RPC_StartingPoint_SetMaliciousPacketRules", RpcTarget.AllBuffered, rule.CompressedRuleString() );
+		return true;
 	}
 	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketRules(string rules){
 		spawnedMaliciousPacketRules = PacketRule.Parse(rules);
@@ -115,14 +98,8 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	// Function which updates the probability of a spawned packet being malicious (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
 	public bool SetMaliciousPacketProbability(float probability) {
-		// Only update the settings if we have updates remaining
-		if(updatesRemaining > 0){
-			// Take away an update if something actually changed
-			if(maliciousPacketProbability != probability)
-				updatesRemaining--;
-			photonView.RPC("RPC_StartingPoint_SetMaliciousPacketProbability", RpcTarget.AllBuffered, probability);
-			return true;
-		} else return false;
+		photonView.RPC("RPC_StartingPoint_SetMaliciousPacketProbability", RpcTarget.AllBuffered, probability);
+		return true;
 	}
 	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketProbability(float probability){
 		maliciousPacketProbability = probability;

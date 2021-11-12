@@ -250,18 +250,14 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 
 	// Function called whenever a firewall's settings are meaninfully updated (updated and actually changed)
 	protected override void StartingPointSettingsUpdated(StartingPoint updated){
-		packetStartPanelStartHeader.text = "Start Point - " + updated.updatesRemaining;
-
 		// Play the success sound
-		if(updated.updatesRemaining > 0) AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
+		AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
 	}
 
 	// Function called whenever a firewall's settings are meaninfully updated (updated and actually changed)
 	protected override void DestinationSettingsUpdated(Destination updated){
-		probabilityLikelihoodPanelLikelihoodHeader.text = "Likelihood - " + updated.updatesRemainingBlack;
-
 		// Play the success sound
-		if(updated.updatesRemainingBlack > 0) AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
+		AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
 	}
 
 

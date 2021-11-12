@@ -147,11 +147,6 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify firewalls you don't own!");
 			return ErrorCodes.WrongPlayer;
 		}
-		// Error if the firewall doesn't have any updates remaining
-		if(toModify.updatesRemaining <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Firewall doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		if(toModify.SetFilterRules(filterRules))
 			FirewallSettingsUpdated(toModify);
@@ -170,11 +165,6 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
 		}
-		// Error if the firewall doesn't have any updates remaining
-		if(toModify.updatesRemaining <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Firewall doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		// Syncronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeNewFirewallFilterRules", RpcTarget.AllBuffered, (int) toModify.ID, filterRules.CompressedRuleString());
@@ -191,11 +181,6 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
 			return ErrorCodes.DestinationNotSelected;
 		}
-		// Error if the destination doesn't have any updates remaining
-		if(toModify.updatesRemainingWhite <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		if(toModify.SetIsHoneypot(true))
 			DestinationSettingsUpdated(toModify);
@@ -208,11 +193,6 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 		if(toModify is null){
 			ErrorHandler(ErrorCodes.DestinationNotSelected, "A Destination to modify must be selected!");
 			return ErrorCodes.DestinationNotSelected;
-		}
-		// Error if the destination doesn't have any updates remaining
-		if(toModify.updatesRemainingWhite <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		// Syncronize the call through the game manager

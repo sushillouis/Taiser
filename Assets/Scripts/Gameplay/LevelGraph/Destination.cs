@@ -44,11 +44,6 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	// The particle system to spawn when a malicious packet hits us
 	public GameObject particleSystemPrefab;
 
-	// The number of updates gained after each wave (based on difficulty)
-	public int[] updatesGrantedPerWave = new int[3] {/*easy*/2, /*medium*/2, /*hard*/2};
-	// Property representing the number of updates currently available
-	public int updatesRemainingWhite = 0, updatesRemainingBlack = 0;
-
 	// All of the likelihoods are added together, then the probability of this point being a packet's destination is <likelihood>/<totalLikelihood>
 	// The likelihood of a packet targeting a HoneyPot is 0
 	[SerializeField] int _packetDestinationLikelihood = 1;
@@ -80,16 +75,8 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 
-	// De/register the start function on wave ends
-	void OnEnable(){ GameManager.waveEndEvent += Start; }
-	void OnDisable(){ GameManager.waveEndEvent -= Start; }
-
-	// When the this is created or a wave starts grant its updates per wave
-	void Start(){
-		SetID();
-		updatesRemainingWhite += updatesGrantedPerWave[(int)GameManager.difficulty];
-		updatesRemainingBlack += updatesGrantedPerWave[(int)GameManager.difficulty];
-	}
+	// When the this is created set its ID
+	void Start(){ SetID(); }
 
 	// Function which synchronizes a destination's ID over the network
 	void SetID(){ if(NetworkingManager.isHost) photonView.RPC("RPC_Destination_SetID", RpcTarget.AllBuffered, (int) nextID++); }
@@ -108,14 +95,8 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	// Function which updates the likelihood of a malicious packet targeting this destination (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
 	public bool SetMaliciousPacketDestinationLikelihood(int likelihood) {
-		// Only update the settings if we have updates remaining
-		if(updatesRemainingBlack > 0){
-			// Take away an update if something actually changed
-			if(packetDestinationLikelihood != likelihood)
-				updatesRemainingBlack--;
-			photonView.RPC("RPC_Destination_SetMaliciousPacketDestinationLikelihood", RpcTarget.AllBuffered, likelihood);
-			return true;
-		} else return false;
+		photonView.RPC("RPC_Destination_SetMaliciousPacketDestinationLikelihood", RpcTarget.AllBuffered, likelihood);
+		return true;
 	}
 	[PunRPC] void RPC_Destination_SetMaliciousPacketDestinationLikelihood(int likelihood){
 		_maliciousPacketDestinationLikelihood = likelihood;
@@ -124,14 +105,8 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	// Function which updates if this is a honeypot or not (also ensures that none of the other destinations are marked as honey pots)
 	// Returns true if we successfully updated, returns false otherwise
 	public bool SetIsHoneypot(bool isHoneypot) {
-		// Only update the settings if we have updates remaining
-		if(updatesRemainingWhite > 0){
-			// Take away an update if something actually changed
-			if(isHoneypot != this.isHoneypot)
-				updatesRemainingWhite--;
-			photonView.RPC("RPC_Destination_SetIsHoneypot", RpcTarget.AllBuffered, isHoneypot);
-			return true;
-		} else return false;
+		photonView.RPC("RPC_Destination_SetIsHoneypot", RpcTarget.AllBuffered, isHoneypot);
+		return true;
 	}
 	[PunRPC] void RPC_Destination_SetIsHoneypot(bool isHoneypot){
 		// Clear all of the honeypots (if we are setting a new one)

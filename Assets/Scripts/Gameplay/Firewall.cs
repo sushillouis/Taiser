@@ -20,12 +20,6 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	// The details of packets that should be filtered
 	public PacketRule filterRules = PacketRule.Default;
 
-	// The number of updates gained after each wave (based on difficulty)
-	public int[] updatesGrantedPerWave = new int[3] {/*easy*/4, /*medium*/4, /*hard*/4};
-	// Property representing the number of updates currently available
-	[SerializeField]
-	public int updatesRemaining = 1; // Starts at 1 to account for initial settings
-
 	// Variable used to uniquely identify a firewall
 	[SerializeField] uint _ID;
 	public uint ID {
@@ -35,14 +29,8 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 
 
 	// De/register the start function on wave ends
-	void OnEnable(){
-		firewalls = FindObjectsOfType<Firewall>(); // Update the list of firewalls
-		GameManager.waveEndEvent += OnWaveStart;
-	}
-	void OnDisable(){
-		firewalls = FindObjectsOfType<Firewall>(); // Update the list of firewalls
-		GameManager.waveEndEvent -= OnWaveStart;
-	}
+	void OnEnable(){ firewalls = FindObjectsOfType<Firewall>(); } // Update the list of firewalls
+	void OnDisable(){ firewalls = FindObjectsOfType<Firewall>(); } // Update the list of firewalls
 
 	// When we stop dragging forward the move to the player manager and reset our position if the move was invalid
 	protected override void OnEndDrag(){
@@ -59,12 +47,6 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 		SetID();
 		// SetFilterRules(PacketRule.Default); // Make sure that the base filter rules are applied
 		SetGateColor(filterRules[0].color);
-		OnWaveStart();
-	}
-
-	// When the this is created or a wave starts grant its updates per wave
-	void OnWaveStart(){
-		updatesRemaining += updatesGrantedPerWave[(int)GameManager.difficulty];
 	}
 
 	// Function which synchronizes a firewall's ID over the network
@@ -84,14 +66,8 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	// Update the packet rules (Network Synced)
 	// Returns true if we successfully updated, returns false otherwise
 	public bool SetFilterRules(PacketRule rule){
-		// Only update the settings if we have updates remaining
-		if(updatesRemaining > 0){
-			// Take away an update if something actually changed
-			if(filterRules != rule)
-				updatesRemaining--;
-			photonView.RPC("RPC_Firewall_SetFilterRules", RpcTarget.AllBuffered, rule.CompressedRuleString() );
-			return true;
-		} else return false;
+		photonView.RPC("RPC_Firewall_SetFilterRules", RpcTarget.AllBuffered, rule.CompressedRuleString() );
+		return true;
 	}
 	[PunRPC] void RPC_Firewall_SetFilterRules(string rules){
 		filterRules = PacketRule.Parse(rules);

@@ -50,11 +50,6 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify Starting Points you don't own!");
 			return ErrorCodes.WrongPlayer;
 		}
-		// Error if the starting point doesn't have any updates remaining
-		if(toModify.updatesRemaining <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		if(toModify.SetMaliciousPacketRules(rules))
 			StartingPointSettingsUpdated(toModify);
@@ -72,11 +67,6 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
-		}
-		// Error if the starting point doesn't have any updates remaining
-		if(toModify.updatesRemaining <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
 		}
 
 		// Syncronize the call through the game manager
@@ -114,11 +104,6 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.InvalidProbability, "The probability " + probability + " is invalid!");
 			return ErrorCodes.InvalidProbability;
 		}
-		// Error if the starting point doesn't have any updates remaining
-		if(toModify.updatesRemaining <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		if(toModify.SetMaliciousPacketProbability(probability))
 			StartingPointSettingsUpdated(toModify);
@@ -142,11 +127,6 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.InvalidProbability, "The probability " + probability + " is invalid!");
 			return ErrorCodes.InvalidProbability;
 		}
-		// Error if the starting point doesn't have any updates remaining
-		if(toModify.updatesRemaining <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Starting Point doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		// Syncronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMaliciousPacketProbability", RpcTarget.AllBuffered, (int) toModify.ID, probability);
@@ -168,11 +148,6 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.WrongPlayer, "You can't modify Destinations you don't own!");
 			return ErrorCodes.WrongPlayer;
 		}
-		// Error if the destination doesn't have any updates remaining
-		if(toModify.updatesRemainingBlack <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
 
 		if(toModify.SetMaliciousPacketDestinationLikelihood(likelihood))
 			DestinationSettingsUpdated(toModify);
@@ -191,12 +166,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
 		}
-		// Error if the destination doesn't have any updates remaining
-		if(toModify.updatesRemainingBlack <= 0){
-			ErrorHandler(ErrorCodes.NoUpdatesRemaining, "The Destination doesn't have any updates remaining!");
-			return ErrorCodes.NoUpdatesRemaining;
-		}
-
+		
 		// Syncronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewDestinationMaliciousPacketTargetLikelihood", RpcTarget.AllBuffered, (int) toModify.ID, likelihood);
 		return ErrorCodes.NoError;
