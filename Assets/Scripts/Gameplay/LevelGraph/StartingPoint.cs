@@ -4,7 +4,10 @@ using UnityEngine;
 using Photon.Pun;
 
 public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
+	// List of starting points
 	public static StartingPoint[] startingPoints = null;
+	// Generator for IDS
+	static uint nextID = 0;
 
 	// Cache of the attached photon view
 	private PhotonView pvCache;
@@ -42,6 +45,13 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	// All of the likelihoods are added together, then the probability of spawning a packet at this point is <likelihood>/<totalLikelihood>
 	public int packetSourceLikelihood = 0;
 
+	// Variable used to uniquely identify a starting point
+	[SerializeField] uint _ID;
+	public uint ID {
+		get => _ID;
+		protected set => _ID = value;
+	}
+
 
 	// De/register the start function on wave ends
 	void OnEnable(){ GameManager.waveEndEvent += Start; }
@@ -49,6 +59,7 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 
 	// When the this is created or a wave starts grant its updates per wave
 	void Start(){
+		SetID();
 		updatesRemaining += updatesGrantedPerWave[(int)GameManager.difficulty];
 	}
 
@@ -64,6 +75,21 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 		while(details.color == PacketRule.Color.Any || details.size == PacketRule.Size.Any || details.size == PacketRule.Size.Invalid || details.shape == PacketRule.Shape.Any || spawnedMaliciousPacketRules.Contains(details))
 			details = randomNonMaliciousPacketDetails();
 		return details;
+	}
+
+
+	// Function which synchronizes a destination's ID over the network
+	void SetID(){ if(NetworkingManager.isHost) photonView.RPC("RPC_StartingPoint_SetID", RpcTarget.AllBuffered, (int) nextID++); }
+	[PunRPC] void RPC_StartingPoint_SetID(int id){
+		ID = (uint) id;
+	}
+
+	// Function which gets a destination from its ID
+	public static StartingPoint GetFromID(uint id){
+		foreach(StartingPoint s in startingPoints)
+			if(s.ID == id)
+				return s;
+		return null;
 	}
 
 

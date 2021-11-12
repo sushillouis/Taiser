@@ -4,7 +4,10 @@ using UnityEngine;
 using Photon.Pun;
 
 public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
+	// List of all firewalls
 	public static Firewall[] firewalls = null;
+	// Generator for IDS
+	static uint nextID = 0;
 
 	// Reference to the attached mesh renderer
 	new public MeshRenderer renderer;
@@ -22,6 +25,13 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	// Property representing the number of updates currently available
 	[SerializeField]
 	public int updatesRemaining = 1; // Starts at 1 to account for initial settings
+
+	// Variable used to uniquely identify a firewall
+	[SerializeField] uint _ID;
+	public uint ID {
+		get => _ID;
+		protected set => _ID = value;
+	}
 
 
 	// De/register the start function on wave ends
@@ -46,6 +56,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 
 	// When the firewall is created make sure its filter rules are defaulted
 	void Start(){
+		SetID();
 		// SetFilterRules(PacketRule.Default); // Make sure that the base filter rules are applied
 		SetGateColor(filterRules[0].color);
 		OnWaveStart();
@@ -54,6 +65,20 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	// When the this is created or a wave starts grant its updates per wave
 	void OnWaveStart(){
 		updatesRemaining += updatesGrantedPerWave[(int)GameManager.difficulty];
+	}
+
+	// Function which synchronizes a firewall's ID over the network
+	void SetID(){ if(NetworkingManager.isHost) photonView.RPC("RPC_Firewall_SetID", RpcTarget.AllBuffered, (int) nextID++); }
+	[PunRPC] void RPC_Firewall_SetID(int id){
+		ID = (uint) id;
+	}
+
+	// Function which gets a firewall from its ID
+	public static Firewall GetFromID(uint id){
+		foreach(Firewall f in firewalls)
+			if(f.ID == id)
+				return f;
+		return null;
 	}
 
 	// Update the packet rules (Network Synced)

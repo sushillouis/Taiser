@@ -4,7 +4,10 @@ using UnityEngine;
 using Photon.Pun;
 
 public class Destination : PathNodeBase, SelectionManager.ISelectable {
+	// List of destinations
 	public static Destination[] destinations = null;
+	// Generator for IDS
+	static uint nextID = 0;
 
 	// Cache of the attached photon view
 	private PhotonView pvCache;
@@ -69,6 +72,13 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 		set => SetIsHoneypot(value);
 	}
 
+	// Variable used to uniquely identify a destination
+	[SerializeField] uint _ID;
+	public uint ID {
+		get => _ID;
+		protected set => _ID = value;
+	}
+
 
 	// De/register the start function on wave ends
 	void OnEnable(){ GameManager.waveEndEvent += Start; }
@@ -76,8 +86,23 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 
 	// When the this is created or a wave starts grant its updates per wave
 	void Start(){
+		SetID();
 		updatesRemainingWhite += updatesGrantedPerWave[(int)GameManager.difficulty];
 		updatesRemainingBlack += updatesGrantedPerWave[(int)GameManager.difficulty];
+	}
+
+	// Function which synchronizes a destination's ID over the network
+	void SetID(){ if(NetworkingManager.isHost) photonView.RPC("RPC_Destination_SetID", RpcTarget.AllBuffered, (int) nextID++); }
+	[PunRPC] void RPC_Destination_SetID(int id){
+		ID = (uint) id;
+	}
+
+	// Function which gets a destination from its ID
+	public static Destination GetFromID(uint id){
+		foreach(Destination d in destinations)
+			if(d.ID == id)
+				return d;
+		return null;
 	}
 
 	// Function which updates the likelihood of a malicious packet targeting this destination (Network Synced)
