@@ -262,6 +262,8 @@ public class ObserverPlayerManager : ObserverBaseManager
 		firewallPacketPanelPacketText.gameObject.SetActive(true);
 		// Display the panel
 		firewallPacketPanel.SetActive(true);
+		// Hide the likelihood panel
+		probabilityLikelihoodPanel.SetActive(false);
 	}
 
 	// Callback which shows the starting point panels when a packet is selected
