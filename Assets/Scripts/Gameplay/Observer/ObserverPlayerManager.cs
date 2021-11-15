@@ -27,6 +27,22 @@ public class ObserverPlayerManager : ObserverBaseManager
 	// References to all of the toggles in the firewall panel
 	public Toggle[] firewallPacketPanelToggles;
 
+	// Reference to the packet panel
+	public GameObject packetStartPanel;
+	// Reference to the packet panel headers
+	public TMPro.TextMeshProUGUI packetStartPanelPacketHeader, packetStartPanelStartHeader;
+	// Reference to all of the toggles in the packet panel
+	public Toggle[] packetStartPanelToggles;
+
+	// Reference to the probability/likelihood panel
+	public GameObject probabilityLikelihoodPanel;
+	// Reference to the probability/likelihood panel headers
+	public TMPro.TextMeshProUGUI probabilityLikelihoodPanelProbabilityHeader, probabilityLikelihoodPanelLikelihoodHeader;
+	// Reference to the probability/likelihood slider
+	public Slider probabilityLikelihoodPanelSlider;
+	// Reference to the text field representing the value of the probability/likelihood slider
+	public TMPro.TextMeshProUGUI probabilityLikelihoodPanelValueText;
+
 	// References to buttons which are disabled for advisors
 	public Button removeFirewallButton, makeHoneypotButton;
 
@@ -55,6 +71,8 @@ public class ObserverPlayerManager : ObserverBaseManager
 		SelectionManager.hoverChangedEvent += OnHoverChanged;
 		SelectionManager.packetSelectEvent += OnPacketSelected;
 		SelectionManager.firewallSelectEvent += OnFirewallSelected;
+		SelectionManager.startingPointSelectEvent += OnStartingPointSelected;
+		SelectionManager.destinationSelectEvent += OnDestinationSelected;
 
 		// If we aren't the primary player, then we can't interact with the move, remove, or make-firewall buttons
 		if (!NetworkingManager.isPrimary)
@@ -78,11 +96,28 @@ public class ObserverPlayerManager : ObserverBaseManager
 		SelectionManager.hoverChangedEvent -= OnHoverChanged;
 		SelectionManager.packetSelectEvent -= OnPacketSelected;
 		SelectionManager.firewallSelectEvent -= OnFirewallSelected;
+		SelectionManager.startingPointSelectEvent -= OnStartingPointSelected;
+		SelectionManager.destinationSelectEvent += OnDestinationSelected;
 	}
 
 
 	// -- Callbacks --
 
+	// Function called when the close button of the packet/starting point panel is pressed
+	public void OnClosePacketStartPanel()
+	{
+		packetStartPanel.SetActive(false);
+	}
+
+	// Function called when when the close button of the probability/likelihood panel is pressed, updates the settings to refelect the value of the slider
+	public void OnCloseProbabilityLikelihoodPanel()
+	{
+		probabilityLikelihoodPanel.gameObject.SetActive(false);
+
+		// Get a reference to staring point and destination (one of them should be null)
+		StartingPoint startPoint = getSelected<StartingPoint>();
+		Destination destination = getSelected<Destination>();
+	}
 
 	// Function which responds to UI buttons that change the current click state
 	public void OnSetClickState(int clickState)
@@ -114,6 +149,7 @@ public class ObserverPlayerManager : ObserverBaseManager
 	void OnPacketSelected(Packet p)
 	{
 		showPacketPanel(p);
+
 	}
 
 	// Callback which handles when the selected firewall changes
@@ -194,6 +230,7 @@ public class ObserverPlayerManager : ObserverBaseManager
 		// Display the correct header
 		firewallPacketPanelFirewallText.gameObject.SetActive(true);
 		firewallPacketPanelPacketText.gameObject.SetActive(false);
+		packetStartPanelStartHeader.gameObject.SetActive(false);
 		// Display the panel
 		firewallPacketPanel.SetActive(true);
 
@@ -221,11 +258,111 @@ public class ObserverPlayerManager : ObserverBaseManager
 
 		// Display the correct header
 		firewallPacketPanelFirewallText.gameObject.SetActive(false);
+		packetStartPanelStartHeader.gameObject.SetActive(false);
 		firewallPacketPanelPacketText.gameObject.SetActive(true);
 		// Display the panel
 		firewallPacketPanel.SetActive(true);
 	}
 
+	// Callback which shows the starting point panels when a packet is selected
+	void OnStartingPointSelected(StartingPoint p)
+	{
+		showStartingPointPanel(p);
+	}
+
+	// Callback which shows the the destination panel when a destination is selected
+	void OnDestinationSelected(Destination d)
+	{
+		showLikelihoodPanel(d);
+
+		OnClosePacketStartPanel();
+	}
+
+	// Function which shows the starting point panel
+	bool startingPointJustSelected = false;
+	public void showStartingPointPanel(StartingPoint p)
+	{
+		startingPointJustSelected = true; // Disable toggle callbacks
+
+		// Set all of the toggles as interactable (only for the blackhat's primary player)
+		foreach (Toggle t in packetStartPanelToggles)
+			if (NetworkingManager.isPrimary) t.interactable = true;
+			else t.interactable = false;
+
+		// Set the correct toggle states
+		packetStartPanelToggles[0].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Small;
+		packetStartPanelToggles[1].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Medium;
+		packetStartPanelToggles[2].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Large;
+		packetStartPanelToggles[3].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cube;
+		packetStartPanelToggles[4].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Sphere;
+		packetStartPanelToggles[5].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cone;
+		packetStartPanelToggles[6].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Blue;
+		packetStartPanelToggles[7].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Green;
+		packetStartPanelToggles[8].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Pink;
+
+		// Display the correct header
+		packetStartPanelPacketHeader.gameObject.SetActive(false);
+		firewallPacketPanelFirewallText.gameObject.SetActive(false);
+		packetStartPanelStartHeader.gameObject.SetActive(true);
+		// Display the panel
+		packetStartPanel.SetActive(true);
+
+		// Display the probability panel
+		showProbabilityPanel(p);
+		//StartingPointSettingsUpdated(p);
+
+		startingPointJustSelected = false; // Re-enable toggle callbacks
+	}
+
+	// Function which shows the destination likelihood panel
+	bool destinationJustSelected = false;
+	public void showLikelihoodPanel(Destination d)
+	{
+		destinationJustSelected = true; // Disable toggle callbacks
+
+		// Set the slider as interactable (only for the blackhat's primary player)
+		if (NetworkingManager.isPrimary) probabilityLikelihoodPanelSlider.interactable = true;
+		else probabilityLikelihoodPanelSlider.interactable = false;
+
+		// Update the slider's properties
+		probabilityLikelihoodPanelSlider.minValue = 0;
+		probabilityLikelihoodPanelSlider.maxValue = 20;
+		probabilityLikelihoodPanelSlider.wholeNumbers = true;
+		// Update the slider's value and text
+		probabilityLikelihoodPanelSlider.value = d.maliciousPacketDestinationLikelihood;
+		updateProbabilityLikelihoodText();
+
+		// Display the correct header
+		probabilityLikelihoodPanelProbabilityHeader.gameObject.SetActive(false);
+		probabilityLikelihoodPanelLikelihoodHeader.gameObject.SetActive(true);
+		// Display the panel
+		probabilityLikelihoodPanel.SetActive(true);
+		DestinationSettingsUpdated(d);
+
+		destinationJustSelected = false; // Re-enable toggle callbacks
+	}
+
+	// Function which shows the starting point probability panel
+	public void showProbabilityPanel(StartingPoint p)
+	{
+		// Set the slider as interactable (only for the blackhat's primary player)
+		if (NetworkingManager.isPrimary) probabilityLikelihoodPanelSlider.interactable = true;
+		else probabilityLikelihoodPanelSlider.interactable = false;
+
+		// Update the slider's properties
+		probabilityLikelihoodPanelSlider.minValue = 0;
+		probabilityLikelihoodPanelSlider.maxValue = 1;
+		probabilityLikelihoodPanelSlider.wholeNumbers = false;
+		// Update the slider's value and text
+		probabilityLikelihoodPanelSlider.value = p.maliciousPacketProbability;
+		updateProbabilityLikelihoodText();
+
+		// Display the correct header
+		probabilityLikelihoodPanelProbabilityHeader.gameObject.SetActive(true);
+		probabilityLikelihoodPanelLikelihoodHeader.gameObject.SetActive(false);
+		// Display the panel
+		probabilityLikelihoodPanel.SetActive(true);
+	}
 
 	// -- Callbacks --
 
@@ -238,6 +375,19 @@ public class ObserverPlayerManager : ObserverBaseManager
 		// Play the success sound
 		if (updated.updatesRemaining > 0) AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
 		
+	}
+
+	// -- Helpers --
+
+
+	// Function which updates the slider label to reflect the state of the slider
+	void updateProbabilityLikelihoodText()
+	{
+		// Format the text appropriately to the starting point (2 decimal place probability) and destination (integer likelihood)
+		if (getSelected<StartingPoint>() != null)
+			probabilityLikelihoodPanelValueText.text = probabilityLikelihoodPanelSlider.value.ToString("0.##");
+		else if (getSelected<Destination>() != null)
+			probabilityLikelihoodPanelValueText.text = "" + (int)probabilityLikelihoodPanelSlider.value;
 	}
 
 

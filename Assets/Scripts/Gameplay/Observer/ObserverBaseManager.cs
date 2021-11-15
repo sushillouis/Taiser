@@ -5,6 +5,7 @@ using Photon.Pun;
 
 public class ObserverBaseManager : BaseSharedBetweenHats
 {
+	// Error codes used by the error handling system
 
 	// Override instance to represent the Whitehat type
 	new static public ObserverBaseManager instance
