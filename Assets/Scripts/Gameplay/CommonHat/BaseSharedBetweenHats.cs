@@ -44,7 +44,7 @@ public class BaseSharedBetweenHats : Core.Utilities.Singleton<BaseSharedBetweenH
 		public static implicit operator int(ErrorCodes e) => e.value;
 		public static implicit operator ErrorCodes(int value) => new ErrorCodes(value);
 
-		// Implicit conversion to a bool (true if an error occured, false otherwise)
+		// Implicit conversion to a bool (true if an error occurred, false otherwise)
 		public static implicit operator bool(ErrorCodes e) => e != NoError;
 	}
 

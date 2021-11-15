@@ -2588,8 +2588,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maximumWaves: 3
   _currentWave: 0
-  whiteHatPrefab: {fileID: 6189335887329274821, guid: 9d9f3c32dd15a484ba26d46ef5d5ff7b, type: 3}
-  blackHatPrefab: {fileID: 9059785588090466832, guid: d15f60bc19df34b40915ddf5f64ca0b5, type: 3}
+  whiteHatPlayerPrefab: {fileID: 6189335887329274821, guid: 9d9f3c32dd15a484ba26d46ef5d5ff7b, type: 3}
+  whiteHatAdvisorPrefab: {fileID: 0}
+  blackHatPlayerPrefab: {fileID: 9059785588090466832, guid: d15f60bc19df34b40915ddf5f64ca0b5, type: 3}
+  blackHatAdvisorPrefab: {fileID: 9059785588090466832, guid: 8a351c512b78e6a4f842383465bc9b82, type: 3}
   observerPrefab: {fileID: 6189335887329274821, guid: 7363fed080f876e4393a4cd0d0b4ee5c, type: 3}
 --- !u!114 &1858544223
 MonoBehaviour:

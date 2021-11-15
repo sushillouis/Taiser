@@ -372,11 +372,9 @@ public class ObserverPlayerManager : ObserverBaseManager
 	// Function called whenever a firewall's settings are meaninfully updated (updated and actually changed)
 	protected override void FirewallSettingsUpdated(Firewall updated)
 	{
-		firewallPacketPanelFirewallText.text = "Firewall - " + updated.updatesRemaining;
-
 		// Play the success sound
-		if (updated.updatesRemaining > 0) AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
-		
+		AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
+
 	}
 
 	// -- Helpers --

@@ -48,7 +48,7 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	}
 
 	// Prefabs to spawn containing the managers specific to each side
-	public GameObject whiteHatPrefab, blackHatPrefab, observerPrefab;
+	public GameObject whiteHatPlayerPrefab, whiteHatAdvisorPrefab, blackHatPlayerPrefab, blackHatAdvisorPrefab, observerPrefab;
 
 
 	// When the scene starts spawn the correct side
@@ -58,8 +58,10 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		if(NetworkingManager.isSpectator){
 			 Debug.Log("Instantiating prefabs for Spectator...");
 			 Instantiate(observerPrefab).name = "Observer Managers";
-		} else if(NetworkingManager.isBlackHat) Instantiate(blackHatPrefab).name = "BlackHat Managers";
-		else Instantiate(whiteHatPrefab).name = "WhiteHat Managers";
+		} else if(NetworkingManager.isBlackHat && NetworkingManager.isPrimary) Instantiate(blackHatPlayerPrefab).name = "BlackHat Player Managers";
+		else if(NetworkingManager.isBlackHat) Instantiate(blackHatAdvisorPrefab).name = "BlackHat Advisor Managers";
+		else if(NetworkingManager.isWhiteHat && NetworkingManager.isPrimary) Instantiate(whiteHatPlayerPrefab).name = "WhiteHat Player Managers";
+		// else Instantiate(whiteHatAdvisorPrefab).name = "WhiteHat Advisor Managers";
 	}
 
 	// When we are dis/enabled register ourselves as a listener to playerPropertyUpdateEvents and roomOtherLeaveEvent
@@ -179,7 +181,7 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 			// TODO: Need to take spectators into account (right now they always lose)
 			// Show the win text if the player's side won
 			if (NetworkingManager.localPlayer.role == Networking.Player.Role.Spectator) // Is Spectator
-				BaseUI.instance.gameEndText.SetActive(true); 
+				BaseUI.instance.gameEndText.SetActive(true);
 			else if (winningSide == NetworkingManager.localPlayer.side)
 				BaseUI.instance.winText.SetActive(true);
 			else BaseUI.instance.loseText.SetActive(true);

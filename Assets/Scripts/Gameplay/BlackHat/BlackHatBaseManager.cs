@@ -15,7 +15,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 		public ErrorCodes(int _value) : base(_value) {}
 		public static implicit operator int(ErrorCodes e) => e.value;
 		public static implicit operator ErrorCodes(int value) => new ErrorCodes(value);
-		// Implicit conversion to a bool (true if an error occured, false otherwise)
+		// Implicit conversion to a bool (true if an error occurred, false otherwise)
 		public static implicit operator bool(ErrorCodes e) => e != NoError;
 	}
 
@@ -69,13 +69,13 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
-		// Syncronize the call through the game manager
+		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMalciousPacketRules", RpcTarget.AllBuffered, (int) toModify.ID, rules.CompressedRuleString());
 		return ErrorCodes.NoError;
 	}
 
 	// Callback when we are proposed new rules for a starting point
-	public virtual void OnProposedNewStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules) {}
+	public virtual void OnProposedNewStartPointMalciousPacketRules(StartingPoint toModify, PacketRule rules) { }
 
 	// Function which changes the probability of a spawned packet being malicious for of all the starting points
 	public ErrorCodes ChangeAllStartPointsMaliciousPacketProbabilities(float probability){
@@ -128,12 +128,12 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.InvalidProbability;
 		}
 
-		// Syncronize the call through the game manager
+		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMaliciousPacketProbability", RpcTarget.AllBuffered, (int) toModify.ID, probability);
 		return ErrorCodes.NoError;
 	}
 
-	// Callback called when we recieve a proposal for a new malicious packet probability
+	// Callback called when we receive a proposal for a new malicious packet probability
 	public virtual void OnProposedNewStartPointMaliciousPacketProbability(StartingPoint toModify, float probability) {}
 
 	// Function which changes the likelihood that a malicious packet will target the specified destination
@@ -167,12 +167,12 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 		
-		// Syncronize the call through the game manager
+		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewDestinationMaliciousPacketTargetLikelihood", RpcTarget.AllBuffered, (int) toModify.ID, likelihood);
 		return ErrorCodes.NoError;
 	}
 
-	// Callback called when we recieve a proposal for a new malicious packet likelihood
+	// Callback called when we receive a proposal for a new malicious packet likelihood
 	public virtual void OnProposedNewDestinationMaliciousPacketTargetLikelihood(Destination toModify, int likelihood) {}
 
 

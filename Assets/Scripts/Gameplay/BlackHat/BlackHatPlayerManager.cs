@@ -14,6 +14,8 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 
 	// Reference to the packet panel
 	public GameObject packetStartPanel;
+	// Reference to the panel holding advisor buttons
+	public GameObject packetStartAdvisorPanel;
 	// Reference to the packet panel headers
 	public TMPro.TextMeshProUGUI packetStartPanelPacketHeader, packetStartPanelStartHeader;
 	// Reference to all of the toggles in the packet panel
@@ -21,12 +23,20 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 
 	// Reference to the probability/likelihood panel
 	public GameObject probabilityLikelihoodPanel;
+	// Reference to the panel holding advisor buttons
+	public GameObject probabilityLikelihoodAdvisorPanel;
 	// Reference to the probability/likelihood panel headers
 	public TMPro.TextMeshProUGUI probabilityLikelihoodPanelProbabilityHeader, probabilityLikelihoodPanelLikelihoodHeader;
 	// Reference to the probability/likelihood slider
 	public Slider probabilityLikelihoodPanelSlider;
 	// Reference to the text field representing the value of the probability/likelihood slider
 	public TMPro.TextMeshProUGUI probabilityLikelihoodPanelValueText;
+
+	// Variables tracking proposed values from the advisors
+	PacketRule proposedRule;
+	float proposedProbability;
+	int proposedLikelihood;
+
 
 	// De/register the click listener as well as Selection Manager event listeners
 	void OnEnable(){
@@ -53,7 +63,7 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 	}
 
 	// Function called when when the close button of the probability/likelihood panel is pressed, updates the settings to refelect the value of the slider
-	public void OnCloseProbabilityLikelihoodPanel(){
+	public virtual void OnCloseProbabilityLikelihoodPanel(){
 		probabilityLikelihoodPanel.gameObject.SetActive(false);
 
 		// Get a reference to staring point and destination (one of them should be null)
@@ -97,7 +107,7 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 	}
 
 	// Callback which handles when one of the toggles in the starting point panel is adjusted
-	public void OnStartingPointToggleSelected(int deltaNumber){
+	public virtual void OnStartingPointToggleSelected(int deltaNumber){
 		// Disable adjusting settings when we are just opening the panel for the first time
 		if(startingPointJustSelected) return;
 		// Don't do anything if we switched off a toggle
@@ -123,11 +133,11 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 		}
 
 		string newRule = new PacketRule.LiteralNode(d).RuleString();
-		if(ChangeStartPointMalciousPacketRules(selected, PacketRule.Parse(newRule)) != ErrorCodes.NoError)
+		if(ChangeStartPointMalciousPacketRules(selected, PacketRule.Parse(newRule)))
 			showStartingPointPanel(selected); // Reload the starting point panel if we failed to update the settings
 	}
 
-	public void OnProbabilityLikelihoodSliderUpdate(float value){
+	public virtual void OnProbabilityLikelihoodSliderUpdate(float value){
 		// Don't bother with this function if we just selected something
 		if(destinationJustSelected || startingPointJustSelected) return;
 
@@ -135,11 +145,154 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 	}
 
 
+	// -- Avisor Callbacks
+
+
+	// Callback when an advisor propses a new starting point rule
+	public override void OnProposedNewStartPointMalciousPacketRules(StartingPoint p, PacketRule r){
+		// Save the rule as propsesed
+		proposedRule = r;
+
+		// Override what is currently selected
+		SelectionManager.instance.SelectGameObject(p.gameObject);
+		// Show the starting point panel
+		showStartingPointPanel(p);
+		startingPointJustSelected = true;
+
+		// Make sure nothing is interactable
+		foreach(Toggle t in packetStartPanelToggles)
+			t.interactable = false;
+
+		// Set the correct toggle states
+		packetStartPanelToggles[0].isOn = r[0].size == PacketRule.Size.Small;
+		packetStartPanelToggles[1].isOn = r[0].size == PacketRule.Size.Medium;
+		packetStartPanelToggles[2].isOn = r[0].size == PacketRule.Size.Large;
+		packetStartPanelToggles[3].isOn = r[0].shape == PacketRule.Shape.Cube;
+		packetStartPanelToggles[4].isOn = r[0].shape == PacketRule.Shape.Sphere;
+		packetStartPanelToggles[5].isOn = r[0].shape == PacketRule.Shape.Cone;
+		packetStartPanelToggles[6].isOn = r[0].color == PacketRule.Color.Blue;
+		packetStartPanelToggles[7].isOn = r[0].color == PacketRule.Color.Green;
+		packetStartPanelToggles[8].isOn = r[0].color == PacketRule.Color.Pink;
+
+		// Show the advisor buttons
+		packetStartAdvisorPanel.SetActive(true);
+
+		// Re-enable events
+		startingPointJustSelected = false;
+	}
+
+	// Callback when an advisor proposes a new starting point malicious probability
+	public override void OnProposedNewStartPointMaliciousPacketProbability(StartingPoint p, float probability){
+		// Mark the probability as proposed
+		proposedProbability = probability;
+
+		// Override what is currently selected
+		SelectionManager.instance.SelectGameObject(p.gameObject);
+		// Show the probability panel
+		showProbabilityPanel(p);
+		startingPointJustSelected = true;
+
+		// Update the slider's value
+		probabilityLikelihoodPanelSlider.value = probability;
+		updateProbabilityLikelihoodText();
+		// Make the slider uninteractable
+		probabilityLikelihoodPanelSlider.interactable = false;
+
+		// Show the advisor buttons
+		probabilityLikelihoodAdvisorPanel.SetActive(true);
+
+		// Re-enable events
+		startingPointJustSelected = false;
+	}
+
+	// Callback when an advisor proposes a new destination likelihood
+	public override void OnProposedNewDestinationMaliciousPacketTargetLikelihood(Destination d, int likelihood){
+		// Mark the likelihood as propsed
+		proposedLikelihood = likelihood;
+
+		// Override what is currently selected
+		SelectionManager.instance.SelectGameObject(d.gameObject);
+		// show the likelihood panel
+		showLikelihoodPanel(d);
+		destinationJustSelected = true;
+
+		// Update the slider's value
+		probabilityLikelihoodPanelSlider.value = (float) likelihood;
+		updateProbabilityLikelihoodText();
+		// Make the slider uninteractable
+		probabilityLikelihoodPanelSlider.interactable = false;
+
+		// Show the advisor buttons
+		probabilityLikelihoodAdvisorPanel.SetActive(true);
+
+		// Re-enable events
+		destinationJustSelected = false;
+	}
+
+	// Callback when a starting point rule from an advisor is accepted
+	public void OnStartPointAdvisorAccept(){
+		// If nothing ges wrong changing the starting point rule...
+		if( !ChangeStartPointMalciousPacketRules(getSelected<StartingPoint>(), proposedRule) ){
+			// Close the panel
+			OnClosePacketStartPanel();
+			OnCloseProbabilityLikelihoodPanel();
+			// Clear propsed changes
+			clearProposed();
+		}
+	}
+
+	// Callback when a starting point rule from an advisor is rejected
+	public void OnStartPointAdvisorReject(){
+		// Close the panel
+		OnClosePacketStartPanel();
+		OnCloseProbabilityLikelihoodPanel();
+		// Clear propsed changes
+		clearProposed();
+	}
+
+	// Callback when a probablity/likelihood from the advisor is accepted
+	public void OnProbabilityLikelihoodAdvisorAccept(){
+		StartingPoint s = getSelected<StartingPoint>();
+		Destination d = getSelected<Destination>();
+
+		// If we have a starting point selected try to update to the propsed proability
+		if(s is object && !ChangeStartPointMaliciousPacketProbability(s, proposedProbability) ){
+			// Close the panel
+			OnCloseProbabilityLikelihoodPanel();
+			// Clear propsed changes
+			clearProposed();
+		// If we have a destination selected try to update to the proposed likelihood
+		} else if(d is object && !ChangeDestinationMaliciousPacketTargetLikelihood(d, proposedLikelihood) ){
+			// Close the panel
+			OnCloseProbabilityLikelihoodPanel();
+			// Clear propsed changes
+			clearProposed();
+		}
+	}
+
+	// Callback when a probablity/likelihood from the advisor is rejected
+	public void OnProbabilityLikelihoodAdvisorReject(){
+		StartingPoint s = getSelected<StartingPoint>();
+		Destination d = getSelected<Destination>();
+
+		// Make sure the slider value is reset to what is currently stored
+		if(s is object)
+			probabilityLikelihoodPanelSlider.value = s.maliciousPacketProbability;
+		else if(d is object)
+			probabilityLikelihoodPanelSlider.value = (float) d.maliciousPacketDestinationLikelihood;
+
+		// Close the panel
+		OnCloseProbabilityLikelihoodPanel();
+		// Clear propsed changes
+		clearProposed();
+	}
+
+
 	// -- Show Panels --
 
 
 	// Function which shows the packet panel
-	public void showPacketPanel(Packet p){
+	public virtual void showPacketPanel(Packet p){
 		// Set all of the toggles as not interactable
 		foreach(Toggle t in packetStartPanelToggles)
 			t.interactable = false;
@@ -160,28 +313,30 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 		packetStartPanelStartHeader.gameObject.SetActive(false);
 		// Display the panel
 		packetStartPanel.SetActive(true);
+
+		// Hide advisor buttons
+		packetStartAdvisorPanel.SetActive(false);
 	}
 
 	// Function which shows the starting point panel
 	bool startingPointJustSelected = false;
-	public void showStartingPointPanel(StartingPoint p){
+	public virtual void showStartingPointPanel(StartingPoint s){
 		startingPointJustSelected = true; // Disable toggle callbacks
 
-		// Set all of the toggles as interactable (only for the blackhat's primary player)
+		// Set all of the toggles as interactable
 		foreach(Toggle t in packetStartPanelToggles)
-			if(NetworkingManager.isPrimary) t.interactable = true;
-			else t.interactable = false;
+			t.interactable = true;
 
 		// Set the correct toggle states
-		packetStartPanelToggles[0].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Small;
-		packetStartPanelToggles[1].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Medium;
-		packetStartPanelToggles[2].isOn = p.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Large;
-		packetStartPanelToggles[3].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cube;
-		packetStartPanelToggles[4].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Sphere;
-		packetStartPanelToggles[5].isOn = p.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cone;
-		packetStartPanelToggles[6].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Blue;
-		packetStartPanelToggles[7].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Green;
-		packetStartPanelToggles[8].isOn = p.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Pink;
+		packetStartPanelToggles[0].isOn = s.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Small;
+		packetStartPanelToggles[1].isOn = s.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Medium;
+		packetStartPanelToggles[2].isOn = s.spawnedMaliciousPacketRules[0].size == PacketRule.Size.Large;
+		packetStartPanelToggles[3].isOn = s.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cube;
+		packetStartPanelToggles[4].isOn = s.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Sphere;
+		packetStartPanelToggles[5].isOn = s.spawnedMaliciousPacketRules[0].shape == PacketRule.Shape.Cone;
+		packetStartPanelToggles[6].isOn = s.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Blue;
+		packetStartPanelToggles[7].isOn = s.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Green;
+		packetStartPanelToggles[8].isOn = s.spawnedMaliciousPacketRules[0].color == PacketRule.Color.Pink;
 
 		// Display the correct header
 		packetStartPanelPacketHeader.gameObject.SetActive(false);
@@ -190,17 +345,19 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 		packetStartPanel.SetActive(true);
 
 		// Display the probability panel
-		showProbabilityPanel(p);
-		StartingPointSettingsUpdated(p);
+		showProbabilityPanel(s);
+		StartingPointSettingsUpdated(s);
 
 		startingPointJustSelected = false; // Re-enable toggle callbacks
+
+		// Hide advisor buttons
+		packetStartAdvisorPanel.SetActive(false);
 	}
 
 	// Function which shows the starting point probability panel
-	public void showProbabilityPanel(StartingPoint p){
-		// Set the slider as interactable (only for the blackhat's primary player)
-		if(NetworkingManager.isPrimary) probabilityLikelihoodPanelSlider.interactable = true;
-		else probabilityLikelihoodPanelSlider.interactable = false;
+	public virtual void showProbabilityPanel(StartingPoint p){
+		// Set the slider as interactable
+		probabilityLikelihoodPanelSlider.interactable = true;
 
 		// Update the slider's properties
 		probabilityLikelihoodPanelSlider.minValue = 0;
@@ -219,12 +376,11 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 
 	// Function which shows the destination likelihood panel
 	bool destinationJustSelected = false;
-	public void showLikelihoodPanel(Destination d){
+	public virtual void showLikelihoodPanel(Destination d){
 		destinationJustSelected = true; // Disable toggle callbacks
 
-		// Set the slider as interactable (only for the blackhat's primary player)
-		if(NetworkingManager.isPrimary) probabilityLikelihoodPanelSlider.interactable = true;
-		else probabilityLikelihoodPanelSlider.interactable = false;
+		// Set the slider as interactable
+		probabilityLikelihoodPanelSlider.interactable = true;
 
 		// Update the slider's properties
 		probabilityLikelihoodPanelSlider.minValue = 0;
@@ -242,6 +398,9 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 		DestinationSettingsUpdated(d);
 
 		destinationJustSelected = false; // Re-enable toggle callbacks
+
+		// Hide advisor buttons
+		probabilityLikelihoodAdvisorPanel.SetActive(false);
 	}
 
 
@@ -265,12 +424,19 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 
 
 	// Function which updates the slider label to reflect the state of the slider
-	void updateProbabilityLikelihoodText(){
+	protected void updateProbabilityLikelihoodText(){
 		// Format the text appropriately to the starting point (2 decimal place probability) and destination (integer likelihood)
-		if(getSelected<StartingPoint>() != null)
+		if(getSelected<StartingPoint>() is object)
 			probabilityLikelihoodPanelValueText.text = probabilityLikelihoodPanelSlider.value.ToString("0.##");
-		else if(getSelected<Destination>() != null)
+		else if(getSelected<Destination>() is object)
 			probabilityLikelihoodPanelValueText.text = "" + (int) probabilityLikelihoodPanelSlider.value;
+	}
+
+	// Function which clears out all of the data an advisor proposed
+	void clearProposed(){
+		proposedRule = new PacketRule();
+		proposedProbability = 0;
+		proposedLikelihood = 0;
 	}
 
 
