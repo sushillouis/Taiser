@@ -22,20 +22,9 @@ public class TestBench : MonoBehaviour {
 		NetworkingManager.players.Add(me);
 		Networking.Player.localPlayer = me;
 
-		me.role = Networking.Player.Role.Advisor;
+		// me.role = Networking.Player.Role.Advisor;
 
 		(WhiteHatPlayerManager.instance as WhiteHatPlayerManager).OnEnable();
-
-		Debug.Log(NetworkingManager.isWhiteHatPrimary);
-
-
-		// PacketRule rule = PacketRule.Parse("pink & cube & !medium | !(cone | !!sphere)", false);
-		PacketRule rule = PacketRule.Parse("((pink | sphere) & (sphere | large)) | cone", false);
-		// rule.treeRoot.DebugDump();
-
-		rule.Commit();
-
-		Debug.Log(rule.treeRoot.RuleString());
 	}
 
 }
