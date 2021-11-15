@@ -353,7 +353,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		if(whiteHatPrimaryPlayer is object)
 			player.role = Networking.Player.Role.Advisor;
 		// Otherwise... the requesting player becomes their primary player
-		else if(player.role == Networking.Player.Role.Spectator)
+		else if(player.role == Networking.Player.Role.Observer)
 			player.role = Networking.Player.Role.Player;
 
 		// Synchronize the room state
@@ -378,17 +378,17 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		if(blackHatPrimaryPlayer is object)
 			player.role = Networking.Player.Role.Advisor;
 		// Otherwise... the requesting player becomes the blackhat primary player
-		else if(player.role == Networking.Player.Role.Spectator)
+		else if(player.role == Networking.Player.Role.Observer)
 			player.role = Networking.Player.Role.Player;
 
 		// Synchronize the room state
 		RequestRoomStateSynchronization();
 	}
 
-	// Function which causes the current player to become a spectator
-	// Optionally a specific side can be passed, a spectator can only see information that can be seen by the side they are assigned to (common side can spectate both)
-	public void BecomeSpectator(Networking.Player.Side side = Networking.Player.Side.Common){ photonView.RPC("RPC_NetworkingManager_BecomeSpectator", RpcTarget.AllBuffered, localPlayer.actorNumber, side); }
-	[PunRPC] void RPC_NetworkingManager_BecomeSpectator(int playerActorNumber, Networking.Player.Side side){
+	// Function which causes the current player to become a Observer
+	// Optionally a specific side can be passed, a Observer can only see information that can be seen by the side they are assigned to (common side can spectate both)
+	public void BecomeObserver(Networking.Player.Side side = Networking.Player.Side.Common){ photonView.RPC("RPC_NetworkingManager_BecomeObserver", RpcTarget.AllBuffered, localPlayer.actorNumber, side); }
+	[PunRPC] void RPC_NetworkingManager_BecomeObserver(int playerActorNumber, Networking.Player.Side side){
 		// Room state management can only be preformed by the host
 		if(!isHost) return;
 
@@ -396,8 +396,8 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		Networking.Player player = players.Find(p => p.actorNumber == playerActorNumber);
 		// Take the side as input
 		player.side = side;
-		// Make the requesting player a spectator
-		player.role = Networking.Player.Role.Spectator;
+		// Make the requesting player a Observer
+		player.role = Networking.Player.Role.Observer;
 
 		// Synchronize the room state
 		RequestRoomStateSynchronization();
@@ -526,7 +526,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		}
 	}
 
-	// Returns an array containing all of the whitehat players (primaries, advisors, and spectators)
+	// Returns an array containing all of the whitehat players (primaries, advisors, and Observers)
 	public static Networking.Player[] whiteHatPlayers {
 		get {
 			if(players.Count == 0) return null;
@@ -534,7 +534,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		}
 	}
 
-	// Returns an array containing all of the blackhat players (primaries, advisors, and spectators)
+	// Returns an array containing all of the blackhat players (primaries, advisors, and Observers)
 	public static Networking.Player[] blackHatPlayers {
 		get {
 			if(players.Count == 0) return null;
@@ -542,7 +542,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		}
 	}
 
-	// Returns an array containing all of the common players (spectators)
+	// Returns an array containing all of the common players (Observers)
 	public static Networking.Player[] commonPlayers {
 		get {
 			if(players.Count == 0) return null;
@@ -550,11 +550,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		}
 	}
 
-	// Returns an array containing all of the spectators (whitehat, blackhat, and common)
-	public static Networking.Player[] spectators {
+	// Returns an array containing all of the Observers (whitehat, blackhat, and common)
+	public static Networking.Player[] Observers {
 		get {
 			if(players.Count == 0) return null;
-			return players.FindAll(p => p.role == Networking.Player.Role.Spectator).ToArray();
+			return players.FindAll(p => p.role == Networking.Player.Role.Observer).ToArray();
 		}
 	}
 
@@ -630,11 +630,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		}
 	}
 
-	// Returns true if we are a spectator
-	public static bool isSpectator {
+	// Returns true if we are a Observer
+	public static bool isObserver {
 		get {
 			if(Networking.Player.localPlayer is null) return false;
-			return Networking.Player.localPlayer.role == Networking.Player.Role.Spectator;
+			return Networking.Player.localPlayer.role == Networking.Player.Role.Observer;
 		}
 	}
 
