@@ -61,7 +61,7 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		} else if(NetworkingManager.isBlackHat && NetworkingManager.isPrimary) Instantiate(blackHatPlayerPrefab).name = "BlackHat Player Managers";
 		else if(NetworkingManager.isBlackHat) Instantiate(blackHatAdvisorPrefab).name = "BlackHat Advisor Managers";
 		else if(NetworkingManager.isWhiteHat && NetworkingManager.isPrimary) Instantiate(whiteHatPlayerPrefab).name = "WhiteHat Player Managers";
-		// else Instantiate(whiteHatAdvisorPrefab).name = "WhiteHat Advisor Managers";
+		else Instantiate(whiteHatAdvisorPrefab).name = "WhiteHat Advisor Managers";
 	}
 
 	// When we are dis/enabled register ourselves as a listener to playerPropertyUpdateEvents and roomOtherLeaveEvent

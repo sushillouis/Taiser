@@ -21,6 +21,8 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 
 	// Reference to the panel which displays information about firewalls and packets
 	public GameObject firewallPacketPanel;
+	// Reference to the panel holding advisor buttons
+	public GameObject firewallPacketAdvisorPanel;
 	// Reference to the firewall and packet header labels
 	public TMPro.TextMeshProUGUI firewallPacketPanelFirewallText, firewallPacketPanelPacketText;
 	// References to all of the toggles in the firewall panel
@@ -29,8 +31,11 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	// References to buttons which are disabled for advisors
 	public Button removeFirewallButton, makeHoneypotButton;
 
+	// Proposed packet rule
+	PacketRule proposedRule;
+
 	// Enum what a click currently means
-	enum ClickState {
+	protected enum ClickState {
 		Selecting,
 		SpawningFirewall,
 		SelectingFirewallToMove,
@@ -38,7 +43,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		SelectingDestinationToMakeHoneypot,
 	}
 	// Variable defining what should happen when we click
-	ClickState clickState = ClickState.Selecting;
+	protected ClickState clickState = ClickState.Selecting;
 
 
 	// De/register the click listener as well as Selection Manager event listeners
@@ -52,15 +57,6 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		SelectionManager.hoverChangedEvent += OnHoverChanged;
 		SelectionManager.packetSelectEvent += OnPacketSelected;
 		SelectionManager.firewallSelectEvent += OnFirewallSelected;
-
-		// If we aren't the primary player, then we can't interact with the move, remove, or make-firewall buttons
-		if(!NetworkingManager.isPrimary){
-			removeFirewallButton.interactable = false;
-			makeHoneypotButton.interactable = false;
-		} else {
-			removeFirewallButton.interactable = true;
-			makeHoneypotButton.interactable = true;
-		}
 
 		Debug.Log(firewallCursor);
 	}
@@ -145,7 +141,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	}
 
 	// Callback which handles when one of the toggles in the firewall panel is adjusted
-	public void OnFirewallToggleSelected(int deltaNumber){
+	public virtual void OnFirewallToggleSelected(int deltaNumber){
 		// Disable filter settings when we are just opening the panel for the first time
 		if(firewallJustSelected) return;
 		// Don't do anything if we switched off a toggle
@@ -172,12 +168,12 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		}
 
 		string newRule = new PacketRule.LiteralNode(d).RuleString();
-		if(SetFirewallFilterRules(selected, PacketRule.Parse(newRule)) != ErrorCodes.NoError)
+		if(SetFirewallFilterRules(selected, PacketRule.Parse(newRule)))
 			showFirewallPanel(selected); // Reload the firewall panel if we failed to update the settings
 	}
 
 	// Callback which makes the selected destination a honeypot (or sets the relevant click state so that the next click will make a destination a honeypot)
-	public void MakeHoneypot(){
+	public virtual void MakeHoneypot(){
 		// If we need to select a destination...
 		if(getSelected<Destination>() is null){
 			clickState = ClickState.SelectingDestinationToMakeHoneypot;
@@ -185,7 +181,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		}
 
 		// If the selection is a destination, make it a honeypot
-		if(MakeDestinationHoneypot(getSelected<Destination>()) == ErrorCodes.NoError)
+		if(!MakeDestinationHoneypot(getSelected<Destination>()))
 			// Play a sound to indicate that settings were updated
 			AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated", .5f);
 
@@ -231,7 +227,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 				AudioManager.instance.soundFXPlayer.PlayTrackImmediate("FirewallSpawn", .5f);
 			}
 		// If we are an advisor... simply suggest where a firewall should be placed
-		} else if(SpawnSuggestedFirewall(SelectionManager.instance.hovered) == ErrorCodes.NoError)
+		} else if(!SpawnSuggestedFirewall(SelectionManager.instance.hovered))
  			clickState = ClickState.Selecting;
 	}
 
@@ -258,7 +254,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 
 	// Function which handles clicks when we are supposed to be moving firewalls
 	void OnClick_MovingFirewall(){
-		if(MoveFirewall(getSelected<Firewall>(), SelectionManager.instance.hovered) != ErrorCodes.NoError){
+		if(MoveFirewall(getSelected<Firewall>(), SelectionManager.instance.hovered)){
 			clickState = ClickState.Selecting;
 
 			// Make sure the placement cursor is hidden
@@ -288,18 +284,76 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	}
 
 
+	// -- Advisor Callbacks --
+
+	public override void OnProposedNewFirewallFilterRules(Firewall f, PacketRule r) {
+		// Save the rule as propsesed
+		proposedRule = r;
+
+		// Override what is currently selected
+		SelectionManager.instance.SelectGameObject(f.gameObject);
+		// Show the firewall panel
+		showFirewallPanel(f);
+		firewallJustSelected = true;
+
+		// Make sure nothing is interactable
+		foreach(Toggle t in firewallPacketPanelToggles)
+			t.interactable = false;
+
+		// Set the correct toggle states
+		firewallPacketPanelToggles[0].isOn = r[0].size == PacketRule.Size.Small;
+		firewallPacketPanelToggles[1].isOn = r[0].size == PacketRule.Size.Medium;
+		firewallPacketPanelToggles[2].isOn = r[0].size == PacketRule.Size.Large;
+		firewallPacketPanelToggles[3].isOn = r[0].shape == PacketRule.Shape.Cube;
+		firewallPacketPanelToggles[4].isOn = r[0].shape == PacketRule.Shape.Sphere;
+		firewallPacketPanelToggles[5].isOn = r[0].shape == PacketRule.Shape.Cone;
+		firewallPacketPanelToggles[6].isOn = r[0].color == PacketRule.Color.Blue;
+		firewallPacketPanelToggles[7].isOn = r[0].color == PacketRule.Color.Green;
+		firewallPacketPanelToggles[8].isOn = r[0].color == PacketRule.Color.Pink;
+
+		// Show the advisor buttons
+		firewallPacketAdvisorPanel.SetActive(true);
+
+		// Re-enable events
+		firewallJustSelected = false;
+	}
+
+	// Callback when we are proposed that we should make a destination a honeypot
+	public virtual void OnProposedMakeDestinationHoneypot(Destination toModify) {
+		// TODO: How should we present this to the player?
+	}
+
+	// Callback when a firewall rule from an advisor is accepted
+	public void OnFirewallAdvisorAccept(){
+		// If nothing ges wrong changing the firewall rule...
+		if( !SetFirewallFilterRules(getSelected<Firewall>(), proposedRule) ){
+			// Close the panel
+			OnClosePacketFirewallPanel();
+			// Clear propsed changes
+			proposedRule = new PacketRule();
+		}
+	}
+
+	// Callback when a firewall rule from an advisor is rejected
+	public void OnFirewallAdvisorReject(){
+		// Close the panel
+		OnClosePacketFirewallPanel();
+		// Clear propsed changes
+		proposedRule = new PacketRule();
+	}
+
+
 	// -- Show Panels --
 
 
 	// Function which shows the firewall panel
 	bool firewallJustSelected = false; // Boolean which tracks if we just selected the firewall, and if we did it prevents toggle updates from registering
-	public void showFirewallPanel(Firewall f){
+	public virtual void showFirewallPanel(Firewall f){
 		firewallJustSelected = true; // Disable toggle callbacks
 
 		// Set all of the toggles as interactable (only for the white hat's primary player)
 		foreach(Toggle t in firewallPacketPanelToggles)
-			if(NetworkingManager.isPrimary) t.interactable = true;
-			else t.interactable = false;
+			t.interactable = true;
 
 		// Set the correct toggle states
 		firewallPacketPanelToggles[0].isOn = f.filterRules[0].size == PacketRule.Size.Small;
@@ -320,6 +374,8 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		firewallPacketPanelPacketText.gameObject.SetActive(false);
 		// Display the panel
 		firewallPacketPanel.SetActive(true);
+		// Make sure to hide the advisor buttons
+		firewallPacketAdvisorPanel.SetActive(false);
 
 		firewallJustSelected = false; // Re-enable toggle callbacks
 	}
@@ -347,6 +403,8 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		firewallPacketPanelPacketText.gameObject.SetActive(true);
 		// Display the panel
 		firewallPacketPanel.SetActive(true);
+		// Make sure to hide the advisor buttons
+		firewallPacketAdvisorPanel.SetActive(false);
 	}
 
 

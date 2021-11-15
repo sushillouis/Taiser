@@ -17,7 +17,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 		public ErrorCodes(int _value) : base(_value) {}
 		public static implicit operator int(ErrorCodes e) => e.value;
 		public static implicit operator ErrorCodes(int value) => new ErrorCodes(value);
-		// Implicit conversion to a bool (true if an error occured, false otherwise)
+		// Implicit conversion to a bool (true if an error occurred, false otherwise)
 		public static implicit operator bool(ErrorCodes e) => e != NoError;
 	}
 
@@ -166,7 +166,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
-		// Syncronize the call through the game manager
+		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeNewFirewallFilterRules", RpcTarget.AllBuffered, (int) toModify.ID, filterRules.CompressedRuleString());
 		return ErrorCodes.NoError;
 	}
@@ -195,7 +195,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.DestinationNotSelected;
 		}
 
-		// Syncronize the call through the game manager
+		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeMakeDestinationHoneypot", RpcTarget.AllBuffered, (int) toModify.ID);
 		return ErrorCodes.NoError;
 	}
