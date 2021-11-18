@@ -10,6 +10,9 @@ public class LobbyScreenManager : Window {
 	// The three screens that the lobby manages
 	public GameObject roomListScreen, inRoomScreen, loadingPrompt, splashScreen, nameEntryScreen;
 
+	// Background texture
+	public GameObject background;
+
 	// RoomList
 	[Header("Room List")]
 	// Reference to the prefab instantiated for each room listing
@@ -61,6 +64,7 @@ public class LobbyScreenManager : Window {
 		inRoomScreen.SetActive(false);
 		splashScreen.SetActive(false);
 		nameEntryScreen.SetActive(false);
+		background.SetActive(false);
 		loadingPrompt.SetActive(true);
 	}
 
@@ -72,6 +76,7 @@ public class LobbyScreenManager : Window {
 		splashScreen.SetActive(false);
 		roomListScreen.SetActive(false);
 		inRoomScreen.SetActive(false);
+		background.SetActive(true);
 
 		// If the loading text is still present... destroy it
 		if (loadingPrompt is object) {
@@ -92,6 +97,7 @@ public class LobbyScreenManager : Window {
 	// Displays the main screen and makes sure the loading screen is gone
 	void init(){
 		splashScreen.SetActive(true);
+		background.SetActive(false);
 		NetworkingManager.gameOpened = true;
 	}
 
@@ -103,7 +109,10 @@ public class LobbyScreenManager : Window {
 			// If we have displayed more than 4 rooms... then stop // TODO: this limit needs to be removed
 			if(i >= 4) break;
 			// If the room is closed, invisible, or removed from the list then don't display it
-			if(!info.IsOpen || !info.IsVisible || info.RemovedFromList) continue;
+			if (!info.IsOpen || !info.IsVisible || info.RemovedFromList) {
+				roomLabels[i].text = "";
+				continue;
+			}
 
 			// Create a new room listing
 			GameObject listing = Instantiate(roomListingPrefab);
@@ -357,6 +366,7 @@ public class LobbyScreenManager : Window {
 	public void OnGameEntered() {
 		splashScreen.SetActive(false);
 		nameEntryScreen.SetActive(true);
+		background.SetActive(true);
 	}
 
 
