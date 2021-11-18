@@ -11,6 +11,8 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Constant used to determine the hashtable key holding weather or not the player is readied up
 	public const string IS_PLAYER_READY = "r";
 
+	public static bool gameOpened = false;
+
 	// Event callbacks
 	public delegate void RoomListEventCallback(List<RoomInfo> roomList);
 	public delegate void RoomPropertiesEventCallback(ExitGames.Client.Photon.Hashtable propertiesThatChanged);
