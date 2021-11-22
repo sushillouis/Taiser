@@ -12,7 +12,7 @@ public class BaseUI : Core.Utilities.Singleton<BaseUI> {
 	// Reference to the Game Over screen
 	public GameObject endGameScreen;
 	// References to the win and lose text in the game over screen
-	public GameObject winText, loseText;
+	public GameObject winText, loseText, gameEndText;
 
 	// Passthrough callbacks which redirect button presses to the game manager
 	public void OnToggleReady(){ GameManager.instance.toggleReady(); }

@@ -48,7 +48,7 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	}
 
 	// Prefabs to spawn containing the managers specific to each side
-	public GameObject whiteHatPrefab, blackHatPrefab;
+	public GameObject whiteHatPrefab, blackHatPrefab, observerPrefab;
 
 
 	// When the scene starts spawn the correct side
@@ -56,8 +56,8 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		base.Awake();
 
 		if(NetworkingManager.isSpectator){
-			 Instantiate(blackHatPrefab).name = "BlackHat Managers";
-			 Instantiate(whiteHatPrefab).name = "WhiteHat Managers";
+			 Debug.Log("Instantiating prefabs for Spectator...");
+			 Instantiate(observerPrefab).name = "Observer Managers";
 		} else if(NetworkingManager.isBlackHat) Instantiate(blackHatPrefab).name = "BlackHat Managers";
 		else Instantiate(whiteHatPrefab).name = "WhiteHat Managers";
 	}
@@ -178,7 +178,9 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		try{
 			// TODO: Need to take spectators into account (right now they always lose)
 			// Show the win text if the player's side won
-			if(winningSide == NetworkingManager.localPlayer.side)
+			if (NetworkingManager.localPlayer.role == Networking.Player.Role.Spectator) // Is Spectator
+				BaseUI.instance.gameEndText.SetActive(true); 
+			else if (winningSide == NetworkingManager.localPlayer.side)
 				BaseUI.instance.winText.SetActive(true);
 			else BaseUI.instance.loseText.SetActive(true);
 		// If we fail to find the index then assume that we lost
