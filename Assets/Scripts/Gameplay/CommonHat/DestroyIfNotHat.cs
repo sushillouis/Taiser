@@ -7,9 +7,9 @@ public class DestroyIfNotHat : MonoBehaviour {
 	public Networking.Player.Side allowedSide;
 
     void OnEnable(){
-		// Destroy for players that aren't of the allowed side, or are common spectators
+		// Destroy for players that aren't of the allowed side, or are common Observers
 		if( !(NetworkingManager.localPlayer.side == allowedSide
-		  || (NetworkingManager.localPlayer.side == Networking.Player.Side.Common && NetworkingManager.localPlayer.role == Networking.Player.Role.Spectator)) )
+		  || (NetworkingManager.localPlayer.side == Networking.Player.Side.Common && NetworkingManager.localPlayer.role == Networking.Player.Role.Observer)) )
 			Destroy(gameObject);
 	}
 }

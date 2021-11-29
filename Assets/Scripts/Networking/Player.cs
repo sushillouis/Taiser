@@ -23,7 +23,7 @@ namespace Networking {
 		public enum Role {
 			Player,
 			Advisor,
-			Spectator
+			Observer
 		}
 
 		// Static reference to current player
@@ -43,8 +43,8 @@ namespace Networking {
 			get => _side;
 			set {
 				_side = value;
-				// Make sure that the common side can only be a spectator
-				if(value == Side.Common) role = Role.Spectator;
+				// Make sure that the common side can only be a Observer
+				if(value == Side.Common) role = Role.Observer;
 			}
 		}
 

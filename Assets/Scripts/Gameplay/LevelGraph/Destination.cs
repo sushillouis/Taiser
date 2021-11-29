@@ -29,10 +29,7 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 	// Whenever a new destination is added update the list of destinations
-	protected override void Awake() {
-		base.Awake();
-		destinations = FindObjectsOfType<Destination>();
-	}
+	protected void Awake() { destinations = FindObjectsOfType<Destination>(); }
 
 	// Reference to the rendered mesh
 	public MeshRenderer mesh;

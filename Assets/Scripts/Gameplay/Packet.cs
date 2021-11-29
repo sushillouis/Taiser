@@ -22,7 +22,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 	public UnityEngine.Color[] colors;
 
 	// Speed of the packets depending on difficulty
-	public float[] speeds = new float[3] {/*easy*/.8f, /*medium*/1, /*hard*/1};
+	public float[] speeds = new float[3] {/*easy*/.8f * 20, /*medium*/1 * 20, /*hard*/1 * 20};
 
 
 	// -- Properties --
@@ -71,8 +71,12 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		// If the trigger was a destination...
 		if(collider.transform.tag == "Destination"){
 			// Process scoring (if the collided destination isn't a honeypot)
-			if(!collider.gameObject.GetComponent<Destination>().isHoneypot)
+			if (!collider.gameObject.GetComponent<Destination>().isHoneypot) {
 				ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
+				// ...And log the packet
+				PacketLogger.instance.ProcessPacketLogEvent(_details, _isMalicious, destination);
+			}
+			
 			// If the packet is malicious play a sound and particle effect
 			if(isMalicious){
 				AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");

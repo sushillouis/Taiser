@@ -29,10 +29,7 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	}
 
 	// Whenever a new starting point is added update the list of starting points
-	protected override void Awake() {
-		base.Awake();
-		startingPoints = FindObjectsOfType<StartingPoint>();
-	}
+	protected void Awake() { startingPoints = FindObjectsOfType<StartingPoint>(); }
 
 	// The number of updates gained after each wave (based on difficulty)
 	public int[] updatesGrantedPerWave = new int[3] {/*easy*/5, /*medium*/5, /*hard*/5};
