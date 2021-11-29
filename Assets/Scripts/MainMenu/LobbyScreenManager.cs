@@ -20,6 +20,7 @@ public class LobbyScreenManager : Window {
 	public TMPro.TMP_InputField aliasTextbox;
 	public List<TMPro.TextMeshProUGUI> roomLabels;
 	public GameObject roomListContent;
+	public GameObject[] joinButtons;
 
 	// In Room
 	[Header("In Room")]
@@ -33,6 +34,7 @@ public class LobbyScreenManager : Window {
 
 	// Boolean tracking if the current lobby is a multiplayer lobby or not
 	bool isMultiplayer = false;
+	public Toggle multiplayerToggle;
 
 	// Connect and disconnect to networking events
 	void OnEnable(){
@@ -367,7 +369,7 @@ public class LobbyScreenManager : Window {
 
 	// Function called when the leave room button is pressed
 	public void OnLeaveRoomButtonPressed(){
-		titlebar.SetWindowTitle("Multiplayer");
+		//titlebar.SetWindowTitle("Multiplayer");
 
 		if(isMultiplayer)
 			NetworkingManager.instance.LeaveRoom();
