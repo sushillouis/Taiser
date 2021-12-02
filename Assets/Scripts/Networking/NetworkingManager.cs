@@ -5,11 +5,14 @@ using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<NetworkingManager> {
+public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<NetworkingManager>
+{
 	// Constant used to determine the hashtable key holding weather or not the host is a whitehat
 	public const string IS_HOST_WHITE_HAT = "w";
 	// Constant used to determine the hashtable key holding weather or not the player is readied up
 	public const string IS_PLAYER_READY = "r";
+
+	public static bool gameOpened = false;
 
 	// Event callbacks
 	public delegate void RoomListEventCallback(List<RoomInfo> roomList);
@@ -51,7 +54,8 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 
 	// Variable used to track what happens when we disconnect
-	enum DisconnectState {
+	enum DisconnectState
+	{
 		Simple,
 		Reconnect,
 		GoOffline,
@@ -75,32 +79,32 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 
 	// Register the de/serialization functions for Networking.Player
-	protected override void Awake(){
+	protected override void Awake() {
 		base.Awake();
 
 		ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(Networking.Player), /*Can't be registered as P or Q since they are reserved by photon*/(byte)'P' + 2, Networking.Player.PhotonSerialize, Networking.Player.PhotonDeserialize);
 	}
 
 	// When enabled we setup the singleton and make sure we are connected to the PhotonNetwork
-	public override void OnEnable(){
+	public override void OnEnable() {
 		base.OnEnable();
 
 		// If we are already connected... don't bother connecting
-		if(PhotonNetwork.IsConnected) return;
+		if (PhotonNetwork.IsConnected) return;
 
 		// Ensure we are connected to Photon
 		Reconnect();
 	}
 
 	// When disabled we cleanup the singleton and disconnect from the PhotonNetwork
-	public override void OnDisable(){
+	public override void OnDisable() {
 		base.OnDisable();
 
 		// Don't bother disconnecting from photon if we are in a room
-		if(inRoom) return;
+		if (inRoom) return;
 
 		// If we are leaving a game and returning to the main menu then we should reconnect to photon
-		if(shouldReturnToMenuOnLeave) Reconnect();
+		if (shouldReturnToMenuOnLeave) Reconnect();
 		// If we are exiting the game then disconnect from photon
 		else PhotonNetwork.Disconnect();
 	}
@@ -110,7 +114,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 
 	// Once we connect to the network we should automatically join the lobby
-	public override void OnConnectedToMaster(){
+	public override void OnConnectedToMaster() {
 		Debug.Log("Connected to Photon (server " + PhotonNetwork.CloudRegion + ")");
 		connectedEvent?.Invoke();
 
@@ -118,17 +122,17 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// When we disconnect from the newtwork, do something based on our disconnect state
-	public override void OnDisconnected (DisconnectCause cause){
+	public override void OnDisconnected(DisconnectCause cause) {
 		Debug.Log("Disconnected from Photon because " + cause + " with state " + disconnectState);
 		// When we disconnect we are no longer the room host
 		isRoomHost = false;
 
 		// If the disconnect was a part of a larger strategy then finish that action, otherwise fire the event
-		switch(disconnectState){
-			case DisconnectState.Simple: disconnectedEvent?.Invoke(); break; 		// Simple means that we disconnect (and trigger the associated event)
-			case DisconnectState.Reconnect: Reconnect(); break;						// Reconnect means that we should immediately reconnect to the network
-			case DisconnectState.GoOffline: GoOffline(); break;						// GoOffline means that we should immediately reconnect in offline mode
-			case DisconnectState.CreateOfflineRoom: CreateOfflineRoom(); break;		// CreateOfflineRoom means that we should immediately reconnect in offline mode and create a new room
+		switch (disconnectState) {
+			case DisconnectState.Simple: disconnectedEvent?.Invoke(); break;        // Simple means that we disconnect (and trigger the associated event)
+			case DisconnectState.Reconnect: Reconnect(); break;                     // Reconnect means that we should immediately reconnect to the network
+			case DisconnectState.GoOffline: GoOffline(); break;                     // GoOffline means that we should immediately reconnect in offline mode
+			case DisconnectState.CreateOfflineRoom: CreateOfflineRoom(); break;     // CreateOfflineRoom means that we should immediately reconnect in offline mode and create a new room
 		}
 
 		// Make sure that the disconnect state is reset
@@ -137,10 +141,10 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Pass along room updates to the connected listeners
-	public override void OnRoomListUpdate (List<RoomInfo> roomList){ roomListUpdateEvent?.Invoke(roomList); }
+	public override void OnRoomListUpdate(List<RoomInfo> roomList) { roomListUpdateEvent?.Invoke(roomList); }
 
 	// If we failed to create a room (it is likely because the name was already taken) so add 1 to the room's name and try again
-	public override void OnCreateRoomFailed (short returnCode, string message){
+	public override void OnCreateRoomFailed(short returnCode, string message) {
 		Debug.Log("Failed to create room because: " + message);
 
 		createRoomFailAttempts++;
@@ -148,19 +152,19 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// When we join a room, create a new player list if we are the first player
-	public override void OnJoinedRoom(){
+	public override void OnJoinedRoom() {
 		Debug.Log("Joined a room (" + PhotonNetwork.CurrentRoom.Name + ")");
 		createRoomFailAttempts = 1;
 
 		// If we are the host or this is a singleplayer game...
-		if(isHost || isSingleplayer){
+		if (isHost || isSingleplayer) {
 			// Create a new list to hold the room's players
 			debuggingPlayers = players = new List<Networking.Player>();
 			// Create a Networking.Player representing ourselves
 			Networking.Player me = new Networking.Player();
 			me.photonPlayer = PhotonNetwork.LocalPlayer;
 			me.debugPhotonPlayer = me.photonPlayer.ActorNumber; // TODO: Remove
-			// Add it to the list
+																// Add it to the list
 			players.Add(me);
 
 			// Setup the local player
@@ -177,7 +181,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// When we leave a room, we might need to return to the main menu, if that is the case then do so
-	public override void OnLeftRoom(){
+	public override void OnLeftRoom() {
 		Debug.Log("Left room");
 
 		// Clear the list of players and local player
@@ -193,14 +197,14 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		roomLeaveEvent?.Invoke();
 
 		// Return to the main menu if requested
-		if(shouldReturnToMenuOnLeave)
+		if (shouldReturnToMenuOnLeave)
 			SceneManager.LoadScene(0);
 	}
 
 	// Pass player joining room events along to the listeners, and update the current list of players
-	public override void OnPlayerEnteredRoom (Player newPlayer){
+	public override void OnPlayerEnteredRoom(Player newPlayer) {
 		// If we are the host...
-		if(isHost){
+		if (isHost) {
 			// Create a Networking.Player for the newly joined player and add it to the player list
 			Networking.Player _new = new Networking.Player();
 			_new.photonPlayer = newPlayer;
@@ -216,11 +220,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Pass player leaving room events along to the listeners, and update the current list of players
-	public override void OnPlayerLeftRoom (Player otherPlayer){
+	public override void OnPlayerLeftRoom(Player otherPlayer) {
 		// If we are the host...
-		if(isHost){
+		if (isHost) {
 			// If we weren't already the host, trigger the become host event
-			if(!isRoomHost){
+			if (!isRoomHost) {
 				isRoomHost = true;
 				becomeRoomHostEvent?.Invoke();
 			}
@@ -238,18 +242,18 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// When the room properties update, propagate the event
-	public override void OnRoomPropertiesUpdate (ExitGames.Client.Photon.Hashtable propertiesThatChanged){ roomPropertiesUpdateEvent?.Invoke(propertiesThatChanged); }
+	public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged) { roomPropertiesUpdateEvent?.Invoke(propertiesThatChanged); }
 
 	// Pass player property updates along to the listeners
-	public override void OnPlayerPropertiesUpdate (Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps){ roomPlayerPropertiesUpdateEvent?.Invoke(targetPlayer, changedProps); }
+	public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps) { roomPlayerPropertiesUpdateEvent?.Invoke(targetPlayer, changedProps); }
 
 
 	// -- Public Interaction Functions (Providing the Outside World a way to manipulate the network)
 
 
 	// Creates a new room (and joins it) with the specified <name>, capable of hosting the provided <playerCount>, and with the set hostWhitehat status
-	public void CreateRoom(string name, byte playerCount, bool isHostWhitehat){
-		RoomOptions options = new RoomOptions(){
+	public void CreateRoom(string name, byte playerCount, bool isHostWhitehat) {
+		RoomOptions options = new RoomOptions() {
 			MaxPlayers = playerCount,
 			CustomRoomProperties = new ExitGames.Client.Photon.Hashtable(){
 				{IS_HOST_WHITE_HAT, isHostWhitehat} // hat
@@ -261,15 +265,15 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		createPlayerCountCache = playerCount;
 	}
 	// Creates a new room same as above, but its name is based on the player's name
-	public void CreateRoom(byte playerCount, bool isHostWhitehat){ CreateRoom(PhotonNetwork.NickName + "'s room", playerCount, isHostWhitehat); }
+	public void CreateRoom(byte playerCount, bool isHostWhitehat) { CreateRoom(PhotonNetwork.NickName + "'s room", playerCount, isHostWhitehat); }
 
 	// Join the specified room
-	public void JoinRoom(string name){ PhotonNetwork.JoinRoom(name); }
+	public void JoinRoom(string name) { PhotonNetwork.JoinRoom(name); }
 
 	// Leave the current room
-	public void LeaveRoom(){
+	public void LeaveRoom() {
 		// Don't bother if we aren't in a room
-		if(PhotonNetwork.CurrentRoom is null) return;
+		if (PhotonNetwork.CurrentRoom is null) return;
 
 		// Make sure that we aren't marked as ready
 		PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable(){
@@ -280,23 +284,23 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		PhotonNetwork.LeaveRoom();
 	}
 	// Leave the current room (and also return to the main menu)
-	public void LeaveRoomAndReturnToMainMenu(){
+	public void LeaveRoomAndReturnToMainMenu() {
 		shouldReturnToMenuOnLeave = true;
 		LeaveRoom();
 	}
 
 	// Set the properties (Most relevant being the white hat status) of the room
-	public void SetRoomProperties(ExitGames.Client.Photon.Hashtable changed){
+	public void SetRoomProperties(ExitGames.Client.Photon.Hashtable changed) {
 		// Don't bother if we aren't in a room
-		if(PhotonNetwork.CurrentRoom is null) return;
+		if (PhotonNetwork.CurrentRoom is null) return;
 
 		PhotonNetwork.CurrentRoom.SetCustomProperties(changed);
 	}
 
 	// Disconnect then reconnect to the PhotonNetwork
-	public void Reconnect(){
+	public void Reconnect() {
 		// If we are connected... first disconnect
-		if(PhotonNetwork.IsConnected){
+		if (PhotonNetwork.IsConnected) {
 			disconnectState = DisconnectState.Reconnect;
 			PhotonNetwork.Disconnect();
 			return;
@@ -309,9 +313,9 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Disconnect from the PhotonNetwork then go into offline mode
-	public void GoOffline(){
+	public void GoOffline() {
 		// If we are connected... first disconnect
-		if(PhotonNetwork.IsConnected){
+		if (PhotonNetwork.IsConnected) {
 			disconnectState = DisconnectState.GoOffline;
 			PhotonNetwork.Disconnect();
 			return;
@@ -322,10 +326,10 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Disconnect from the PhotonNetwork, go into offline mode, and create an offline room
-	public void CreateOfflineRoom(){
+	public void CreateOfflineRoom() {
 		// Switch into offline mode
 		GoOffline();
-		if(PhotonNetwork.IsConnected) disconnectState = DisconnectState.CreateOfflineRoom;
+		if (PhotonNetwork.IsConnected) disconnectState = DisconnectState.CreateOfflineRoom;
 
 		// Join a random room while in offline mode
 		PhotonNetwork.JoinRandomRoom();
@@ -336,10 +340,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 
 	// Function which causes the current player to become a whitehat
-	public void BecomeWhiteHat(){ photonView.RPC("RPC_NetworkingManager_BecomeWhiteHat", RpcTarget.AllBuffered, localPlayer.actorNumber); }
-	[PunRPC] void RPC_NetworkingManager_BecomeWhiteHat(int playerActorNumber){
+	public void BecomeWhiteHat() { photonView.RPC("RPC_NetworkingManager_BecomeWhiteHat", RpcTarget.AllBuffered, localPlayer.actorNumber); }
+	[PunRPC]
+	void RPC_NetworkingManager_BecomeWhiteHat(int playerActorNumber) {
 		// Room state management can only be preformed by the host
-		if(!isHost) return;
+		if (!isHost) return;
 
 		// Reference to the current primary player
 		var whiteHatPrimaryPlayer = NetworkingManager.whiteHatPrimaryPlayer;
@@ -350,10 +355,10 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		player.side = Networking.Player.Side.WhiteHat;
 
 		// If the whitehats already have a primary player... then the requesting player becomes an advisor
-		if(whiteHatPrimaryPlayer is object)
+		if (whiteHatPrimaryPlayer is object)
 			player.role = Networking.Player.Role.Advisor;
 		// Otherwise... the requesting player becomes their primary player
-		else if(player.role == Networking.Player.Role.Observer)
+		else if (player.role == Networking.Player.Role.Observer)
 			player.role = Networking.Player.Role.Player;
 
 		// Synchronize the room state
@@ -361,10 +366,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Function which causes the current player to become a blackhat
-	public void BecomeBlackHat(){ photonView.RPC("RPC_NetworkingManager_BecomeBlackHat", RpcTarget.AllBuffered, localPlayer.actorNumber); }
-	[PunRPC] void RPC_NetworkingManager_BecomeBlackHat(int playerActorNumber){
+	public void BecomeBlackHat() { photonView.RPC("RPC_NetworkingManager_BecomeBlackHat", RpcTarget.AllBuffered, localPlayer.actorNumber); }
+	[PunRPC]
+	void RPC_NetworkingManager_BecomeBlackHat(int playerActorNumber) {
 		// Room state management can only be preformed by the host
-		if(!isHost) return;
+		if (!isHost) return;
 
 		// Reference to the current primary player
 		var blackHatPrimaryPlayer = NetworkingManager.blackHatPrimaryPlayer;
@@ -375,10 +381,10 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		player.side = Networking.Player.Side.BlackHat;
 
 		// If the blackhats already have a pimary player, then the requesting player becomes an advisor
-		if(blackHatPrimaryPlayer is object)
+		if (blackHatPrimaryPlayer is object)
 			player.role = Networking.Player.Role.Advisor;
 		// Otherwise... the requesting player becomes the blackhat primary player
-		else if(player.role == Networking.Player.Role.Observer)
+		else if (player.role == Networking.Player.Role.Observer)
 			player.role = Networking.Player.Role.Player;
 
 		// Synchronize the room state
@@ -387,10 +393,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 	// Function which causes the current player to become a Observer
 	// Optionally a specific side can be passed, a Observer can only see information that can be seen by the side they are assigned to (common side can spectate both)
-	public void BecomeObserver(Networking.Player.Side side = Networking.Player.Side.Common){ photonView.RPC("RPC_NetworkingManager_BecomeObserver", RpcTarget.AllBuffered, localPlayer.actorNumber, side); }
-	[PunRPC] void RPC_NetworkingManager_BecomeObserver(int playerActorNumber, Networking.Player.Side side){
+	public void BecomeObserver(Networking.Player.Side side = Networking.Player.Side.Common) { photonView.RPC("RPC_NetworkingManager_BecomeObserver", RpcTarget.AllBuffered, localPlayer.actorNumber, side); }
+	[PunRPC]
+	void RPC_NetworkingManager_BecomeObserver(int playerActorNumber, Networking.Player.Side side) {
 		// Room state management can only be preformed by the host
-		if(!isHost) return;
+		if (!isHost) return;
 
 		// Find the player who requested to to become a spector
 		Networking.Player player = players.Find(p => p.actorNumber == playerActorNumber);
@@ -404,10 +411,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Function which causes the current player to become their side's primary player, ensuring that each side only has one primary player
-	public void BecomePrimaryPlayer(){ photonView.RPC("RPC_NetworkingManager_BecomePrimaryPlayer", RpcTarget.AllBuffered, localPlayer.actorNumber); }
-	[PunRPC] void RPC_NetworkingManager_BecomePrimaryPlayer(int playerActorNumber){
+	public void BecomePrimaryPlayer() { photonView.RPC("RPC_NetworkingManager_BecomePrimaryPlayer", RpcTarget.AllBuffered, localPlayer.actorNumber); }
+	[PunRPC]
+	void RPC_NetworkingManager_BecomePrimaryPlayer(int playerActorNumber) {
 		// Room state management can only be preformed by the host
-		if(!isHost) return;
+		if (!isHost) return;
 
 		// Find the player who wishes to become their side's primary player
 		Networking.Player player = players.Find(p => p.actorNumber == playerActorNumber);
@@ -417,15 +425,15 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		var blackHatPrimaryPlayer = NetworkingManager.blackHatPrimaryPlayer;
 
 		// If the player is a whitehat...
-		if(player.side == Networking.Player.Side.WhiteHat){
+		if (player.side == Networking.Player.Side.WhiteHat) {
 			// And there is currently a primary whitehat player...
-			if(whiteHatPrimaryPlayer is object)
+			if (whiteHatPrimaryPlayer is object)
 				// The current whitehat primary player becomes an advisor
 				whiteHatPrimaryPlayer.role = Networking.Player.Role.Advisor;
-		// If the player is a blackhat...
-		} else if(player.side == Networking.Player.Side.BlackHat)
+			// If the player is a blackhat...
+		} else if (player.side == Networking.Player.Side.BlackHat)
 			// And there is currently a primary blackhat player...
-			if(blackHatPrimaryPlayer is object)
+			if (blackHatPrimaryPlayer is object)
 				// The current blackhat primary player becomes an advisor
 				blackHatPrimaryPlayer.role = Networking.Player.Role.Advisor;
 
@@ -437,10 +445,11 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Function which causes the current player to become an advisor
-	public void BecomeAdvisor(){ photonView.RPC("RPC_NetworkingManager_BecomeAdvisor", RpcTarget.AllBuffered, localPlayer.actorNumber); }
-	[PunRPC] void RPC_NetworkingManager_BecomeAdvisor(int playerActorNumber){
+	public void BecomeAdvisor() { photonView.RPC("RPC_NetworkingManager_BecomeAdvisor", RpcTarget.AllBuffered, localPlayer.actorNumber); }
+	[PunRPC]
+	void RPC_NetworkingManager_BecomeAdvisor(int playerActorNumber) {
 		// Room state management can only be preformed by the host
-		if(!isHost) return;
+		if (!isHost) return;
 
 		// Find the player who requested to become an advisor
 		Networking.Player player = players.Find(p => p.actorNumber == playerActorNumber);
@@ -457,23 +466,25 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 	// Request that the host synchronize the room state
 	// If a joining player is passed as input, then that player will also have the join room event triggered once the state is synchronized
-	public void RequestRoomStateSynchronization(Player joinedPlayer = null){ photonView.RPC("RPC_NetworkingManager_RequestRoomStateSynchronization", RpcTarget.AllBuffered, joinedPlayer); }
-	[PunRPC] void RPC_NetworkingManager_RequestRoomStateSynchronization(Player joinedPlayer){
+	public void RequestRoomStateSynchronization(Player joinedPlayer = null) { photonView.RPC("RPC_NetworkingManager_RequestRoomStateSynchronization", RpcTarget.AllBuffered, joinedPlayer); }
+	[PunRPC]
+	void RPC_NetworkingManager_RequestRoomStateSynchronization(Player joinedPlayer) {
 		// Only the host can provide the room state
-		if(!isHost) return;
+		if (!isHost) return;
 
 		photonView.RPC("RPC_NetworkingManager_RoomStateSynchronization", RpcTarget.AllBuffered, players.ToArray(), joinedPlayer);
 	}
 
 	// Callback which sends a copy of the host's room state to all of the other players
-	[PunRPC] void RPC_NetworkingManager_RoomStateSynchronization(Networking.Player[] _players, Player joinedPlayer){
+	[PunRPC]
+	void RPC_NetworkingManager_RoomStateSynchronization(Networking.Player[] _players, Player joinedPlayer) {
 		// Update the player list
 		debuggingPlayers = players = new List<Networking.Player>(_players);
 		// Find the local player in the updated player list
 		Networking.Player.localPlayer = players.Find(p => p == PhotonNetwork.LocalPlayer);
 
 		// If a player should have the join room event triggered, and we are that player... trigger the join room event
-		if(joinedPlayer is object && joinedPlayer == Networking.Player.localPlayer)
+		if (joinedPlayer is object && joinedPlayer == Networking.Player.localPlayer)
 			roomJoinEvent?.Invoke();
 
 		// Trigger the room state update event
@@ -485,26 +496,27 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 
 	// Check if all players have readied up
-	public bool allPlayersReady(){
-		foreach(Networking.Player p in players)
-			if(!p.isReady) return false;
+	public bool allPlayersReady() {
+		foreach (Networking.Player p in players)
+			if (!p.isReady) return false;
 
 		return true;
 	}
 
 	// Marks the local player as being ready or not based on what is passed in
-	public void setReady(bool isReady){
+	public void setReady(bool isReady) {
 		localPlayer.photonPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable(){
 			{IS_PLAYER_READY, isReady}
 		});
 	}
 
 	// Toggles weather or not the local player is ready.
-	public void toggleReady(){ setReady( !localPlayer.isReady ); }
+	public void toggleReady() { setReady(!localPlayer.isReady); }
 
 	// Function which ensures that all of the players are marked as unready (Network Synced)
 	public void UnreadyAllPlayers() { photonView.RPC("RPC_NetworkingManager_UnreadyAllPlayers", RpcTarget.AllBuffered); }
-	[PunRPC] void RPC_NetworkingManager_UnreadyAllPlayers(){
+	[PunRPC]
+	void RPC_NetworkingManager_UnreadyAllPlayers() {
 		// Mark the local player as not ready
 		setReady(false);
 	}
@@ -521,7 +533,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are the multiplayer session's host or if we are in a singleplayer session
 	public static bool isHost {
 		get {
-			if(isSingleplayer) return true;
+			if (isSingleplayer) return true;
 			return PhotonNetwork.IsMasterClient;
 		}
 	}
@@ -529,7 +541,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns an array containing all of the whitehat players (primaries, advisors, and Observers)
 	public static Networking.Player[] whiteHatPlayers {
 		get {
-			if(players.Count == 0) return null;
+			if (players.Count == 0) return null;
 			return players.FindAll(p => p.side == Networking.Player.Side.WhiteHat).ToArray();
 		}
 	}
@@ -537,7 +549,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns an array containing all of the blackhat players (primaries, advisors, and Observers)
 	public static Networking.Player[] blackHatPlayers {
 		get {
-			if(players.Count == 0) return null;
+			if (players.Count == 0) return null;
 			return players.FindAll(p => p.side == Networking.Player.Side.BlackHat).ToArray();
 		}
 	}
@@ -545,7 +557,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns an array containing all of the common players (Observers)
 	public static Networking.Player[] commonPlayers {
 		get {
-			if(players.Count == 0) return null;
+			if (players.Count == 0) return null;
 			return players.FindAll(p => p.side == Networking.Player.Side.Common).ToArray();
 		}
 	}
@@ -553,7 +565,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns an array containing all of the Observers (whitehat, blackhat, and common)
 	public static Networking.Player[] Observers {
 		get {
-			if(players.Count == 0) return null;
+			if (players.Count == 0) return null;
 			return players.FindAll(p => p.role == Networking.Player.Role.Observer).ToArray();
 		}
 	}
@@ -562,7 +574,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	public static Networking.Player whiteHatPrimaryPlayer {
 		get {
 			var tmp = whiteHatPlayers;
-			if(tmp is null) return null;
+			if (tmp is null) return null;
 
 			return System.Array.Find(tmp, p => p.role == Networking.Player.Role.Player);
 		}
@@ -572,7 +584,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	public static Networking.Player[] whiteHatAdvisors {
 		get {
 			var tmp = whiteHatPlayers;
-			if(tmp is null) return null;
+			if (tmp is null) return null;
 
 			return System.Array.FindAll(tmp, p => p.role == Networking.Player.Role.Advisor);
 		}
@@ -582,7 +594,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	public static Networking.Player blackHatPrimaryPlayer {
 		get {
 			var tmp = blackHatPlayers;
-			if(tmp is null) return null;
+			if (tmp is null) return null;
 
 			return System.Array.Find(tmp, p => p.role == Networking.Player.Role.Player);
 		}
@@ -592,7 +604,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	public static Networking.Player[] blackHatAdvisors {
 		get {
 			var tmp = blackHatPlayers;
-			if(tmp is null) return null;
+			if (tmp is null) return null;
 
 			return System.Array.FindAll(tmp, p => p.role == Networking.Player.Role.Advisor);
 		}
@@ -601,7 +613,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are a whitehat player
 	public static bool isWhiteHat {
 		get {
-			if(Networking.Player.localPlayer is null) return false;
+			if (Networking.Player.localPlayer is null) return false;
 			return Networking.Player.localPlayer.side == Networking.Player.Side.WhiteHat;
 		}
 	}
@@ -609,7 +621,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are the primary whitehat player
 	public static bool isWhiteHatPrimary {
 		get {
-			if(Networking.Player.localPlayer is null || whiteHatPrimaryPlayer is null) return false;
+			if (Networking.Player.localPlayer is null || whiteHatPrimaryPlayer is null) return false;
 			return Networking.Player.localPlayer == whiteHatPrimaryPlayer;
 		}
 	}
@@ -617,7 +629,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are a blackhat player
 	public static bool isBlackHat {
 		get {
-			if(Networking.Player.localPlayer is null) return false;
+			if (Networking.Player.localPlayer is null) return false;
 			return Networking.Player.localPlayer.side == Networking.Player.Side.BlackHat;
 		}
 	}
@@ -625,7 +637,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are the primary blackhat player
 	public static bool isBlackHatPrimary {
 		get {
-			if(Networking.Player.localPlayer is null || blackHatPrimaryPlayer is null) return false;
+			if (Networking.Player.localPlayer is null || blackHatPrimaryPlayer is null) return false;
 			return Networking.Player.localPlayer == blackHatPrimaryPlayer;
 		}
 	}
@@ -633,7 +645,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are a Observer
 	public static bool isObserver {
 		get {
-			if(Networking.Player.localPlayer is null) return false;
+			if (Networking.Player.localPlayer is null) return false;
 			return Networking.Player.localPlayer.role == Networking.Player.Role.Observer;
 		}
 	}
@@ -656,10 +668,10 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if we are the primary player on our side
 	public static bool isPrimary {
 		get {
-			if(localPlayer is null) return false;
+			if (localPlayer is null) return false;
 
-			if(localPlayer.side == Networking.Player.Side.WhiteHat) return isWhiteHatPrimary;
-			else if(localPlayer.side == Networking.Player.Side.BlackHat) return isBlackHatPrimary;
+			if (localPlayer.side == Networking.Player.Side.WhiteHat) return isWhiteHatPrimary;
+			else if (localPlayer.side == Networking.Player.Side.BlackHat) return isBlackHatPrimary;
 			else return false;
 		}
 	}
@@ -667,7 +679,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns true if the local player is marked as ready
 	public static bool isReady {
 		get {
-			if(localPlayer is null) return false;
+			if (localPlayer is null) return false;
 			return localPlayer.isReady;
 		}
 	}
@@ -675,7 +687,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	// Returns the current list of players
 	public static Networking.Player[] roomPlayers {
 		get {
-			if(players is null) return null;
+			if (players is null) return null;
 			return players.ToArray();
 		}
 	}

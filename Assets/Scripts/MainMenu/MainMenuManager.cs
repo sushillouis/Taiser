@@ -14,14 +14,14 @@ public class MainMenuManager : MonoBehaviour {
 		var instance = findOrCreateLobbyWindow();
 
 		instance.OnLeaveRoomButtonPressed(); // Make sure that we leave any room so that we can join a new single player room
-		instance.OnCreateSingleplayerRoomButtonPressed();
+		//instance.OnCreateSingleplayerRoomButtonPressed();
 	}
 
 	// Function called when the multiplayer button is pressed
 	public void OnMultiplayerButtonPressed(){
 		var instance = findOrCreateLobbyWindow();
 
-		instance.titlebar.SetWindowTitle("Multiplayer");
+		//instance.titlebar.SetWindowTitle("Multiplayer");
 		instance.OnLeaveRoomButtonPressed(); // Make sure that we leave any room so we are presented with the room list
 	}
 
