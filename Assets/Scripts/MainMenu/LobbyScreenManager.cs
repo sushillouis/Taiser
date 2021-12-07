@@ -198,36 +198,49 @@ public class LobbyScreenManager : Window {
 		var blackHatPrimaryPlayer = NetworkingManager.blackHatPrimaryPlayer;
 
 		// If there are whitehat advisors...
-		if(whiteHatAdvisors.Length > 0){
+		if (whiteHatAdvisors.Length > 0) {
 			// Display the whitehat primary player with a spacer
 			playerLabels[0].text = "White: " + (whiteHatPrimaryPlayer is null ? "Selecting..." : whiteHatPrimaryPlayer.nickname) + " - ";
 			// Display the name of the first whitehat advisor
 			advisorLabels[0].text = whiteHatAdvisors[0].nickname;
+			Debug.Log(whiteHatAdvisors);
 			// Display the rest of the whitehat advisors with commas separating them
-			for(int i = 1; i < whiteHatAdvisors.Length; i++)
+			for (int i = 1; i < whiteHatAdvisors.Length; i++)
 				advisorLabels[0].text += ", " + whiteHatAdvisors[i].nickname;
-		// If there is a whitehat primary player (but no advisors)... display their name
-		} else if(whiteHatPrimaryPlayer is object) playerLabels[0].text = "White: " + (whiteHatPrimaryPlayer is null ? "Joining..." : whiteHatPrimaryPlayer.nickname);
+			// If there is a whitehat primary player (but no advisors)... display their name
+		} else if (whiteHatPrimaryPlayer is object) {
+			playerLabels[0].text = "White: " + (whiteHatPrimaryPlayer is null ? "Joining..." : whiteHatPrimaryPlayer.nickname);
+			advisorLabels[0].text = "- No Advisor -";
+		}
 		// Otherwise display that the whitehat side is joining, or an AI in singleplayer
-		else playerLabels[0].text = "White: " + (!NetworkingManager.isSingleplayer ? "Joining..." : "AI");
+		else {
+			playerLabels[0].text = "White: " + (!NetworkingManager.isSingleplayer ? "Joining..." : "AI");
+			advisorLabels[0].text = "- No Advisor -";
+		}
 
 		// If there are blackhat advisors...
-		if(blackHatAdvisors.Length > 0){
+		if (blackHatAdvisors.Length > 0) {
 			// Display the black primary player with a spacer
 			playerLabels[1].text = "Black: " + (blackHatPrimaryPlayer is null ? "Selecting..." : blackHatPrimaryPlayer.nickname) + " - ";
 			// Display the name of the first blackhat advisor
 			advisorLabels[1].text = blackHatAdvisors[0].nickname;
 			// Display the rest of the blackhat advisors with commas separating them
-			for(int i = 1; i < blackHatAdvisors.Length; i++)
+			for (int i = 1; i < blackHatAdvisors.Length; i++)
 				advisorLabels[1].text += ", " + blackHatAdvisors[i].nickname;
-		// If there is a blackhat primary player (but no advisors)... display their name
-		} else if(blackHatPrimaryPlayer is object) playerLabels[1].text = "Black: " + (blackHatPrimaryPlayer is null ? "Joining..." : blackHatPrimaryPlayer.nickname);
+			// If there is a blackhat primary player (but no advisors)... display their name
+		} else if (blackHatPrimaryPlayer is object) {
+			playerLabels[1].text = "Black: " + (blackHatPrimaryPlayer is null ? "Joining..." : blackHatPrimaryPlayer.nickname);
+			advisorLabels[1].text = "- No Advisor -";
+		}
 		// Otherwise display that the blachat side is joining, or an AI in singleplayer
-		else playerLabels[1].text = "Black: " + (!NetworkingManager.isSingleplayer ? "Joining..." : "AI");
+		else {
+			playerLabels[1].text = "Black: " + (!NetworkingManager.isSingleplayer ? "Joining..." : "AI");
+			advisorLabels[1].text = "- No Advisor -";
+		}
 
 
-		// Clear the lists of disabled dropdown indices
-		sideDropdownController.indicesToDisable = new List<int>();
+			// Clear the lists of disabled dropdown indices
+			sideDropdownController.indicesToDisable = new List<int>();
 		roleDropdownController.indicesToDisable = new List<int>();
 
 		// If there is already a primary player on our side... disable selecting the primary player role
