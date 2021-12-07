@@ -70,7 +70,6 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 		// If the trigger was a destination...
 		if(collider.transform.tag == "Destination"){
-			// Debug.Log("Hit destination");
 			// Make sure that the destination we collided with is our target destination (and that our destination isn't a terminal node)
 			if(collider.gameObject.name == destination.name){
 				Destination destination = this.destination.GetComponent<Destination>();
