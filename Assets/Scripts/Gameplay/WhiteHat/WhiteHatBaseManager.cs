@@ -161,7 +161,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.FirewallNotSelected;
 		}
 		// Error if we aren't an advisor
-		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+		if(NetworkingManager.isPrimary || NetworkingManager.isObserver){
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
 		}

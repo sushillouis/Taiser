@@ -312,7 +312,7 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: BlackHat
       m_Image: {fileID: 0}
-    - m_Text: Spectator
+    - m_Text: Observer
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1032,7 +1032,7 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: Advisor
       m_Image: {fileID: 0}
-    - m_Text: Spectator
+    - m_Text: Observer
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:

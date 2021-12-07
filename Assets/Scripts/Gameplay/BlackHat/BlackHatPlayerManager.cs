@@ -212,7 +212,7 @@ public class BlackHatPlayerManager : BlackHatBaseManager {
 
 		// Override what is currently selected
 		SelectionManager.instance.SelectGameObject(d.gameObject);
-		// show the likelihood panel
+		// Show the likelihood panel
 		showLikelihoodPanel(d);
 		destinationJustSelected = true;
 

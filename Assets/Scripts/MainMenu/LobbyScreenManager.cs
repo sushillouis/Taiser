@@ -222,10 +222,10 @@ public class LobbyScreenManager : Window {
 		}
 
 		try{
-			// If we are a black or whitehat... disable becoming a spectator
+			// If we are a black or whitehat... disable becoming a Observer
 			if(NetworkingManager.localPlayer.side != Networking.Player.Side.Common)
 				roleDropdownController.indicesToDisable.Add(2);
-			// If we are a common spectator... disable becoming a primary player or advisor
+			// If we are a common Observer... disable becoming a primary player or advisor
 			else {
 				roleDropdownController.indicesToDisable.Add(0);
 				roleDropdownController.indicesToDisable.Add(1);
@@ -293,8 +293,8 @@ public class LobbyScreenManager : Window {
 				NetworkingManager.instance.BecomeBlackHat();
 				break;
 			case Networking.Player.Side.Common:
-				NetworkingManager.instance.BecomeSpectator();
-				// Make the role automatically be spectator
+				NetworkingManager.instance.BecomeObserver();
+				// Make the role automatically be Observer
 				roleDropdownController.SetValueWithoutTriggeringEvents(2);
 				break;
 		}
@@ -309,9 +309,9 @@ public class LobbyScreenManager : Window {
 			case Networking.Player.Role.Advisor:
 				NetworkingManager.instance.BecomeAdvisor();
 				break;
-			case Networking.Player.Role.Spectator:
-				NetworkingManager.instance.BecomeSpectator();
-				// Make the side automatically be spectator
+			case Networking.Player.Role.Observer:
+				NetworkingManager.instance.BecomeObserver();
+				// Make the side automatically be Observer
 				sideDropdownController.SetValueWithoutTriggeringEvents(2);
 				break;
 		}

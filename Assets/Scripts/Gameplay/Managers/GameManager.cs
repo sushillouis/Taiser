@@ -55,8 +55,8 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	new void Awake(){
 		base.Awake();
 
-		if(NetworkingManager.isSpectator){
-			 Debug.Log("Instantiating prefabs for Spectator...");
+		if(NetworkingManager.isObserver){
+			 Debug.Log("Instantiating prefabs for Observer...");
 			 Instantiate(observerPrefab).name = "Observer Managers";
 		} else if(NetworkingManager.isBlackHat && NetworkingManager.isPrimary) Instantiate(blackHatPlayerPrefab).name = "BlackHat Player Managers";
 		else if(NetworkingManager.isBlackHat) Instantiate(blackHatAdvisorPrefab).name = "BlackHat Advisor Managers";
@@ -178,10 +178,10 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	public void EndGame(Networking.Player.Side winningSide) { if(NetworkingManager.isHost) photonView.RPC("RPC_GameManager_EndGame", RpcTarget.AllBuffered, winningSide); }
 	[PunRPC] void RPC_GameManager_EndGame(Networking.Player.Side winningSide){
 		try{
-			// TODO: Need to take spectators into account (right now they always lose)
+			// TODO: Need to take Observers into account (right now they always lose)
 			// Show the win text if the player's side won
-			if (NetworkingManager.localPlayer.role == Networking.Player.Role.Spectator) // Is Spectator
-				BaseUI.instance.gameEndText.SetActive(true);
+			if (NetworkingManager.localPlayer.role == Networking.Player.Role.Observer) // Is Observer
+				BaseUI.instance.gameEndText.SetActive(true); 
 			else if (winningSide == NetworkingManager.localPlayer.side)
 				BaseUI.instance.winText.SetActive(true);
 			else BaseUI.instance.loseText.SetActive(true);

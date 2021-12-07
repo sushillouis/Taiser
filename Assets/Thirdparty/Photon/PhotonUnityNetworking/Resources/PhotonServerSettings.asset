@@ -52,7 +52,7 @@ MonoBehaviour:
   - RPC_NetworkingManager_BecomeAdvisor
   - RPC_NetworkingManager_BecomeBlackHat
   - RPC_NetworkingManager_BecomePrimaryPlayer
-  - RPC_NetworkingManager_BecomeSpectator
+  - RPC_NetworkingManager_BecomeObserver
   - RPC_NetworkingManager_BecomeWhiteHat
   - RPC_NetworkingManager_RequestRoomStateSynchronization
   - RPC_NetworkingManager_RoomStateSynchronization

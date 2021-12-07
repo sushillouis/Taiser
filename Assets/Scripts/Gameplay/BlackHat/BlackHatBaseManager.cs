@@ -64,7 +64,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.StartingPointNotSelected;
 		}
 		// Error if we aren't an advisor
-		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+		if(NetworkingManager.isPrimary || NetworkingManager.isObserver){
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
 		}
@@ -118,7 +118,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.StartingPointNotSelected;
 		}
 		// Error if we aren't an advisor
-		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+		if(NetworkingManager.isPrimary || NetworkingManager.isObserver){
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
 		}
@@ -162,7 +162,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.DestinationNotSelected;
 		}
 		// Error if we aren't an advisor
-		if(NetworkingManager.isPrimary || NetworkingManager.isSpectator){
+		if(NetworkingManager.isPrimary || NetworkingManager.isObserver){
 			ErrorHandler(ErrorCodes.WrongPlayer, "Only Advisors can propose changes to the Primary Player.");
 			return ErrorCodes.WrongPlayer;
 		}
