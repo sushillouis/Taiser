@@ -171,7 +171,10 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Sets the start point (network synced)
 	// NOTE: The network syncing relies on each starting point and destination having a unique name!
-	public void SetStartPoint(StartingPoint startPoint){ photonView.RPC("RPC_Packet_SetStartPoint", RpcTarget.AllBuffered, startPoint.name); }
+	public void SetStartPoint(StartingPoint startPoint){
+		if(photonView) photonView.RPC("RPC_Packet_SetStartPoint", RpcTarget.AllBuffered, startPoint.name);
+		else RPC_Packet_SetStartPoint(startPoint.name);
+	}
 	[PunRPC] void RPC_Packet_SetStartPoint(string startPointName){
 		startPoint = GameObject.Find(startPointName).GetComponent<StartingPoint>();
 
@@ -182,7 +185,10 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Sets the destination (network synced)
 	// NOTE: The network syncing relies on each starting point and destination having a unique name!
-	public void SetDestination(Destination Destination){ photonView.RPC("RPC_Packet_SetDestination", RpcTarget.AllBuffered, Destination.name); }
+	public void SetDestination(Destination Destination){
+		if(photonView) photonView.RPC("RPC_Packet_SetDestination", RpcTarget.AllBuffered, Destination.name);
+		else RPC_Packet_SetDestination(Destination.name);
+	}
 	[PunRPC] void RPC_Packet_SetDestination(string DestinationName){
 		destination = GameObject.Find(DestinationName).GetComponent<Destination>();
 
@@ -197,7 +203,10 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Generates a path from the start point to the destination (network synced)
 	// NOTE: The network syncing relies on each starting point and destination having a unique name!
-	public void InitPath(){ photonView.RPC("RPC_Packet_InitPath", RpcTarget.AllBuffered); }
+	public void InitPath(){
+		if(photonView) photonView.RPC("RPC_Packet_InitPath", RpcTarget.AllBuffered);
+		else RPC_Packet_InitPath();
+	}
 	[PunRPC] void RPC_Packet_InitPath(){
 		path = startPoint.findPathTo(destination);
 	}
@@ -205,8 +214,10 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Synchronizes the properties across the network
 	// NOTE: The starting point must be set before this function can properly do its job
-	public void SetProperties(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape, bool isMalicious){ SetProperties(new PacketRule.Details(color, size, shape), isMalicious); }
-	public void SetProperties(PacketRule.Details details, bool isMalicious){ photonView.RPC("RPC_Packet_SetProperties", RpcTarget.AllBuffered, details.color, details.size, details.shape, isMalicious, UnityEngine.Random.Range(0, startPoint.spawnedMaliciousPacketRules.Count) ); }
+	public void SetProperties(PacketRule.Details details, bool isMalicious){
+		if(photonView) photonView.RPC("RPC_Packet_SetProperties", RpcTarget.AllBuffered, details.color, details.size, details.shape, isMalicious, UnityEngine.Random.Range(0, startPoint.spawnedMaliciousPacketRules.Count) );
+		else RPC_Packet_SetProperties(details.color, details.size, details.shape, isMalicious, UnityEngine.Random.Range(0, startPoint.spawnedMaliciousPacketRules.Count));
+	}
 	[PunRPC] void RPC_Packet_SetProperties(PacketRule.Color color, PacketRule.Size size, PacketRule.Shape shape, bool isMalicious, int maliciousPacketRuleIndex){
 		// Ensure the local properties match the remote ones
 		_isMalicious = isMalicious;
@@ -242,13 +253,19 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 	}
 
 
+	// -- Helpers --
+	
+
 	// Coroutine which destroys the packet after the specified number of seconds
 	IEnumerator DestroyAfterSeconds(float seconds){
 		yield return new WaitForSeconds(seconds);
 		Destroy();
 	}
 	// Destroys the packet (network synced)
-	public void Destroy(){ photonView.RPC("RPC_Packet_Destroy", RpcTarget.AllBuffered); }
+	public void Destroy(){
+		if(photonView) photonView.RPC("RPC_Packet_Destroy", RpcTarget.AllBuffered);
+		else UnityEngine.Object.Destroy(gameObject);
+	}
 	[PunRPC] void RPC_Packet_Destroy(){
 		if(!NetworkingManager.isHost) return;
 
