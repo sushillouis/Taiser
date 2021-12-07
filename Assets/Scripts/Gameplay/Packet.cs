@@ -47,7 +47,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Nodes defining the start and end point of the packet's journey
 	public StartingPoint startPoint;
-	public Destination destination;
+	public PathNodeBase destination;
 	// Path to get from the start point to the destination point
 	public List<PathNodeBase> path = null;
 
@@ -70,17 +70,21 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 		// If the trigger was a destination...
 		if(collider.transform.tag == "Destination"){
-			// Process scoring (if the collided destination isn't a honeypot)
-			if(!collider.gameObject.GetComponent<Destination>().isHoneypot)
-				ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
-			// If the packet is malicious play a sound and particle effect
-			if(isMalicious){
-				AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
-				destination.PlayParticleSimulation();
-			}
+			// Debug.Log("Hit destination");
+			// Make sure that the destination we collided with is our target destination (and that our destination isn't a terminal node)
+			if(collider.gameObject.name == destination.name){
+				Destination destination = this.destination.GetComponent<Destination>();
+				
+				// Process scoring (if the collided destination isn't a honeypot and our destination isn't a terminal node)
+				if(destination && !destination.isHoneypot)
+					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
+				// If the packet is malicious play a sound
+				if(isMalicious)
+					AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
 
-			// Destroy the packet after it has had a few seconds to enter the destination
-			StartCoroutine(DestroyAfterSeconds(1));
+				// Destroy the packet after it has had a few seconds to enter the destination
+				StartCoroutine(DestroyAfterSeconds(.5f));
+			}
 		} else if(collider.transform.tag == "Firewall") {
 			Firewall firewall = collider.gameObject.GetComponent<Firewall>();
 
@@ -97,9 +101,11 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 	}
 
 	// Function which determines if a packet is malicious or not and then generates/loads the appropriate packet details
-	public void initPacketDetails(){
+	public void initPacketDetails(bool canBeMalicious = true){
 		// Determine if this packet is malicious or not (not network synced, we will network sync when we set the details)
-		_isMalicious = UnityEngine.Random.Range(0f, 1f) <= startPoint.maliciousPacketProbability;
+		if(canBeMalicious)
+			_isMalicious = UnityEngine.Random.Range(0f, 1f) <= startPoint.maliciousPacketProbability;
+		else _isMalicious = false;
 
 		// If the packet is malicious, change its target to be based on the malicious weights
 		if(isMalicious){
@@ -163,7 +169,8 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Wrapper function which calls all of the functions needed to setup this packet's path
 	// NOTE: The network syncing relies on each starting point and destination having a unique name!
-	public void setStartDestinationAndPath(StartingPoint startPoint, Destination destination){
+	// NOTE: <destination> really only accepts Destinations and TerminalNodes, any other type of path node will result in Undefined Behavior
+	public void setStartDestinationAndPath(StartingPoint startPoint, PathNodeBase destination){
 		SetStartPoint(startPoint);
 		SetDestination(destination);
 		InitPath();
@@ -185,20 +192,25 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 	// Sets the destination (network synced)
 	// NOTE: The network syncing relies on each starting point and destination having a unique name!
-	public void SetDestination(Destination Destination){
+	// NOTE: Really only accepts Destinations and TerminalNodes, any other type of path node will result in Undefined Behavior
+	public void SetDestination(PathNodeBase Destination) {
 		if(photonView) photonView.RPC("RPC_Packet_SetDestination", RpcTarget.AllBuffered, Destination.name);
 		else RPC_Packet_SetDestination(Destination.name);
 	}
 	[PunRPC] void RPC_Packet_SetDestination(string DestinationName){
-		destination = GameObject.Find(DestinationName).GetComponent<Destination>();
+		Destination destination = GameObject.Find(DestinationName).GetComponent<Destination>();
 
-		// While the current destination is a honeypot and the packet is malicious, set the destination to the next index in the destinations array
-		if(!isMalicious && NetworkingManager.isHost)
-			while(destination.isHoneypot){
-				int index = System.Array.FindIndex(Destination.destinations, d => d.isHoneypot);
-				index = (index + 1) % Destination.destinations.Length; // Modulus ensures that we remain in the bounds of the array
-				SetDestination(Destination.destinations[index]);
-			}
+		if(destination){
+			this.destination = destination;
+			// While the current destination is a honeypot and the packet is malicious, set the destination to the next index in the destinations array
+			if(!isMalicious && NetworkingManager.isHost)
+				while(destination.isHoneypot){
+					int index = System.Array.FindIndex(Destination.destinations, d => d.isHoneypot);
+					index = (index + 1) % Destination.destinations.Length; // Modulus ensures that we remain in the bounds of the array
+					SetDestination(Destination.destinations[index]);
+				}
+		} else 
+			this.destination = GameObject.Find(DestinationName).GetComponent<TerminalNode>();
 	}
 
 	// Generates a path from the start point to the destination (network synced)
