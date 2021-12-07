@@ -23,7 +23,7 @@ public class HoverableLine : MonoBehaviour, SelectionManager.IHoverable /* It ha
 	// Function which enables the hovering logic
 	public Color hoverColor, baseColor;
 	void requestHoverEnable(bool enable){
-		Debug.Log(enable);
+		// Debug.Log(enable);
 
 		Gradient gradient = new Gradient();
 		gradient.SetKeys(

@@ -156,7 +156,7 @@ GameObject:
   - component: {fileID: 2500992826168154455}
   m_Layer: 0
   m_Name: TerminalNode
-  m_TagString: StartingPoint
+  m_TagString: Destination
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -198,6 +198,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  updatesGrantedPerWave: 050000000500000005000000
+  updatesRemaining: 1
+  packetSourceLikelihood: 0
+  maliciousPacketProbability: 0.33333
+  backgroundPacketPool: {fileID: 2402874235894236318}
+  networklessPacketPrefab: {fileID: 5976014468393907128, guid: 84cad9533594c3e409fc2b56f428050a, type: 3}
+  secondsBetweenPackets: 1
 --- !u!65 &2500992826168154455
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -206,7 +213,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2402874235894236318}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
