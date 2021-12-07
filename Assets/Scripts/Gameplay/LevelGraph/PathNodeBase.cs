@@ -33,6 +33,16 @@ public class PathNodeBase : MonoBehaviour {
 		}
 	}
 
+	public static Directions fromIndex(int index){
+		switch(index){
+			case 0: return Directions.North;
+			case 1: return Directions.East;
+			case 2: return Directions.South;
+			case 3: return Directions.West;
+			default: throw new IndexOutOfRangeException("The index " + index + " can't be converted to a direction!");
+		}
+	}
+
 	// Converts a direction into the direction exactly opposed to it
 	public static Directions opposite(Directions d){
 		switch(d){
@@ -69,7 +79,7 @@ public class PathNodeBase : MonoBehaviour {
 
 
 	// Function which updates the graph connections for this particular node
-	protected void UpdateLocalGraphConnections(){
+	protected virtual void UpdateLocalGraphConnections(){
 		PathNodeBase[] allNodes = FindObjectsOfType<PathNodeBase>(); // List of PathNodeBase's
 		Directions[] toLoopThrough = new Directions[]{ Directions.North, Directions.East, Directions.South, Directions.West }; // List of directions to loop through
 

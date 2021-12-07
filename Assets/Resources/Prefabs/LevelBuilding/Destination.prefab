@@ -92,8 +92,9 @@ MonoBehaviour:
   honeypotMaterial: {fileID: 2100000, guid: 5390a60897d37f4408c03d5a81d421d9, type: 2}
   particleSystemPrefab: {fileID: 3405987651233412754, guid: 245f009905325fc469c20b3339a7a386, type: 3}
   updatesGrantedPerWave: 020000000200000002000000
-  updatesRemaining: 0
-  packetDestinationLikelihood: 1
+  updatesRemainingWhite: 0
+  updatesRemainingBlack: 0
+  _packetDestinationLikelihood: 1
   _maliciousPacketDestinationLikelihood: 1
   _isHoneypot: 0
 --- !u!1 &6676117428811601370
@@ -155,7 +156,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b9001e840f9b03744ab4cb36178e364e, type: 2}
+  - {fileID: 2100000, guid: 8c5d5b54d6b6f6645aefc4514814538c, type: 2}
   - {fileID: 2100000, guid: bf6e4f26b95a0304ea02b68530945831, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
