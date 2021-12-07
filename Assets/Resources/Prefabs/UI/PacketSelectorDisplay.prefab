@@ -153,6 +153,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 534409942568138292}
+  - component: {fileID: 1095118953704467174}
   m_Layer: 0
   m_Name: Circles
   m_TagString: Untagged
@@ -188,6 +189,14 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1095118953704467174
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 363245910988775216}
+  m_CullTransparentMesh: 1
 --- !u!1 &1489938106426460669
 GameObject:
   m_ObjectHideFlags: 0
@@ -1052,6 +1061,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6595913468092536650}
   - component: {fileID: 6282311030742237973}
+  - component: {fileID: 7451483834957539187}
   m_Layer: 0
   m_Name: TextElements
   m_TagString: Untagged
@@ -1107,6 +1117,14 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!222 &7451483834957539187
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134447224899678800}
+  m_CullTransparentMesh: 1
 --- !u!1 &4415298511352328394
 GameObject:
   m_ObjectHideFlags: 0
@@ -1476,6 +1494,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7230047116259022876}
+  - component: {fileID: 4819111221239225438}
   m_Layer: 0
   m_Name: Triangles
   m_TagString: Untagged
@@ -1511,6 +1530,14 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &4819111221239225438
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5854184710094484819}
+  m_CullTransparentMesh: 1
 --- !u!1 &5933760899631537683
 GameObject:
   m_ObjectHideFlags: 0
@@ -2330,6 +2357,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6638378645961515325}
+  - component: {fileID: 8920545286048407799}
   m_Layer: 0
   m_Name: PacketSelectorDisplay
   m_TagString: Untagged
@@ -2358,6 +2386,14 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &8920545286048407799
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8639826459029268045}
+  m_CullTransparentMesh: 1
 --- !u!1 &8740980490752129680
 GameObject:
   m_ObjectHideFlags: 0
@@ -2367,6 +2403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 459914850754667850}
+  - component: {fileID: 1531360611936933373}
   m_Layer: 0
   m_Name: Squares
   m_TagString: Untagged
@@ -2402,6 +2439,14 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1531360611936933373
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8740980490752129680}
+  m_CullTransparentMesh: 1
 --- !u!1 &8893293607302144066
 GameObject:
   m_ObjectHideFlags: 0
