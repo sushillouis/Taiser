@@ -145,6 +145,9 @@ public class SelectionManager : Core.Utilities.Singleton<SelectionManager> {
 				startingPointSelectEvent?.Invoke(selected.GetComponent<StartingPoint>());
 		// If we were passed a destination...
 		} else if(obj.transform.tag == "Destination"){
+			// Don't bother with the object if it is a terminal node
+			if(obj.transform.gameObject.GetComponent<TerminalNode>() is object) return;
+
 			// Select it
 			selected = obj.transform.gameObject;
 

@@ -224,11 +224,15 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.InvalidTarget;
 		}
 
+		Vector3 position;
+		Quaternion rotation;
+		Firewall.PathToPositionRotation(targetPathPiece, out position, out rotation);
+
 		// If the suggested firewall doesn't exist spawn it (and start a timer which will delete it after 5 seconds)
 		if(suggestedFirewall is null){
 			suggestedFirewall = PhotonNetwork.Instantiate(suggestedFirewallPrefabPath, new Vector3(0, 100, 0), Quaternion.identity).GetComponent<SuggestedFirewall>();
-			suggestedFirewall.transform.position = targetPathPiece.transform.position;
-			suggestedFirewall.transform.rotation = targetPathPiece.transform.rotation;
+			suggestedFirewall.transform.position = position;
+			suggestedFirewall.transform.rotation = rotation;
 		}
 
 		// Reset the deletion timer of the selected firewall and gradually move it to its new location

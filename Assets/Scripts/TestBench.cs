@@ -12,6 +12,9 @@ public class TestBench : MonoBehaviour {
 	}
 
 	void Start() {
+		// Don't run this function if there are already players
+		if(NetworkingManager.instance.debuggingPlayers.Count != 0) return;
+
 		// Create a new list to hold the room's players
 		NetworkingManager.instance.debuggingPlayers = NetworkingManager.players = new List<Networking.Player>();
 		// Create a Networking.Player representing ourselves
@@ -23,8 +26,9 @@ public class TestBench : MonoBehaviour {
 		Networking.Player.localPlayer = me;
 
 		// me.role = Networking.Player.Role.Advisor;
+		// me.side = Networking.Player.Side.BlackHat;
 
-		(WhiteHatPlayerManager.instance as WhiteHatPlayerManager).OnEnable();
+		// (WhiteHatPlayerManager.instance as WhiteHatPlayerManager).OnEnable();
 	}
 
 }

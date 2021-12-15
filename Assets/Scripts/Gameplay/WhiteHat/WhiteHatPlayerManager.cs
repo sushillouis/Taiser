@@ -57,8 +57,6 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		SelectionManager.hoverChangedEvent += OnHoverChanged;
 		SelectionManager.packetSelectEvent += OnPacketSelected;
 		SelectionManager.firewallSelectEvent += OnFirewallSelected;
-
-		Debug.Log(firewallCursor);
 	}
 	void OnDisable(){
 		leftClickAction.action.performed -= OnClickPressed;
