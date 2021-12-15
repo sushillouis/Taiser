@@ -49,10 +49,11 @@ MonoBehaviour:
   - RPC_GameManager_EndWave
   - RPC_GameManager_SetDifficulty
   - RPC_GameManager_StartNextWave
+  - RPC_InstrumentationManager_LogInstrumentationEvent
   - RPC_NetworkingManager_BecomeAdvisor
   - RPC_NetworkingManager_BecomeBlackHat
-  - RPC_NetworkingManager_BecomePrimaryPlayer
   - RPC_NetworkingManager_BecomeObserver
+  - RPC_NetworkingManager_BecomePrimaryPlayer
   - RPC_NetworkingManager_BecomeWhiteHat
   - RPC_NetworkingManager_RequestRoomStateSynchronization
   - RPC_NetworkingManager_RoomStateSynchronization
