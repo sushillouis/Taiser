@@ -4,6 +4,18 @@ using UnityEngine;
 using Photon.Pun;
 
 public class BlackHatBaseManager : BaseSharedBetweenHats {
+	// Events
+	public delegate void StartingPointRuleEventCallback(StartingPoint toModify, PacketRule rules);
+	public static StartingPointRuleEventCallback updatedStartingPointRuleEvent;
+	public static StartingPointRuleEventCallback proposedStartingPointRuleEvent;
+	public delegate void StartingPointProbabilityEventCallback(StartingPoint toModify, float probability);
+	public static StartingPointProbabilityEventCallback updatedStartingPointProbabilityEvent;
+	public static StartingPointProbabilityEventCallback proposedStartingPointProbabilityEvent;
+	public delegate void DestiniationLikelihoodEventCallback(Destination toModify, int likelihood);
+	public static DestiniationLikelihoodEventCallback updatedDestinationLikelihoodEvent;
+	public static DestiniationLikelihoodEventCallback proposedDestinationLikelihoodEvent;
+
+
 	// Error codes used by the error handling system
 	public new class ErrorCodes : BaseSharedBetweenHats.ErrorCodes {
 		public static readonly int StartingPointNotSelected = 5;	// Error code indicating that a starting point was not selected
@@ -51,8 +63,10 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
-		if(toModify.SetMaliciousPacketRules(rules))
+		if(toModify.SetMaliciousPacketRules(rules)){
 			StartingPointSettingsUpdated(toModify);
+			updatedStartingPointRuleEvent?.Invoke(toModify, rules);
+		}
 		return ErrorCodes.NoError;
 	}
 
@@ -71,6 +85,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 
 		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMalciousPacketRules", RpcTarget.AllBuffered, (int) toModify.ID, rules.CompressedRuleString());
+		proposedStartingPointRuleEvent?.Invoke(toModify, rules);
 		return ErrorCodes.NoError;
 	}
 
@@ -105,8 +120,10 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.InvalidProbability;
 		}
 
-		if(toModify.SetMaliciousPacketProbability(probability))
+		if(toModify.SetMaliciousPacketProbability(probability)){
 			StartingPointSettingsUpdated(toModify);
+			updatedStartingPointProbabilityEvent?.Invoke(toModify, probability);
+		}
 		return ErrorCodes.NoError;
 	}
 
@@ -130,6 +147,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 
 		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewStartPointMaliciousPacketProbability", RpcTarget.AllBuffered, (int) toModify.ID, probability);
+		proposedStartingPointProbabilityEvent?.Invoke(toModify, probability);
 		return ErrorCodes.NoError;
 	}
 
@@ -149,8 +167,10 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
-		if(toModify.SetMaliciousPacketDestinationLikelihood(likelihood))
+		if(toModify.SetMaliciousPacketDestinationLikelihood(likelihood)) {
 			DestinationSettingsUpdated(toModify);
+			updatedDestinationLikelihoodEvent?.Invoke(toModify, likelihood);
+		}
 		return ErrorCodes.NoError;
 	}
 
@@ -169,6 +189,7 @@ public class BlackHatBaseManager : BaseSharedBetweenHats {
 		
 		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_BlackHatBaseManager_ProposeNewDestinationMaliciousPacketTargetLikelihood", RpcTarget.AllBuffered, (int) toModify.ID, likelihood);
+		proposedDestinationLikelihoodEvent?.Invoke(toModify, likelihood);
 		return ErrorCodes.NoError;
 	}
 

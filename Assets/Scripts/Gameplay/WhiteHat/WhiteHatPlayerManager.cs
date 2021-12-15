@@ -320,7 +320,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	}
 
 	// Callback when we are proposed that we should make a destination a honeypot
-	public virtual void OnProposedMakeDestinationHoneypot(Destination toModify) {
+	public override void OnProposedMakeDestinationHoneypot(Destination toModify) {
 		// TODO: How should we present this to the player?
 	}
 
