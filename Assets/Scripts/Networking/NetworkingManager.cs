@@ -553,7 +553,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	}
 
 	// Returns an array containing all of the Observers (whitehat, blackhat, and common)
-	public static Networking.Player[] Observers {
+	public static Networking.Player[] observers {
 		get {
 			if(players.Count == 0) return null;
 			return players.FindAll(p => p.role == Networking.Player.Role.Observer).ToArray();
