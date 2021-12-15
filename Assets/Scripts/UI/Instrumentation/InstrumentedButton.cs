@@ -10,12 +10,17 @@ using UnityEditor;
 public class InstrumentedButton : ThemedButton {
 	[Tooltip("The name in the event log of this source")]
 	public string sourceName;
+	[Tooltip("Wether or not instrumentation should be enabled on this button or not.")]
+	public bool enableInstrumentation = true;
 
 	// On awake register a callback to log changes
 	protected override void Awake() { base.Awake(); onClick.AddListener(logPressed); }
 
 	// When the button is pressed... log that it was pressed
 	void logPressed(){
+		// If instrumentation is disabled, don't bother with this function
+		if(!enableInstrumentation) return;
+		
 		// Create an instrumentation event
 		var e = InstrumentationManager.instance.generateNewEvent();
 		e.source = sourceName;

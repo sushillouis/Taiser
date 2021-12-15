@@ -10,6 +10,8 @@ using UnityEditor;
 public class InstrumentedSlider : ThemedSlider {
 	[Tooltip("The name in the event log of this source")]
 	public string sourceName;
+	[Tooltip("Wether or not instrumentation should be enabled on this button or not.")]
+	public bool enableInstrumentation = true;
 
 	// On awake register a callback to log changes
 	protected override void Awake() { base.Awake(); onValueChanged.AddListener(logValueChangedCallback); }
@@ -26,6 +28,9 @@ public class InstrumentedSlider : ThemedSlider {
 	[Tooltip("The number of seconds after the value stops changing before its value is considered final.")]
 	public float settleTime = 1;
 	IEnumerator logValueChanged(float value){
+		// If instrumentation is disabled, don't bother with this function
+		if(!enableInstrumentation) yield break;
+
 		// Wait for the settle time to pass by
 		float startTime = Time.time;
 		while(Time.time - startTime < settleTime) yield return null;
