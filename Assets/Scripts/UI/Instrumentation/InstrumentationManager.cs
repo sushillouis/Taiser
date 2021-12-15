@@ -57,14 +57,14 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 	public void SaveToFile(string filePath = "<default>"){
 		// If the file path is default, update it to the persistent path, with the player's name and the current date
 		if(filePath == "<default>") filePath = Application.persistentDataPath + "/"
-			+ Networking.Player.localPlayer.nickname + System.DateTime.Now.Date.ToString("MM_dd_yyyy") + ".csv";
+			+ Networking.Player.localPlayer.remoteNickname.Replace("#", "_") + "." + System.DateTime.Now.Date.ToString("MM_dd_yyyy.HH_mm") + ".csv";
 
 		// Open the file (or create it)
-		Debug.Log(filePath);
+		Debug.Log("Writing Instrumentation Log to: " + filePath);
 		FileStream file = File.OpenWrite(filePath);
 
 		// Write the CSV header
-		byte[] bytes = System.Text.Encoding.UTF8.GetBytes("player,isAI,timestamp,source,eventType,data\n");
+		byte[] bytes = System.Text.Encoding.UTF8.GetBytes("timestamp,player,isAI,source,eventType,data\n");
 		file.Write(bytes, 0, bytes.Length);
 
 		// Sort the log according to timestamp // TODO: needed?
@@ -76,7 +76,7 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 			Networking.Player eventPlayer = System.Array.Find(NetworkingManager.roomPlayers, p => p.actorNumber == e.playerID);
 			
 			// Add the row to the file 
-			bytes = System.Text.Encoding.UTF8.GetBytes(eventPlayer.nickname + "," + "false" + "," + e.timestamp.ToString() + "," + e.source + "," + e.eventType + "," + e.data + "\n");
+			bytes = System.Text.Encoding.UTF8.GetBytes(e.timestamp.ToString() + "," + eventPlayer.remoteNickname + "," + "false" + "," + e.source + "," + e.eventType + "," + e.data + "\n");
 			file.Write(bytes, 0, bytes.Length);
 		}
 

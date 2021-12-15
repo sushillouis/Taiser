@@ -81,6 +81,16 @@ namespace Networking {
 			}
 			set => photonPlayer.NickName = value;
 		}
+		
+		// Gets the nickname of this player as seen by other players
+		public string remoteNickname {
+			get {
+				// If the player has a default name, replace it with their actor number
+				if(photonPlayer is object && photonPlayer.NickName == "You")
+					return "Player #" + actorNumber;
+				return photonPlayer.NickName;
+			}
+		}
 
 		// Returns true if the player is ready
 		public bool isReady {
