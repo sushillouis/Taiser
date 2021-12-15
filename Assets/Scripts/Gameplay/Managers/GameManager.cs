@@ -134,6 +134,7 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 	// Whenever the disconnect button (or return to main menu button in the win screen) is pressed, leave the game and go back to the main menu
 	public void OnDisconnectButtonPressed(){
 		NetworkingManager.instance.LeaveRoomAndReturnToMainMenu();
+		gameEndEvent?.Invoke();
 	}
 
 	// When the other play leaves the game, the player who remains wins the game
