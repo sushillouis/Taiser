@@ -82,8 +82,8 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 				if(isMalicious)
 					AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
 
-				// Destroy the packet after it has had a few seconds to enter the destination
-				StartCoroutine(DestroyAfterSeconds(.5f));
+				// Destroy the packet
+				Destroy();
 			}
 		} else if(collider.transform.tag == "Firewall") {
 			Firewall firewall = collider.gameObject.GetComponent<Firewall>();
@@ -95,7 +95,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 				if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
 				else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
 
-				StartCoroutine(DestroyAfterSeconds(.5f));
+				Destroy();
 			}
 		}
 	}
