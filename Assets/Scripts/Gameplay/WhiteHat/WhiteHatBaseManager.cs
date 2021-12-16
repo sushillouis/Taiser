@@ -120,6 +120,10 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 		Quaternion rotation;
 		Firewall.PathToPositionRotation(targetPathPiece, out position, out rotation);
 
+		// If the firewall is already in the correct position, don't bother moving it
+		if(position == toMove.transform.position && rotation == toMove.transform.rotation)
+			return ErrorCodes.NoError;
+
 		// Fire the event
 		moveFirewallEvent?.Invoke(toMove, position, rotation);
 		// If we should be animating the movement...

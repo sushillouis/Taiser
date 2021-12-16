@@ -149,14 +149,14 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 	float lastDistance = Mathf.Infinity; // Variable defining how far this packet was from the next waypoint last frame
 	void FollowPath(){
 		// Determine the direction we should be heading in
-		Vector3 direction = (Utilities.positionNoY(path[pathIndex].transform.position) - Utilities.positionNoY(path[pathIndex - 1].transform.position)).normalized;
+		Vector3 direction = (Utilities.positionNoY(path[pathIndex].transform.position) - Utilities.positionNoY(transform.position)).normalized;
 		// Apply that direction to the rigidbody's velocity
 		rigidbody.velocity = direction * speeds[(int)GameManager.difficulty];
 		// Calculate the distance to the next waypoint
 		float distance = Mathf.Abs((Utilities.positionNoY(path[pathIndex].transform.position) - Utilities.positionNoY(transform.position)).magnitude);
 
 		// If we have started moving backwards...
-		if(distance > lastDistance){
+		if(distance < .1 || distance > lastDistance){
 			// Snap to the current waypoint
 			transform.position = Utilities.positionSetY(path[pathIndex].transform.position, transform.position.y);
 
