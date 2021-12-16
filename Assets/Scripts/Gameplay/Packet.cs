@@ -5,6 +5,9 @@ using UnityEngine;
 using Photon.Pun;
 
 public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
+	// Generator for IDS
+	static uint nextID = 0;
+
 	// This packet's mesh filter
 	public MeshFilter filter;
 	// This packet's mesh renderer
@@ -44,13 +47,22 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		set => SetProperties(_details, value);
 	}
 
-
 	// Nodes defining the start and end point of the packet's journey
 	public StartingPoint startPoint;
 	public PathNodeBase destination;
 	// Path to get from the start point to the destination point
 	public List<PathNodeBase> path = null;
 
+	// Variable used to uniquely identify a starting point
+	[SerializeField] uint _ID;
+	public uint ID {
+		get => _ID;
+		protected set => _ID = value;
+	}
+
+
+	// When the this is created set its ID
+	void Start(){ SetID(); }
 
 	// Manages packet movement
 	void Update() {
@@ -62,6 +74,15 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 		// Follow the path
 		FollowPath();
+	}
+
+	// Function which synchronizes a destination's ID over the network
+	void SetID(){
+		if(photonView) { if(NetworkingManager.isHost) photonView.RPC("RPC_Packet_SetID", RpcTarget.AllBuffered, (int) nextID++); }
+		else RPC_Packet_SetID((int) nextID++);
+	}
+	[PunRPC] void RPC_Packet_SetID(int id){
+		ID = (uint) id;
 	}
 
 	// Function called whenever the packet interacts with another trigger
