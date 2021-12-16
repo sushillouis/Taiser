@@ -88,7 +88,9 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 	[PunRPC] void RPC_StartingPoint_SetMaliciousPacketRules(string rules){
 		spawnedMaliciousPacketRules = PacketRule.Parse(rules);
 
-		Debug.Log(spawnedMaliciousPacketRules.treeRoot.RuleString());
+		// Clear out each firewall's correct rule (we will need to rebuild it as needed)
+		foreach(Firewall f in Firewall.firewalls)
+			f.correctRule.Clear();
 	}
 
 

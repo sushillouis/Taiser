@@ -95,7 +95,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 			// Make sure that the destination we collided with is our target destination (and that our destination isn't a terminal node)
 			if(collider.gameObject.name == destination.name){
 				Destination destination = this.destination.GetComponent<Destination>();
-				
+
 				// Process scoring (if the collided destination isn't a honeypot and our destination isn't a terminal node)
 				if(destination && !destination.isHoneypot)
 					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
@@ -118,6 +118,9 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 				Destroy();
 			}
+
+			// If we are malicious, add our details as part of the firewall's correct rule
+			if(isMalicious)	firewall.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
 		}
 	}
 
@@ -230,7 +233,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 					index = (index + 1) % Destination.destinations.Length; // Modulus ensures that we remain in the bounds of the array
 					SetDestination(Destination.destinations[index]);
 				}
-		} else 
+		} else
 			this.destination = GameObject.Find(DestinationName).GetComponent<TerminalNode>();
 	}
 
@@ -287,7 +290,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 
 	// -- Helpers --
-	
+
 
 	// Coroutine which destroys the packet after the specified number of seconds
 	IEnumerator DestroyAfterSeconds(float seconds){

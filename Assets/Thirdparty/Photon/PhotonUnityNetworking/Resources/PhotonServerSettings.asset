@@ -61,6 +61,7 @@ MonoBehaviour:
   - RPC_Packet_Destroy
   - RPC_Packet_InitPath
   - RPC_Packet_SetDestination
+  - RPC_Packet_SetID
   - RPC_Packet_SetProperties
   - RPC_Packet_SetStartPoint
   - RPC_ScoreManager_ProcessScoreEvent
