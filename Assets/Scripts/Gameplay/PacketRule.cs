@@ -362,12 +362,28 @@ public partial class PacketRule : List<PacketRule.Details> {
 	public static readonly PacketRule All = Parse("pink | blue | green | small | medium | large | sphere | cone | cube");
 	public static readonly PacketRule Default = Parse("Blue & Cube & Small");
 
+	// Override clear to also take out the treeRoot
+	public new void Clear() {
+		base.Clear();
+		treeRoot = null;
+	}
+
 	// Converts the rule into a string representation (if that string representation is parsed it results in the same rule)
-	public string RuleString() => treeRoot.RuleString();
+	public string RuleString() => treeRoot?.RuleString() ?? "";
 	// Converts the rule into its lexed form (if that representation is parsed it results in the same rule)
 	public string CompressedRuleString() => Lex(RuleString());
 	// Override of ToString which simply returns the rule string
 	public override string ToString() => RuleString();
+
+	// Function which merges two PacketRules together (Ensuring unique elements and properly optimized trees)
+	public void Union(PacketRule other) => Parse("(" + RuleString() + ") | (" + other.RuleString() + ")");
+	public void Union(string otherString) => Parse("(" + RuleString() + ") | (" + otherString + ")");
+	// Function which finds the common elements of two PacketRules (Ensuring unique elements and properly optimized trees)
+	public void Intersection(PacketRule other) => Parse("(" + RuleString() + ") & (" + other.RuleString() + ")");
+	public void Intersection(string otherString) => Parse("(" + RuleString() + ") & (" + otherString + ")");
+	// Function which removes a PacketRule from this rule (Ensuring unique elements and properly optimized trees)
+	public void Difference(PacketRule other) => Parse("(" + RuleString() + ") & !(" + other.RuleString() + ")");
+	public void Difference(string otherString) => Parse("(" + RuleString() + ") & !(" + otherString + ")");
 
 
 	// -- Parser --
@@ -584,8 +600,8 @@ public partial class PacketRule : List<PacketRule.Details> {
 	// Function which commits the changes to the parse tree
 	// Converts the parse tree into a fully expanded sum of products form
 	public void Commit() {
-		// Make sure that we are no longer storing any values
-		Clear();
+		// Make sure that we are no longer storing any values (calling base version so we don't take out the parsed tree)
+		base.Clear();
 
 		// Make a deep copy of the tree so that we can manipulate it without worying about the integrity of the original
 		Node treeCopy = ObjectExtensions.Copy(treeRoot); // Code found in Utilities/ObjectExtensions.cs

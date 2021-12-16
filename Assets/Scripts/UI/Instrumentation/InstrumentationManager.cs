@@ -164,10 +164,10 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 		LogInstrumentationEvent("Firewall #" + f.ID, "PositionedFirewall", "" + f.transform.position, "" + pos);
 	}
 	void OnFirewallUpdatedEvent(Firewall f, PacketRule r){
-		LogInstrumentationEvent("Firewall #" + f.ID, "ChangedFirewallFilterRules", "<correct>", "" + r);	
+		LogInstrumentationEvent("Firewall #" + f.ID, "ChangedFirewallFilterRules", f.correctRule.Count > 0 ? "" + f.correctRule : "unkown", "" + r);	
 	}
 	void OnFirewallProposedEvent(Firewall f, PacketRule r){
-		LogInstrumentationEvent("Firewall #" + f.ID, "ProposedFirewallFilterRules", "<correct>", "" + r);
+		LogInstrumentationEvent("Firewall #" + f.ID, "ProposedFirewallFilterRules", f.correctRule.Count > 0 ? "" + f.correctRule : "unkown", "" + r);
 	}
 	void OnHoneypotUpdatedEvent(Destination d){
 		LogInstrumentationEvent("Destination #" + d.ID, "MadeDestinationHoneypot");
