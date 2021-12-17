@@ -25,7 +25,8 @@ public class InstrumentedToggle : ThemedToggle {
 		var e = InstrumentationManager.instance.generateNewEvent();
 		e.source = sourceName;
 		e.eventType = "Toggled";
-		e.data = on ? "on" : "off";
+		e._old = (!on) ? "on" : "off";
+		e._new = on ? "on" : "off";
 
 		// Log the event
 		InstrumentationManager.instance.LogInstrumentationEvent(e);

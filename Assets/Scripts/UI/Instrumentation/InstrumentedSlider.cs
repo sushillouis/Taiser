@@ -40,7 +40,8 @@ public class InstrumentedSlider : ThemedSlider {
 		e.timestamp = startTime;
 		e.source = sourceName;
 		e.eventType = "ValueChanged";
-		e.data = "" + value;
+		e._old = "" + this.value;
+		e._new = "" + value;
 
 		// Log the event
 		InstrumentationManager.instance.LogInstrumentationEvent(e);

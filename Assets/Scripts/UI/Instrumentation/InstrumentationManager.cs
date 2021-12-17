@@ -11,7 +11,7 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 		public float timestamp;
 		public string source;
 		public string eventType;
-		public string data;
+		public string _old, _new;
 	}
 
 	[SerializeField]
@@ -22,17 +22,17 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 		GameManager.waveEndEvent += OnWaveEnd;
 		GameManager.gameEndEvent += OnApplicationQuit;
 		ScoreManager.scoreEvent += OnScoreEvent;
-		BlackHatBaseManager.updatedStartingPointRuleEvent += OnUpdatedStartingPointRuleEvent;
-		BlackHatBaseManager.proposedStartingPointRuleEvent += OnProposedStartingPointRuleEvent;
-		BlackHatBaseManager.updatedStartingPointProbabilityEvent += OnUpdatedStartingPointProbabilityEvent;
-		BlackHatBaseManager.proposedStartingPointProbabilityEvent += OnProposedStartingPointProbabilityEvent;
-		BlackHatBaseManager.updatedDestinationLikelihoodEvent += OnUpdatedDestinationLikelihoodEvent;
-		BlackHatBaseManager.proposedDestinationLikelihoodEvent += OnProposedDestinationLikelihoodEvent;
-		WhiteHatBaseManager.movedFirewallEvent += OnMovedFirewallEvent;
-		WhiteHatBaseManager.firewallUpdatedEvent += OnFirewallUpdatedEvent;
-		WhiteHatBaseManager.firewallProposedEvent += OnFirewallProposedEvent;
-		WhiteHatBaseManager.honeypotUpdatedEvent += OnHoneypotUpdatedEvent;
-		WhiteHatBaseManager.honeypotProposedEvent += OnHoneypotProposedEvent;
+		BlackHatBaseManager.updateStartingPointRuleEvent += OnUpdatedStartingPointRuleEvent;
+		BlackHatBaseManager.proposeStartingPointRuleEvent += OnProposedStartingPointRuleEvent;
+		BlackHatBaseManager.updateStartingPointProbabilityEvent += OnUpdatedStartingPointProbabilityEvent;
+		BlackHatBaseManager.proposeStartingPointProbabilityEvent += OnProposedStartingPointProbabilityEvent;
+		BlackHatBaseManager.updateDestinationLikelihoodEvent += OnUpdatedDestinationLikelihoodEvent;
+		BlackHatBaseManager.proposeDestinationLikelihoodEvent += OnProposedDestinationLikelihoodEvent;
+		WhiteHatBaseManager.moveFirewallEvent += OnMovedFirewallEvent;
+		WhiteHatBaseManager.firewallUpdateEvent += OnFirewallUpdatedEvent;
+		WhiteHatBaseManager.firewallProposeEvent += OnFirewallProposedEvent;
+		WhiteHatBaseManager.honeypotUpdateEvent += OnHoneypotUpdatedEvent;
+		WhiteHatBaseManager.honeypotProposeEvent += OnHoneypotProposedEvent;
 		WhiteHatBaseManager.suggestedFirewallEvent += OnSuggestedFirewallEvent;
 	}
 	void OnDisable(){
@@ -40,31 +40,31 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 		GameManager.waveEndEvent -= OnWaveEnd;
 		GameManager.gameEndEvent -= OnApplicationQuit;
 		ScoreManager.scoreEvent -= OnScoreEvent;
-		BlackHatBaseManager.updatedStartingPointRuleEvent -= OnUpdatedStartingPointRuleEvent;
-		BlackHatBaseManager.proposedStartingPointRuleEvent -= OnProposedStartingPointRuleEvent;
-		BlackHatBaseManager.updatedStartingPointProbabilityEvent -= OnUpdatedStartingPointProbabilityEvent;
-		BlackHatBaseManager.proposedStartingPointProbabilityEvent -= OnProposedStartingPointProbabilityEvent;
-		BlackHatBaseManager.updatedDestinationLikelihoodEvent -= OnUpdatedDestinationLikelihoodEvent;
-		BlackHatBaseManager.proposedDestinationLikelihoodEvent -= OnProposedDestinationLikelihoodEvent;
-		WhiteHatBaseManager.movedFirewallEvent -= OnMovedFirewallEvent;
-		WhiteHatBaseManager.firewallUpdatedEvent -= OnFirewallUpdatedEvent;
-		WhiteHatBaseManager.firewallProposedEvent -= OnFirewallProposedEvent;
-		WhiteHatBaseManager.honeypotUpdatedEvent -= OnHoneypotUpdatedEvent;
-		WhiteHatBaseManager.honeypotProposedEvent -= OnHoneypotProposedEvent;
+		BlackHatBaseManager.updateStartingPointRuleEvent -= OnUpdatedStartingPointRuleEvent;
+		BlackHatBaseManager.proposeStartingPointRuleEvent -= OnProposedStartingPointRuleEvent;
+		BlackHatBaseManager.updateStartingPointProbabilityEvent -= OnUpdatedStartingPointProbabilityEvent;
+		BlackHatBaseManager.proposeStartingPointProbabilityEvent -= OnProposedStartingPointProbabilityEvent;
+		BlackHatBaseManager.updateDestinationLikelihoodEvent -= OnUpdatedDestinationLikelihoodEvent;
+		BlackHatBaseManager.proposeDestinationLikelihoodEvent -= OnProposedDestinationLikelihoodEvent;
+		WhiteHatBaseManager.moveFirewallEvent -= OnMovedFirewallEvent;
+		WhiteHatBaseManager.firewallUpdateEvent -= OnFirewallUpdatedEvent;
+		WhiteHatBaseManager.firewallProposeEvent -= OnFirewallProposedEvent;
+		WhiteHatBaseManager.honeypotUpdateEvent -= OnHoneypotUpdatedEvent;
+		WhiteHatBaseManager.honeypotProposeEvent -= OnHoneypotProposedEvent;
 		WhiteHatBaseManager.suggestedFirewallEvent -= OnSuggestedFirewallEvent;
 	}
 
 	public void SaveToFile(string filePath = "<default>"){
 		// If the file path is default, update it to the persistent path, with the player's name and the current date
 		if(filePath == "<default>") filePath = Application.persistentDataPath + "/"
-			+ Networking.Player.localPlayer.remoteNickname.Replace("#", "_") + "." + System.DateTime.Now.Date.ToString("MM_dd_yyyy.HH_mm") + ".csv";
+			+ Networking.Player.localPlayer.remoteNickname.Replace("#", "_") + "." + System.DateTime.Now.ToString("MM_dd_yyyy.HH_mm") + ".csv";
 
 		// Open the file (or create it)
 		Debug.Log("Writing Instrumentation Log to: " + filePath);
 		FileStream file = File.OpenWrite(filePath);
 
 		// Write the CSV header
-		byte[] bytes = System.Text.Encoding.UTF8.GetBytes("timestamp,player,isAI,source,eventType,data\n");
+		byte[] bytes = System.Text.Encoding.UTF8.GetBytes("timestamp,player,hat/AI?,source,eventType,old/correct,new/given\n");
 		file.Write(bytes, 0, bytes.Length);
 
 		// Sort the log according to timestamp // TODO: needed?
@@ -76,7 +76,7 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 			Networking.Player eventPlayer = System.Array.Find(NetworkingManager.roomPlayers, p => p.actorNumber == e.playerID);
 			
 			// Add the row to the file 
-			bytes = System.Text.Encoding.UTF8.GetBytes(e.timestamp.ToString() + "," + eventPlayer.remoteNickname + "," + "false" + "," + e.source + "," + e.eventType + "," + e.data + "\n");
+			bytes = System.Text.Encoding.UTF8.GetBytes(e.timestamp.ToString() + "," + eventPlayer.remoteNickname + "," + eventPlayer.side + "," + e.source + "," + e.eventType + "," + e._old + "," + e._new + "\n");
 			file.Write(bytes, 0, bytes.Length);
 		}
 
@@ -97,28 +97,30 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 	// Logs an event (network synced)
 	public void LogInstrumentationEvent(InstrumentationEvent e) {
 		if(photonView is null) eventLog.Add(e);
-		else photonView.RPC("RPC_InstrumentationManager_LogInstrumentationEvent", RpcTarget.AllBuffered, e.playerID, e.timestamp, e.source, e.eventType, e.data);
+		else photonView.RPC("RPC_InstrumentationManager_LogInstrumentationEvent", RpcTarget.AllBuffered, e.playerID, e.timestamp, e.source, e.eventType, e._old, e._new);
 	}
 	public void LogInstrumentationEventIfHost(InstrumentationEvent e) { if(NetworkingManager.isHost) LogInstrumentationEvent(e); }
 
 	// Logs an event (network synced)
-	public void LogInstrumentationEvent(string source, string eventType, string data = "") {
+	public void LogInstrumentationEvent(string source, string eventType, string _old = "", string _new = "") {
 		InstrumentationEvent e = generateNewEvent();
 		e.source = source;
 		e.eventType = eventType;
-		e.data = data;
+		e._old = _old;
+		e._new = _new;
 		LogInstrumentationEvent(e);
 	}
-	public void LogInstrumentationEventIfHost(string source, string eventType, string data = "") { if(NetworkingManager.isHost) LogInstrumentationEvent(source, eventType, data); }
+	public void LogInstrumentationEventIfHost(string source, string eventType, string _old = "", string _new = "") { if(NetworkingManager.isHost) LogInstrumentationEvent(source, eventType, _old, _new); }
 
 	// RPC which logs an event on every client
-	[PunRPC] void RPC_InstrumentationManager_LogInstrumentationEvent(int playerID, float timestamp, string source, string eventType, string data){
+	[PunRPC] void RPC_InstrumentationManager_LogInstrumentationEvent(int playerID, float timestamp, string source, string eventType, string _old = "", string _new = ""){
 		InstrumentationEvent e = new InstrumentationEvent();
 		e.playerID = playerID;
 		e.timestamp = timestamp;
 		e.source = source;
 		e.eventType = eventType;
-		e.data = data;
+		e._old = _old;
+		e._new = _new;
 
 		eventLog.Add(e);
 	}
@@ -132,47 +134,48 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 		SaveToFile();
 	}
 
-	void OnWaveStart() { LogInstrumentationEventIfHost("GameManager", "WaveStart", "" + GameManager.instance?.currentWave); }
-	void OnWaveEnd() { LogInstrumentationEventIfHost("GameManager", "WaveEnd", "" + GameManager.instance?.currentWave); }
-	void OnScoreEvent(float _, float whiteHatScore, float __, float blackHatScore) {
-		LogInstrumentationEventIfHost("ScoreManager", "ScoreEvent - WhiteHat", "" + whiteHatScore + " - " + blackHatScore);
+	void OnWaveStart() { LogInstrumentationEventIfHost("GameManager", "WaveStart", "", "" + GameManager.instance?.currentWave); }
+	void OnWaveEnd() { LogInstrumentationEventIfHost("GameManager", "WaveEnd", "", "" + GameManager.instance?.currentWave); }
+	void OnScoreEvent(float whiteHatDelta, float whiteHatScore, float blackHatDelta, float blackHatScore) {
+		LogInstrumentationEventIfHost("ScoreManager", "WhiteHat Score", "" + (whiteHatScore - whiteHatDelta), "" + whiteHatScore);
+		LogInstrumentationEventIfHost("ScoreManager", "BlackHat Score", "" + (blackHatScore - blackHatDelta), "" + blackHatScore);
 	}
 
 	void OnUpdatedStartingPointRuleEvent(StartingPoint s, PacketRule r){
-		LogInstrumentationEvent("BlackHat", "ChangedStartPointMaliciousPacketRules", "" + s.ID + " - " + r);
+		LogInstrumentationEvent("Source #" + s.ID, "ChangedStartPointMaliciousPacketRules", "" + s.spawnedMaliciousPacketRules, "" + r);
 	}
 	void OnProposedStartingPointRuleEvent(StartingPoint s, PacketRule r){
-		LogInstrumentationEvent("BlackHat", "ProposedStartPointMaliciousPacketRules", "" + s.ID + " - " + r);
+		LogInstrumentationEvent("Source #" + s.ID, "ProposedStartPointMaliciousPacketRules", "" + s.spawnedMaliciousPacketRules, "" + r);
 	}
 	void OnUpdatedStartingPointProbabilityEvent(StartingPoint s, float probability){
-		LogInstrumentationEvent("BlackHat", "ChangedStartPointMaliciousProbability", "" + s.ID + " - " + probability);
+		LogInstrumentationEvent("Source #" + s.ID, "ChangedStartPointMaliciousProbability", "" + s.maliciousPacketProbability, "" + probability);
 	}
 	void OnProposedStartingPointProbabilityEvent(StartingPoint s, float probability){
-		LogInstrumentationEvent("BlackHat", "ProposedStartPointMaliciousProbability", "" + s.ID + " - " + probability);
+		LogInstrumentationEvent("Source #" + s.ID, "ProposedStartPointMaliciousProbability", "" + s.maliciousPacketProbability, "" + probability);
 	}
 	void OnUpdatedDestinationLikelihoodEvent(Destination d, int likelihood){
-		LogInstrumentationEvent("BlackHat", "ChangedDestinationLikelihood", "" + d.ID + " - " + likelihood);
+		LogInstrumentationEvent("Destination #" + d.ID, "ChangedDestinationLikelihood", "" + d.maliciousPacketDestinationLikelihood, "" + likelihood);
 	}
 	void OnProposedDestinationLikelihoodEvent(Destination d, int likelihood){
-		LogInstrumentationEvent("BlackHat", "ProposeDestinationLikelihood", "" + d.ID + " - " + likelihood);
+		LogInstrumentationEvent("Destination #" + d.ID, "ProposeDestinationLikelihood", "" + d.maliciousPacketDestinationLikelihood, "" + likelihood);
 	}
 
 	void OnMovedFirewallEvent(Firewall f, Vector3 pos, Quaternion _){
-		LogInstrumentationEvent("WhiteHat", "PositionedFirewall", "" + f.ID + " - " + pos);
+		LogInstrumentationEvent("Firewall #" + f.ID, "PositionedFirewall", "" + f.transform.position, "" + pos);
 	}
 	void OnFirewallUpdatedEvent(Firewall f, PacketRule r){
-		LogInstrumentationEvent("WhiteHat", "ChangedFirewallFilterRules", "" + f.ID + " - " + r);	
+		LogInstrumentationEvent("Firewall #" + f.ID, "ChangedFirewallFilterRules", "<correct>", "" + r);	
 	}
 	void OnFirewallProposedEvent(Firewall f, PacketRule r){
-		LogInstrumentationEvent("WhiteHat", "ProposedFirewallFilterRules", "" + f.ID + " - " + r);
+		LogInstrumentationEvent("Firewall #" + f.ID, "ProposedFirewallFilterRules", "<correct>", "" + r);
 	}
 	void OnHoneypotUpdatedEvent(Destination d){
-		LogInstrumentationEvent("WhiteHat", "MadeDestinationHoneypot", "" + d.ID);
+		LogInstrumentationEvent("Destination #" + d.ID, "MadeDestinationHoneypot");
 	}
 	void OnHoneypotProposedEvent(Destination d){
-		LogInstrumentationEvent("WhiteHat", "ProposedMakeDestinationHoneypot", "" + d.ID);
+		LogInstrumentationEvent("Destination #" + d.ID, "ProposedMakeDestinationHoneypot");
 	}
 	void OnSuggestedFirewallEvent(SuggestedFirewall f, Vector3 pos, Quaternion _){
-		LogInstrumentationEvent("WhiteHat", "ProposedFirewallPosition", pos.ToString());
+		LogInstrumentationEvent("WhiteHat", "ProposedFirewallPosition", "", pos.ToString());
 	}
 }
