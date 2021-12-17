@@ -4,19 +4,20 @@ using UnityEngine;
 using Photon.Pun;
 
 public class WhiteHatBaseManager : BaseSharedBetweenHats {
-	// Events
+	// Callbacks
 	public delegate void FirewallEventCallback(Firewall spawned);
-	public static FirewallEventCallback spawnedFirewallEvent;
-	public static FirewallEventCallback destroyFirewallEvent;
 	public delegate void MovedFirewallEventCallback(Firewall moved, Vector3 targetPosition, Quaternion targetRotation);
-	public static MovedFirewallEventCallback movedFirewallEvent;
 	public delegate void FirewallRulesEventCallback(Firewall toModify, PacketRule rules);
-	public static FirewallRulesEventCallback firewallUpdatedEvent;
-	public static FirewallRulesEventCallback firewallProposedEvent;
 	public delegate void HoneypotEventCallback(Destination toModify);
-	public static HoneypotEventCallback honeypotUpdatedEvent;
-	public static HoneypotEventCallback honeypotProposedEvent;
 	public delegate void SuggestedFirewallEventCallback(SuggestedFirewall moved, Vector3 targetPosition, Quaternion targetRotation);
+	// Events (NOTE: Events are fired before the action occures, in the callback the old state can be acquired from the object)
+	public static FirewallEventCallback spawnFirewallEvent;
+	public static FirewallEventCallback destroyFirewallEvent;
+	public static MovedFirewallEventCallback moveFirewallEvent;
+	public static FirewallRulesEventCallback firewallUpdateEvent;
+	public static FirewallRulesEventCallback firewallProposeEvent;
+	public static HoneypotEventCallback honeypotUpdateEvent;
+	public static HoneypotEventCallback honeypotProposeEvent;
 	public static SuggestedFirewallEventCallback suggestedFirewallEvent;
 
 
@@ -83,7 +84,7 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 
 		// Spawn the new firewall over the network
 		Firewall spawned = PhotonNetwork.Instantiate(firewallPrefabPath, new Vector3(0, 100, 0), Quaternion.identity).GetComponent<Firewall>();
-		spawnedFirewallEvent?.Invoke(spawned);
+		spawnFirewallEvent?.Invoke(spawned);
 		// Move it to its proper position
 		MoveFirewall(spawned, targetPathPiece, /*not animated*/ false);
 
@@ -119,6 +120,8 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 		Quaternion rotation;
 		Firewall.PathToPositionRotation(targetPathPiece, out position, out rotation);
 
+		// Fire the event
+		moveFirewallEvent?.Invoke(toMove, position, rotation);
 		// If we should be animating the movement...
 		if(animated){
 			// Try to start the movement and return an error if it is already moving
@@ -131,8 +134,6 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			toMove.transform.position = position;
 			toMove.transform.rotation = rotation;
 		}
-		// Fire the event
-		movedFirewallEvent?.Invoke(toMove, position, rotation);
 
 		// We have successfully moved the path piece, so return true
 		return ErrorCodes.NoError;
@@ -151,10 +152,8 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
-		// TODO: Possibly add a particle system!
-
-		// Network destroy the firewall
 		destroyFirewallEvent?.Invoke(toDestroy);
+		// Network destroy the firewall
 		PhotonNetwork.Destroy(toDestroy.gameObject);
 		return ErrorCodes.NoError;
 	}
@@ -172,10 +171,9 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
-		if(toModify.SetFilterRules(filterRules)){
+		firewallUpdateEvent?.Invoke(toModify, filterRules);
+		if(toModify.SetFilterRules(filterRules))
 			FirewallSettingsUpdated(toModify);
-			firewallUpdatedEvent?.Invoke(toModify, filterRules);
-		}
 		return ErrorCodes.NoError;
 	}
 
@@ -192,9 +190,9 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.WrongPlayer;
 		}
 
+		firewallProposeEvent?.Invoke(toModify, filterRules);
 		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeNewFirewallFilterRules", RpcTarget.AllBuffered, (int) toModify.ID, filterRules.CompressedRuleString());
-		firewallProposedEvent?.Invoke(toModify, filterRules);
 		return ErrorCodes.NoError;
 	}
 
@@ -209,10 +207,9 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.DestinationNotSelected;
 		}
 
-		if(toModify.SetIsHoneypot(true)) {
+		honeypotUpdateEvent?.Invoke(toModify);
+		if(toModify.SetIsHoneypot(true))
 			DestinationSettingsUpdated(toModify);
-			honeypotUpdatedEvent?.Invoke(toModify);
-		}
 		return ErrorCodes.NoError;
 	}
 
@@ -224,9 +221,9 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			return ErrorCodes.DestinationNotSelected;
 		}
 
+		honeypotProposeEvent?.Invoke(toModify);
 		// Synchronize the call through the game manager
 		GameManager.instance.photonView.RPC("RPC_WhiteHatBaseManager_ProposeMakeDestinationHoneypot", RpcTarget.AllBuffered, (int) toModify.ID);
-		honeypotProposedEvent?.Invoke(toModify);
 		return ErrorCodes.NoError;
 	}
 
@@ -261,10 +258,10 @@ public class WhiteHatBaseManager : BaseSharedBetweenHats {
 			suggestedFirewall.transform.rotation = rotation;
 		}
 
+		suggestedFirewallEvent?.Invoke(suggestedFirewall, position, rotation);
 		// Reset the deletion timer of the selected firewall and gradually move it to its new location
 		suggestedFirewall.ResetDeleteTimer();
 		suggestedFirewall.StartGradualMove(targetPathPiece.transform.position, targetPathPiece.transform.rotation);
-		suggestedFirewallEvent?.Invoke(suggestedFirewall, position, rotation);
 
 		// TODO: should we return firewall already moving if the start gradual move returns false?
 		return ErrorCodes.NoError;

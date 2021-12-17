@@ -25,7 +25,8 @@ public class InstrumentedDropdown : ThemedDropdown {
 		var e = InstrumentationManager.instance.generateNewEvent();
 		e.source = sourceName;
 		e.eventType = "ValueChanged";
-		e.data = options[opt].text;
+		e._old = options[value].text;
+		e._new = options[opt].text;
 
 		// Log the event
 		InstrumentationManager.instance.LogInstrumentationEvent(e);

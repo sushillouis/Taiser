@@ -25,7 +25,8 @@ public class InstrumentedButton : ThemedButton {
 		var e = InstrumentationManager.instance.generateNewEvent();
 		e.source = sourceName;
 		e.eventType = "Pressed";
-		e.data = "";
+		e._old = "";
+		e._new = "";
 
 		// Log the event
 		InstrumentationManager.instance.LogInstrumentationEvent(e);
