@@ -31,8 +31,8 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 		}
 	}
 
-	// Whenever a new destination is added update the list of destinations
-	protected void Awake() { destinations = FindObjectsOfType<Destination>(); }
+	// Whenever a new destination is added update the list of destinations, and set its ID
+	protected void Awake() { destinations = FindObjectsOfType<Destination>(); SetID(); }
 
 	// Reference to the rendered mesh
 	public MeshRenderer mesh;
@@ -70,10 +70,6 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 		get => _ID;
 		protected set => _ID = value;
 	}
-
-
-	// When the this is created set its ID
-	void Start(){ SetID(); }
 
 	// Function which synchronizes a destination's ID over the network
 	void SetID(){ if(NetworkingManager.isHost) photonView.RPC("RPC_Destination_SetID", RpcTarget.AllBuffered, (int) nextID++); }

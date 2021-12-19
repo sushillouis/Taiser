@@ -62,7 +62,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 
 	// When the this is created set its ID
-	void Start(){ SetID(); }
+	void Awake(){ SetID(); }
 
 	// Manages packet movement
 	void Update() {

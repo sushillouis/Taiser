@@ -45,7 +45,7 @@ public class Firewall : DraggableSnappedToPath, SelectionManager.ISelectable {
 	}
 
 	// When the firewall is created make sure its filter rules are defaulted
-	void Start(){
+	void Awake(){
 		SetID();
 		// SetFilterRules(PacketRule.Default); // Make sure that the base filter rules are applied
 		SetGateColor(filterRules[0].color);
