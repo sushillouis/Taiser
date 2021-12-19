@@ -31,8 +31,8 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 		}
 	}
 
-	// Whenever a new starting point is added update the list of starting points
-	protected void Awake() { startingPoints = FindObjectsOfType<StartingPoint>(); }
+	// Whenever a new starting point is added update the list of starting points, and set its ID
+	protected void Awake() { startingPoints = FindObjectsOfType<StartingPoint>(); SetID(); }
 
 
 	// All of the likelihoods are added together, then the probability of spawning a packet at this point is <likelihood>/<totalLikelihood>
@@ -45,9 +45,6 @@ public class StartingPoint : PathNodeBase, SelectionManager.ISelectable {
 		protected set => _ID = value;
 	}
 
-
-	// When the this is created set its ID
-	void Start(){ SetID(); }
 
 	// The malicious packet for this starting point (NetworkSynced)
 	public PacketRule spawnedMaliciousPacketRules = System.ObjectExtensions.Copy(PacketRule.Default);
