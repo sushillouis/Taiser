@@ -12422,9 +12422,15 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 363245910988775216, guid: 7a857a84c9d36274bbd67ce7a4a764af, type: 3}
   m_PrefabInstance: {fileID: 7059267797852207021}
   m_PrefabAsset: {fileID: 0}
+<<<<<<< Updated upstream
+--- !u!1 &1781663866413108541 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8740980490752129680, guid: 7a857a84c9d36274bbd67ce7a4a764af, type: 3}
+=======
 --- !u!1 &1590151969654198752 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8639826459029268045, guid: 7a857a84c9d36274bbd67ce7a4a764af, type: 3}
+>>>>>>> Stashed changes
   m_PrefabInstance: {fileID: 7059267797852207021}
   m_PrefabAsset: {fileID: 0}
 --- !u!224 &4456255334952375952 stripped
