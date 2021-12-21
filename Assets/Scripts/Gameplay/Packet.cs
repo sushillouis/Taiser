@@ -102,25 +102,40 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 				if(isMalicious)
 					AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
 
+				
+				// TODO: Remove
+				// If we are malicious, add our details as part of the firewall's correct rule
+				if(isMalicious)	destination.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
+
+				if(destination.filterRules.Contains(details) ){
+					// Process scoring
+					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
+					// Play a sound depending on if the packet is malicious or not
+					if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
+					else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
+				}
+
+
 				// Destroy the packet
 				Destroy();
 			}
-		} else if(collider.transform.tag == "Firewall") {
-			Firewall firewall = collider.gameObject.GetComponent<Firewall>();
+		} 
+		// else if(collider.transform.tag == "Firewall") {
+		// 	Firewall firewall = collider.gameObject.GetComponent<Firewall>();
 
-			if(firewall.filterRules.Contains(details) ){
-				// Process scoring
-				ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
-				// Play a sound depending on if the packet is malicious or not
-				if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
-				else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
+		// 	// If we are malicious, add our details as part of the firewall's correct rule
+		// 	if(isMalicious)	firewall.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
 
-				Destroy();
-			}
+		// 	if(firewall.filterRules.Contains(details) ){
+		// 		// Process scoring
+		// 		ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
+		// 		// Play a sound depending on if the packet is malicious or not
+		// 		if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
+		// 		else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
 
-			// If we are malicious, add our details as part of the firewall's correct rule
-			if(isMalicious)	firewall.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
-		}
+		// 		Destroy();
+		// 	}
+		// }
 	}
 
 	// Function which determines if a packet is malicious or not and then generates/loads the appropriate packet details
