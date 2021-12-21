@@ -17,7 +17,7 @@ public class EnhancedUIBehavior : MonoBehaviour {
 	protected virtual void Awake(){
 		rectTransform = GetComponent<RectTransform>();
 
-		canvas = Findcanvas(transform);
+		canvas = FindCanvas(transform);
 		canvasTransform = canvas.GetComponent<RectTransform>();
 	}
 
@@ -80,7 +80,7 @@ public class EnhancedUIBehavior : MonoBehaviour {
 	}
 
 	// Helper function which finds the parent canvas of UI element
-	public static Canvas Findcanvas(Transform us){
+	public static Canvas FindCanvas(Transform us){
 		while(us.parent != null){
 			Canvas canvas = us.parent.gameObject.GetComponent<Canvas>();
 			if(canvas != null)
