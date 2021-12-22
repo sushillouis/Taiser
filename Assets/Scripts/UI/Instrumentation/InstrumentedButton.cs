@@ -20,16 +20,9 @@ public class InstrumentedButton : ThemedButton {
 	void logPressed(){
 		// If instrumentation is disabled, don't bother with this function
 		if(!enableInstrumentation) return;
-		
-		// Create an instrumentation event
-		var e = InstrumentationManager.instance.generateNewEvent();
-		e.source = sourceName;
-		e.eventType = "Pressed";
-		e._old = "";
-		e._new = "";
 
 		// Log the event
-		InstrumentationManager.instance.LogInstrumentationEvent(e);
+		InstrumentationManager.instance.LogInstrumentationEvent(sourceName, "Pressed");
 	}
 
 	#if UNITY_EDITOR

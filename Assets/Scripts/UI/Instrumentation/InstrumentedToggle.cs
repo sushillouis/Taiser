@@ -21,15 +21,8 @@ public class InstrumentedToggle : ThemedToggle {
 		// If instrumentation is disabled, don't bother with this function
 		if(!enableInstrumentation) return;
 
-		// Create an instrumentation event
-		var e = InstrumentationManager.instance.generateNewEvent();
-		e.source = sourceName;
-		e.eventType = "Toggled";
-		e._old = (!on) ? "on" : "off";
-		e._new = on ? "on" : "off";
-
 		// Log the event
-		InstrumentationManager.instance.LogInstrumentationEvent(e);
+		InstrumentationManager.instance.LogInstrumentationEvent(sourceName, "Toggled", (!on) ? "on" : "off", on ? "on" : "off");
 	}
 
 	#if UNITY_EDITOR
