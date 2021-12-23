@@ -34,6 +34,9 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	// Proposed packet rule
 	PacketRule proposedRule;
 
+	// Packet Select Panel
+	public GameObject packetSelectPanel;
+
 	// Enum what a click currently means
 	protected enum ClickState {
 		Selecting,
@@ -57,6 +60,7 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		SelectionManager.hoverChangedEvent += OnHoverChanged;
 		SelectionManager.packetSelectEvent += OnPacketSelected;
 		SelectionManager.firewallSelectEvent += OnFirewallSelected;
+		SelectionManager.destinationSelectEvent += ShowPacketSelectPanel;
 	}
 	void OnDisable(){
 		leftClickAction.action.performed -= OnClickPressed;
@@ -407,6 +411,11 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		// Make sure to hide the advisor buttons
 		firewallPacketAdvisorPanel.SetActive(false);
 	}
+
+	// Function which shows the PacketSelectPanel
+	public void ShowPacketSelectPanel(Destination d) {
+		packetSelectPanel.SetActive(true);
+    }
 
 
 	// -- Callbacks --

@@ -18,10 +18,12 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 	public delegate void RoomPropertiesEventCallback(ExitGames.Client.Photon.Hashtable propertiesThatChanged);
 	public delegate void RoomPlayerPropertiesEventCallback(Player targetPlayer, ExitGames.Client.Photon.Hashtable propertiesThatChanged);
 	public delegate void OtherPlayerEventCallback(Player otherPlayer);
+	public delegate void RoomCreationFailedEventCallback(string message);
 	// (Dis)connect
 	public static Utilities.VoidEventCallback connectedEvent;
 	public static Utilities.VoidEventCallback disconnectedEvent;
 	// Join/Leave room
+	public static RoomCreationFailedEventCallback createRoomFailedEvent;
 	public static Utilities.VoidEventCallback roomJoinEvent;
 	public static Utilities.VoidEventCallback roomLeaveEvent;
 	public static OtherPlayerEventCallback roomOtherJoinEvent;
@@ -64,7 +66,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 	// Variables used when room creation fails and we need to try again
 	int createRoomFailAttempts = 1;
-	byte createPlayerCountCache;
+	int createPlayerCountCache;
 	bool createIsWhiteHatCache;
 	// Variable used to determine if we should return to the main menu when we leave a room or not
 	static bool shouldReturnToMenuOnLeave = false;
@@ -146,7 +148,9 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		Debug.Log("Failed to create room because: " + message);
 
 		createRoomFailAttempts++;
-		CreateRoom(PhotonNetwork.NickName + "'s room #" + createRoomFailAttempts, createPlayerCountCache, createIsWhiteHatCache);
+		if(createRoomFailAttempts <= 5)
+			CreateRoom(PhotonNetwork.NickName + "'s room #" + createRoomFailAttempts, createPlayerCountCache, createIsWhiteHatCache);
+		else createRoomFailedEvent?.Invoke(message);
 	}
 
 	// When we join a room, create a new player list if we are the first player
@@ -250,9 +254,9 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 
 
 	// Creates a new room (and joins it) with the specified <name>, capable of hosting the provided <playerCount>, and with the set hostWhitehat status
-	public void CreateRoom(string name, byte playerCount, bool isHostWhitehat){
+	public void CreateRoom(string name, int playerCount, bool isHostWhitehat){
 		RoomOptions options = new RoomOptions(){
-			MaxPlayers = playerCount,
+			MaxPlayers = (byte)playerCount,
 			CustomRoomProperties = new ExitGames.Client.Photon.Hashtable(){
 				{IS_HOST_WHITE_HAT, isHostWhitehat} // hat
 			}
@@ -263,7 +267,7 @@ public class NetworkingManager : Core.Utilities.SingletonPunCallbacks<Networking
 		createPlayerCountCache = playerCount;
 	}
 	// Creates a new room same as above, but its name is based on the player's name
-	public void CreateRoom(byte playerCount, bool isHostWhitehat){ CreateRoom(PhotonNetwork.NickName + "'s room", playerCount, isHostWhitehat); }
+	public void CreateRoom(int playerCount, bool isHostWhitehat){ CreateRoom(PhotonNetwork.NickName + "'s room", playerCount, isHostWhitehat); }
 
 	// Join the specified room
 	public void JoinRoom(string name){ PhotonNetwork.JoinRoom(name); }

@@ -21,15 +21,8 @@ public class InstrumentedDropdown : ThemedDropdown {
 		// If instrumentation is disabled, don't bother with this function
 		if(!enableInstrumentation) return;
 
-		// Create an instrumentation event
-		var e = InstrumentationManager.instance.generateNewEvent();
-		e.source = sourceName;
-		e.eventType = "ValueChanged";
-		e._old = options[value].text;
-		e._new = options[opt].text;
-
 		// Log the event
-		InstrumentationManager.instance.LogInstrumentationEvent(e);
+		InstrumentationManager.instance.LogInstrumentationEvent(sourceName, "ValueChanged", options[value].text, options[opt].text);
 	}
 
 	#if UNITY_EDITOR

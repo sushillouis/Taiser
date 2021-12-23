@@ -64,6 +64,14 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 		set => SetIsHoneypot(value);
 	}
 
+
+	// TODO: Remove
+	// The details of packets that should be filtered
+	public PacketRule filterRules = PacketRule.Default;
+	// Variable tracking what the correct rule for this firewall is (updated whenever a malicious packet hits this firewall and cleared when starting point rules are updated)
+	public PacketRule correctRule;
+
+
 	// Variable used to uniquely identify a destination
 	[SerializeField] uint _ID;
 	public uint ID {
