@@ -105,7 +105,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 				
 				// TODO: Remove
 				// If we are malicious, add our details as part of the firewall's correct rule
-				if(isMalicious)	destination.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
+				if(isMalicious)	destination.correctRule.Union_InPlace(new PacketRule.LiteralNode(details).RuleString());
 
 				if(destination.filterRules.Contains(details) ){
 					// Process scoring
@@ -124,7 +124,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		// 	Firewall firewall = collider.gameObject.GetComponent<Firewall>();
 
 		// 	// If we are malicious, add our details as part of the firewall's correct rule
-		// 	if(isMalicious)	firewall.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
+		// 	if(isMalicious)	firewall.correctRule.Union_InPlace(new PacketRule.LiteralNode(details).RuleString());
 
 		// 	if(firewall.filterRules.Contains(details) ){
 		// 		// Process scoring
