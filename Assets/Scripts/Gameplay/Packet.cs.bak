@@ -105,18 +105,33 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 				// If the packet is malicious play a sound
 				if (isMalicious)
 					AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
-				
+
+<<<<<<< Updated upstream
 				
 				// TODO: Remove
-				if(destination){
-					// If we are malicious, add our details as part of the firewall's correct rule
-					if(isMalicious)	destination.correctRule.Union_InPlace(new PacketRule.LiteralNode(details).RuleString());
+				// If we are malicious, add our details as part of the firewall's correct rule
+				if(isMalicious)	destination.correctRule.Union_InPlace(new PacketRule.LiteralNode(details).RuleString());
 
-					if(destination.filterRules.Contains(details) ){
+				if(destination.filterRules.Contains(details) ){
+					// Process scoring
+					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
+					// Play a sound depending on if the packet is malicious or not
+					if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
+					else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
+				}
+=======
+>>>>>>> Stashed changes
+
+				if (destination) {
+					// TODO: Remove
+					// If we are malicious, add our details as part of the firewall's correct rule
+					if (isMalicious) destination.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
+
+					if (destination.filterRules.Contains(details)) {
 						// Process scoring
 						ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
 						// Play a sound depending on if the packet is malicious or not
-						if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
+						if (isMalicious) AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
 						else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
 					}
 				}

@@ -69,8 +69,21 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	// The details of packets that should be filtered
 	public PacketRule filterRules = PacketRule.Default;
 	// Variable tracking what the correct rule for this firewall is (updated whenever a malicious packet hits this firewall and cleared when starting point rules are updated)
-	public PacketRule correctRule;
+	public PacketRule correctRule = PacketRule.Default;
 
+	// TODO: also remove
+
+	public static int maxRecords = 16;
+	public Queue<PacketRule.Details> packetLog = new Queue<PacketRule.Details>();
+
+	public void LogPacket(PacketRule.Details prd) {
+		Debug.Log("Intercepted packet with details");
+		Debug.Log(prd);
+		packetLog.Enqueue(prd);
+		while (packetLog.Count > maxRecords)
+			packetLog.Dequeue();
+		
+	}
 
 	// Variable used to uniquely identify a destination
 	[SerializeField] uint _ID;

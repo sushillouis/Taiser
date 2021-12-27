@@ -113,6 +113,8 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 		showPacketPanel(p);
 	}
 
+
+
 	// Callback which handles when the selected firewall changes
 	void OnFirewallSelected(Firewall f){
 		// Error if we don't own the firewall
@@ -415,6 +417,10 @@ public class WhiteHatPlayerManager : WhiteHatBaseManager {
 	// Function which shows the PacketSelectPanel
 	public void ShowPacketSelectPanel(Destination d) {
 		packetSelectPanel.SetActive(true);
+    }
+
+	public void HidePacketSelectPanel(Destination d) {
+		packetSelectPanel.SetActive(false);
     }
 
 
