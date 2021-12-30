@@ -162,6 +162,29 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 	}
 
 
+	// Initalize the packet as a background packet
+	public void reinitBackgroundPacketDetails(){
+		TerminalNode[] terminals = TerminalNode.terminals;
+
+		// Pick unique (if possible) start and end points for the packet to travel between
+		TerminalNode start = terminals[UnityEngine.Random.Range(0, terminals.Length)];
+		TerminalNode end = terminals[UnityEngine.Random.Range(0, terminals.Length)];
+		while(start == end && terminals.Length > 2) end = terminals[UnityEngine.Random.Range(0, terminals.Length)];
+
+		// Pick a random starting point and destination for it (network synced)
+		setStartDestinationAndPath(start as StartingPoint, end);
+		transform.rotation = startPoint.transform.rotation; // Ensure that the packets have the same orientation as their spawners
+
+		// Setup the packet's appearance and make sure the packets are never malicious (network synced)
+		initPacketDetails(false);
+
+		// Reset the path index
+		pathIndex = 1;
+	}
+
+
+
+
 	// -- Movement Functions --
 
 
@@ -317,10 +340,12 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		yield return new WaitForSeconds(seconds);
 		Destroy();
 	}
-	// Destroys the packet (network synced)
+	// Destroys the packet or resets its properties (network synced)
 	public void Destroy(){
+		// Network synced packets are destroyed
 		if(photonView) photonView.RPC("RPC_Packet_Destroy", RpcTarget.AllBuffered);
-		else UnityEngine.Object.Destroy(gameObject);
+		// Background packets have their properties reset
+		else reinitBackgroundPacketDetails();
 	}
 	[PunRPC] void RPC_Packet_Destroy(){
 		if(!NetworkingManager.isHost) return;
