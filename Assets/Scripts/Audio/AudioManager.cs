@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AudioManager : AudioManagerBase {
-	// List of music clips
-	public NamedAudioClip[] musicClips;
+
+    public float initVolume;
+
+    // List of music clips
+    public NamedAudioClip[] musicClips;
 	// List of ui sound effect clips
 	public NamedAudioClip[] uiSoundFxClips;
 	// List of sound effect clips
@@ -18,10 +21,11 @@ public class AudioManager : AudioManagerBase {
 		get => AudioManagerBase.instance as AudioManager;
 	}
 
+
 	void Start(){
 		// Create a music player and set it off cycling through the music tracks indefinitely
 		musicPlayer = CreateAudioPlayer("music", musicClips);
-		musicPlayer.volume = .8f;
+        musicPlayer.volume = initVolume;
 		musicPlayer.CycleTracks(/*once*/ false, 10);
 
 		// Create a UI SoundFX player
