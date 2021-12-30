@@ -376,14 +376,46 @@ public partial class PacketRule : List<PacketRule.Details> {
 	public override string ToString() => RuleString();
 
 	// Function which merges two PacketRules together (Ensuring unique elements and properly optimized trees)
-	public void Union(PacketRule other) => Parse("(" + RuleString() + ") | (" + other.RuleString() + ")");
-	public void Union(string otherString) => Parse("(" + RuleString() + ") | (" + otherString + ")");
+	public PacketRule Union_InPlace(string otherString) {
+		string combined = "";
+		if(!this.EmptyRule()) combined += "(" + RuleString() + ")";
+		if(!EmptyRule(otherString)) combined += (combined.Length > 0 ? " | " : "") + "(" + otherString + ")";
+		if(combined.Length > 0) Parse(combined);
+		return this;
+	}
+	public PacketRule Union_InPlace(PacketRule other) => Union_InPlace(other.RuleString());
+	public PacketRule Union(PacketRule other) { PacketRule _out = this.MemberwiseClone() as PacketRule; return _out.Union_InPlace(other.RuleString()); }
+	public PacketRule Union(string other) { PacketRule _out = this.MemberwiseClone() as PacketRule; return _out.Union_InPlace(other); }
 	// Function which finds the common elements of two PacketRules (Ensuring unique elements and properly optimized trees)
-	public void Intersection(PacketRule other) => Parse("(" + RuleString() + ") & (" + other.RuleString() + ")");
-	public void Intersection(string otherString) => Parse("(" + RuleString() + ") & (" + otherString + ")");
+	public PacketRule Intersection_InPlace(string otherString) {
+		if(this.EmptyRule()) return this;
+		if(EmptyRule(otherString)) { Clear(); return this; }
+
+		Parse("(" + RuleString() + ") & (" + otherString + ")");
+		return this;
+	}
+	public PacketRule Intersection_InPlace(PacketRule other) => Intersection_InPlace(other.RuleString());
+	public PacketRule Intersection(PacketRule other) { PacketRule _out = this.MemberwiseClone() as PacketRule; return _out.Intersection_InPlace(other.RuleString()); }
+	public PacketRule Intersection(string other) { PacketRule _out = this.MemberwiseClone() as PacketRule; return _out.Intersection_InPlace(other); }
 	// Function which removes a PacketRule from this rule (Ensuring unique elements and properly optimized trees)
-	public void Difference(PacketRule other) => Parse("(" + RuleString() + ") & !(" + other.RuleString() + ")");
-	public void Difference(string otherString) => Parse("(" + RuleString() + ") & !(" + otherString + ")");
+	public PacketRule Difference_InPlace(string otherString){
+		if(this.EmptyRule()) return this;
+		if(EmptyRule(otherString)) return this;
+		
+		Parse("(" + RuleString() + ") & !(" + otherString + ")");
+		return this;
+	}
+	public PacketRule Difference_InPlace(PacketRule other) => Difference_InPlace(other.RuleString());
+	public PacketRule Difference(PacketRule other) { PacketRule _out = this.MemberwiseClone() as PacketRule; return _out.Difference_InPlace(other.RuleString()); }
+	public PacketRule Difference(string other) { PacketRule _out = this.MemberwiseClone() as PacketRule; return _out.Difference_InPlace(other); }
+
+	// Function which checks if this rulke is empty
+	private static bool EmptyRule(string rule) {
+		if(rule.Length == 0) return true;
+		return rule == "()" || rule == "()|()";
+	}
+	private static bool EmptyRule(PacketRule rule) => EmptyRule(rule.RuleString());
+	public bool EmptyRule() => EmptyRule(this);
 
 
 	// -- Parser --

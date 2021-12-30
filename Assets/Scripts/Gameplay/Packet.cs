@@ -96,25 +96,31 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 				Destination destination = this.destination.GetComponent<Destination>();
 
 				// Process scoring (if the collided destination isn't a honeypot and our destination isn't a terminal node)
-				if(destination && !destination.isHoneypot)
+				if (destination && !destination.isHoneypot) {
 					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
+					// TODO Remove
+					destination.LogPacket(details);
+					Debug.Log("Packet logged.");
+				}
 				// If the packet is malicious play a sound
-				if(isMalicious)
+				if (isMalicious)
 					AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
-
+				
 				
 				// TODO: Remove
-				// If we are malicious, add our details as part of the firewall's correct rule
-				if(isMalicious)	destination.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
+				if(destination){
+					// If we are malicious, add our details as part of the firewall's correct rule
+					if(isMalicious)	destination.correctRule.Union_InPlace(new PacketRule.LiteralNode(details).RuleString());
 
-				if(destination.filterRules.Contains(details) ){
-					// Process scoring
-					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
-					// Play a sound depending on if the packet is malicious or not
-					if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
-					else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
+					if(destination.filterRules.Contains(details) ){
+						// Process scoring
+						ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousDestroyed : ScoreManager.ScoreEvent.GoodDestroyed);
+						// Play a sound depending on if the packet is malicious or not
+						if(isMalicious)	AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousDestroyed");
+						else AudioManager.instance.soundFXPlayer.PlayTrackImmediate("MaliciousSuccess");
+					}
 				}
-
+				
 
 				// Destroy the packet
 				Destroy();
@@ -124,7 +130,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		// 	Firewall firewall = collider.gameObject.GetComponent<Firewall>();
 
 		// 	// If we are malicious, add our details as part of the firewall's correct rule
-		// 	if(isMalicious)	firewall.correctRule.Union(new PacketRule.LiteralNode(details).RuleString());
+		// 	if(isMalicious)	firewall.correctRule.Union_InPlace(new PacketRule.LiteralNode(details).RuleString());
 
 		// 	if(firewall.filterRules.Contains(details) ){
 		// 		// Process scoring
@@ -154,6 +160,29 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		// Set the packet details (if the packed is malicious the network property synchronizer will load the correct settings from the starting point)
 		details = startPoint.randomNonMaliciousPacketDetails();
 	}
+
+
+	// Initalize the packet as a background packet
+	public void reinitBackgroundPacketDetails(){
+		TerminalNode[] terminals = TerminalNode.terminals;
+
+		// Pick unique (if possible) start and end points for the packet to travel between
+		TerminalNode start = terminals[UnityEngine.Random.Range(0, terminals.Length)];
+		TerminalNode end = terminals[UnityEngine.Random.Range(0, terminals.Length)];
+		while(start == end && terminals.Length > 2) end = terminals[UnityEngine.Random.Range(0, terminals.Length)];
+
+		// Pick a random starting point and destination for it (network synced)
+		setStartDestinationAndPath(start as StartingPoint, end);
+		transform.rotation = startPoint.transform.rotation; // Ensure that the packets have the same orientation as their spawners
+
+		// Setup the packet's appearance and make sure the packets are never malicious (network synced)
+		initPacketDetails(false);
+
+		// Reset the path index
+		pathIndex = 1;
+	}
+
+
 
 
 	// -- Movement Functions --
@@ -311,10 +340,12 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 		yield return new WaitForSeconds(seconds);
 		Destroy();
 	}
-	// Destroys the packet (network synced)
+	// Destroys the packet or resets its properties (network synced)
 	public void Destroy(){
+		// Network synced packets are destroyed
 		if(photonView) photonView.RPC("RPC_Packet_Destroy", RpcTarget.AllBuffered);
-		else UnityEngine.Object.Destroy(gameObject);
+		// Background packets have their properties reset
+		else reinitBackgroundPacketDetails();
 	}
 	[PunRPC] void RPC_Packet_Destroy(){
 		if(!NetworkingManager.isHost) return;
