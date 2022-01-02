@@ -82,10 +82,10 @@ public class NewLobbyMgr : MonoBehaviour
         GameNamePlaceholderText.text = GameName;
         //NetworkingManager.instance.JoinLobby();
 
-        if(!NetworkingManager.gameOpened)
-            NetworkingManager.gameOpened = true;
+        //if(!NetworkingManager.gameOpened)
+        //    NetworkingManager.gameOpened = true;
 
-        Debug.Log("Entered Game: " + PhotonNetwork.LocalPlayer.NickName);
+        Debug.Log("Joined Lobbby with name: " + PhotonNetwork.LocalPlayer.NickName);
 
         State = LobbyState.CreateOrJoin;
         //...
@@ -131,13 +131,16 @@ public class NewLobbyMgr : MonoBehaviour
 
     public InputField GameNameInputField;
     public Text WaitingForPlayersText;
+    public int MaxPlayersPerRoom;
     // Function called whenever the create room button is pressed, it updates the player's name and creates a room
     public void OnCreateRoomButton()
     {
         //updatePlayerAlias();
         GameName =
             (GameNameInputField.text.Length == 0 ? GameName : GameNameInputField.text);
-        NetworkingManager.instance.CreateRoom(GameName, /*max players*/ 2, true);
+        //NetworkingManager.instance.CreateRoom(GameName, /*max players*/ 2, true);
+        NewNetworkMgr.inst.CreateTaiserRoom(GameName, MaxPlayersPerRoom);
+
         //PlayButton.interactable = false;
         ResetPlayerNamesList();
         Team1PlayerNamesList[0].text = PlayerName;
@@ -165,6 +168,14 @@ public class NewLobbyMgr : MonoBehaviour
         Team2PlayerRolesList[0].value = opponentRole;
         Team2PlayerRolesList[0].RefreshShownValue();
         ValidatePlayButton();
+    }
+
+    public void UpdateRoom()
+    {
+        foreach (Player p in PhotonNetwork.CurrentRoom.Players.Values) {
+            Debug.Log(p.ToStringFull());
+        }
+
     }
 
     public void InvalidateDropdownsExceptForMine()

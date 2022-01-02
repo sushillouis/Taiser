@@ -11458,6 +11458,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1193752227}
+  - component: {fileID: 1193752228}
   m_Layer: 0
   m_Name: NewNetworkMgr
   m_TagString: Untagged
@@ -11479,6 +11480,19 @@ Transform:
   m_Father: {fileID: 1476208628}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1193752228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193752226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53dcf4e9b876a134ba73e517620fef3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameVersion: 1.0
 --- !u!1 &1232129950
 GameObject:
   m_ObjectHideFlags: 0
@@ -18402,7 +18416,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2146096636
 MonoBehaviour:
   m_ObjectHideFlags: 0
