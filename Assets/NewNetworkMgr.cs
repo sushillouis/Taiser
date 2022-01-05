@@ -4,6 +4,7 @@ using UnityEngine;
 
 using Photon.Pun;
 using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 public class NewNetworkMgr : MonoBehaviourPunCallbacks
 {
@@ -36,7 +37,8 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
     //MonoBehaviorPunCallbacks
     public override void OnConnectedToMaster()
     {
-        Debug.Log("Taiser Lobby: OnConnectedToMaster");
+        Debug.Log("Taiser Network: OnConnectedToMaster");
+        PhotonNetwork.JoinLobby();
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -48,7 +50,7 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         base.OnJoinedLobby();
-        Debug.LogWarning("Joined a Lobby for this Taiser");
+        Debug.Log("Joined a Lobby for this Taiser");
     }
 
     //-------------------------------------------------------
@@ -56,7 +58,7 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
     {
         base.OnCreatedRoom();
         Debug.Log("Taiser: OnCreatedRoom: " + PhotonNetwork.CurrentRoom.Name + 
-                           " Max players: " + PhotonNetwork.CurrentRoom.MaxPlayers);
+                           ", Max players: " + PhotonNetwork.CurrentRoom.MaxPlayers);
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -70,13 +72,15 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
         Photon.Realtime.RoomOptions roomOptions = new RoomOptions();
         roomOptions.MaxPlayers = (byte) maxPlayersPerRoom; // Photon likes bytes
         PhotonNetwork.CreateRoom(roomName, roomOptions);
+        Debug.Log(PhotonNetwork.NickName + " : Created room: " + roomName + " with " + maxPlayersPerRoom + " max players");
     }
     //-------------------------------------------------------
 
     public void JoinTaiserRoom(string roomName)
     {
         PhotonNetwork.JoinRoom(roomName);
-        Debug.LogWarning(PhotonNetwork.NickName + "did Join(existing)TaiserRoom:  " + roomName);
+        Debug.Log(PhotonNetwork.NickName + " is Joining (existing) TaiserRoom:  " + roomName);
+
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -89,12 +93,50 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         base.OnJoinedRoom();
-        NewLobbyMgr.inst.UpdateRoom();
+        Debug.Log("Players in room " + PhotonNetwork.CurrentRoom.Name + ":\n"
+            + PhotonNetwork.CurrentRoom.Players.ToStringFull());
+        NewLobbyMgr.inst.SetWaitingForPlayersLists();
     }
 
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)    {
         base.OnRoomListUpdate(roomList);
-        Debug.Log(PhotonNetwork.NickName + " got OnRoomListUpdate called");
+        Debug.Log(PhotonNetwork.NickName + 
+            " got OnRoomListUpdate called with list: " + roomList.ToStringFull<RoomInfo>());
+        foreach(RoomInfo ri in roomList) {
+            NewLobbyMgr.inst.CachedRoomList.Add(ri);
+        }
+        NewLobbyMgr.inst.UpdateRoomList();
     }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        base.OnPlayerEnteredRoom(newPlayer);
+        Debug.Log(PhotonNetwork.NickName + ": OnPlayerEnteredRoom: player: " + newPlayer.NickName +
+        "\n players in room: " + PhotonNetwork.CurrentRoom.Name + " are: \n" +
+        PhotonNetwork.CurrentRoom.Players.ToStringFull());
+        NewLobbyMgr.inst.SetWaitingForPlayersLists();
+    }
+
+    //-------------------------------------------------------------
+
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+    {
+        base.OnRoomPropertiesUpdate(propertiesThatChanged);
+        Debug.Log(PhotonNetwork.NickName + ": OnRoomPropertiesUpdate: " + propertiesThatChanged.ToStringFull() +
+        "\n players in room: " + PhotonNetwork.CurrentRoom.Name + " are: \n" +
+        PhotonNetwork.CurrentRoom.Players.ToStringFull());
+        NewLobbyMgr.inst.SetWaitingForPlayersLists();
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
+        Debug.Log(PhotonNetwork.NickName + ": OnPLAYERPropertiesUpdate: " + changedProps.ToStringFull() +
+        "\n players in room: " + PhotonNetwork.CurrentRoom.Name + " are: \n" +
+        PhotonNetwork.CurrentRoom.Players.ToStringFull());
+        Debug.Log("Calling NewLobbyMgr.inst.SetWaitingPlayers");
+        NewLobbyMgr.inst.SetWaitingForPlayersLists();
+    }
+
+
 }

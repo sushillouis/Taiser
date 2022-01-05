@@ -6,10 +6,14 @@ public class TaiserPanel : MonoBehaviour
 {
     // Start is called before the first frame update
     public RectTransform panel;
-    void Start()
+    private void Awake()
     {
         panel = GetComponent<RectTransform>(); //redundant
         holdingPosition = panel.anchoredPosition;
+
+    }
+    void Start()
+    {
     }
     // Update is called once per frame
 

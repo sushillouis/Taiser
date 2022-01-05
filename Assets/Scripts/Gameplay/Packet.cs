@@ -91,16 +91,24 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 
 		// If the trigger was a destination...
 		if(collider.transform.tag == "Destination"){
-			// Make sure that the destination we collided with is our target destination (and that our destination isn't a terminal node)
-			if(collider.gameObject.name == destination.name){
+            // Make sure that the destination we collided with is our target destination (and that our destination isn't a terminal node)
+
+
+            if(collider.gameObject.name == destination.name){
 				Destination destination = this.destination.GetComponent<Destination>();
 
-				// Process scoring (if the collided destination isn't a honeypot and our destination isn't a terminal node)
-				if (destination && !destination.isHoneypot) {
+                if(destination) {
+                    //Debug.Log("DestinationId: " + destination.DestinationId);
+                    destination.AnimateDestinationButton(isMalicious);
+                }
+
+                // Process scoring (if the collided destination isn't a honeypot and our destination isn't a terminal node)
+                if (destination && !destination.isHoneypot) {
 					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
 					// TODO Remove
 					destination.LogPacket(details);
-					Debug.Log("Packet logged.");
+                    NewGameMgr.inst.LogPacket(details, isMalicious, destination.DestinationId);
+					//Debug.Log("Packet logged.");
 				}
 				// If the packet is malicious play a sound
 				if (isMalicious)

@@ -77,13 +77,29 @@ public class Destination : PathNodeBase, SelectionManager.ISelectable {
 	public Queue<PacketRule.Details> packetLog = new Queue<PacketRule.Details>();
 
 	public void LogPacket(PacketRule.Details prd) {
-		Debug.Log("Intercepted packet with details");
-		Debug.Log(prd);
+		//Debug.Log("Intercepted packet with details");
+		//Debug.Log(prd);
 		packetLog.Enqueue(prd);
 		while (packetLog.Count > maxRecords)
 			packetLog.Dequeue();
-		
+
 	}
+    public int DestinationId;
+    public UnityEngine.UI.Button DestinationButton;
+    public Vector2 sizeDelta = new Vector2(5, 5);
+    public Vector2 minSize = new Vector2(1, 1);
+    public Vector2 maxSize = new Vector2(200, 200);
+    public bool shouldGrow = false;
+    public void AnimateDestinationButton(bool isMalicious)
+    {
+        RectTransform rt = DestinationButton.GetComponent<RectTransform>();
+        Vector2 size = rt.sizeDelta;
+        //Debug.Log("AnimateDestinationButton: size: " + size);
+        if(size.x < maxSize.x) {
+            rt.sizeDelta += sizeDelta;
+        }
+
+    }
 
 	// Variable used to uniquely identify a destination
 	[SerializeField] uint _ID;

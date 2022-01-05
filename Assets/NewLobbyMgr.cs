@@ -6,6 +6,12 @@ using UnityEngine.UI;
 using Photon.Realtime;
 using Photon.Pun;
 
+public class AIPlayer
+{
+    public string name;
+    public NewLobbyMgr.PlayerRole role;
+}
+
 public class NewLobbyMgr : MonoBehaviour
 {
     public static NewLobbyMgr inst;
@@ -85,15 +91,82 @@ public class NewLobbyMgr : MonoBehaviour
         //if(!NetworkingManager.gameOpened)
         //    NetworkingManager.gameOpened = true;
 
-        Debug.Log("Joined Lobbby with name: " + PhotonNetwork.LocalPlayer.NickName);
+        Debug.Log("Joined Lobby with name: " + PhotonNetwork.LocalPlayer.NickName);
 
+
+        UpdateRoomList();
+        
         State = LobbyState.CreateOrJoin;
         //...
     }
 
+    //------------------------------------------------------------------
+    public enum PlayerRole
+    {
+        Whitehat = 0,
+        Blackhat,
+        Observer,
+        None
+    }
 
+    public void SetNetworkPlayerRole(PlayerRole role)
+    {
+        ExitGames.Client.Photon.Hashtable playerProps = new ExitGames.Client.Photon.Hashtable();
+        playerProps.Add("R", role.ToString());
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProps);
+    }
+    //------------------------------------------------------------------
 
+    public void JoinExistingRoomButtonClicked(int buttonId)
+    {
+        string roomName = RoomButtonsList[buttonId].GetComponentInChildren<Text>().text.Trim();
+        Debug.Log(PhotonNetwork.NickName + " is joining " + roomName);
+        SetNetworkPlayerRole(PlayerRole.Blackhat);
+        NewNetworkMgr.inst.JoinTaiserRoom(roomName);
 
+        WaitForPlayers(roomName);
+    }
+
+    public void WaitForPlayers(string gameName)
+    {
+        GameName = gameName; //assigned twice if you are game creator
+        WaitingForPlayersText.text = "Game: " + GameName + ", waiting for players";
+        //InvalidateDropdownsExceptForMine();
+        State = LobbyState.WaitingForPlayers;
+
+    }
+
+    public List<RoomInfo> CachedRoomList = new List<RoomInfo>();
+    public List<string> CachedRoomNameList = new List<string>();
+    public List<Button> RoomButtonsList = new List<Button>();
+    public void UpdateRoomList()
+    {
+        CachedRoomNameList.Clear();
+        int i = 0;
+        foreach (RoomInfo ri in CachedRoomList) {
+            if(ri.Name != GameName && i < 4) {//Can only do 4 buttons/rooms/games
+                RoomButtonsList[i].interactable = true;
+                RoomButtonsList[i].GetComponentInChildren<Text>().text = ri.Name;
+                i++;
+                CachedRoomNameList.Add(ri.Name);
+               
+            }
+        }
+    }
+
+    public RectTransform GameButtonsPanel;
+    [ContextMenu("FindConnectGameButtons")]
+    public void FindConnectGameButtons()
+    {
+        RoomButtonsList.Clear();
+        foreach(Button b in GameButtonsPanel.GetComponentsInChildren<Button>()) {
+            RoomButtonsList.Add(b);
+            b.interactable = false;
+            
+        }
+    }
+
+    //--------------------------------------------------------------------------
     public RectTransform Team1Panel; //Set both enclosing panels in editor 
     public RectTransform Team2Panel; // ... and this panel ...
     public List<string> dropdownValues; // Then set this 
@@ -111,6 +184,8 @@ public class NewLobbyMgr : MonoBehaviour
     public List<Text> Team2PlayerNamesList = new List<Text>();
     public List<Dropdown> Team2PlayerRolesList = new List<Dropdown>();
 
+    public List<AIPlayer> AIPlayers = new List<AIPlayer>();
+
     public void ConnectTeam(RectTransform panel, List<Text> players, List<Dropdown> teamDropdowns)
     {
         players.Clear();
@@ -127,11 +202,12 @@ public class NewLobbyMgr : MonoBehaviour
             teamDropdowns.Add(d);
         }
     }
-
+    //--------------------------------------------------------------------------
 
     public InputField GameNameInputField;
     public Text WaitingForPlayersText;
     public int MaxPlayersPerRoom;
+    public bool isRoomCreator = false;
     // Function called whenever the create room button is pressed, it updates the player's name and creates a room
     public void OnCreateRoomButton()
     {
@@ -140,55 +216,117 @@ public class NewLobbyMgr : MonoBehaviour
             (GameNameInputField.text.Length == 0 ? GameName : GameNameInputField.text);
         //NetworkingManager.instance.CreateRoom(GameName, /*max players*/ 2, true);
         NewNetworkMgr.inst.CreateTaiserRoom(GameName, MaxPlayersPerRoom);
+        isRoomCreator = true;
 
-        //PlayButton.interactable = false;
-        ResetPlayerNamesList();
-        Team1PlayerNamesList[0].text = PlayerName;
-        Team2PlayerNamesList[0].text = "AI";
+        SetNetworkPlayerRole(PlayerRole.Whitehat);
+        WaitForPlayers(GameName);
 
-        WaitingForPlayersText.text = "Game: " + GameName + ", waiting for players";
-        State = LobbyState.WaitingForPlayers;
-        InvalidateDropdownsExceptForMine();
-        Invoke("MakeAIPlayerAndActivatePlayButton", 1);
 
+
+        if(isAI)
+            Invoke("MakeAIPlayerAndActivatePlayButton", 1);
     }
 
+    //-----------------------------------------------------------
     public bool isAI;
     public void MakeAIPlayerAndActivatePlayButton()
     {
-        string opponent;
-        if(isAI)
-            opponent = "AI";
-        else
-            opponent = "zorkster";
+        string opponent = "AI";
+        PlayerRole opponentRole = PlayerRole.Blackhat; // fixed for now
+        AIPlayer aip = new AIPlayer();
+        aip.name = "AI";
+        aip.role = PlayerRole.Blackhat;
+        AIPlayers.Add(aip);
+        SetWaitingForPlayersLists();
 
-        int opponentRole = 1;
-
-        Team2PlayerNamesList[0].text = opponent;
-        Team2PlayerRolesList[0].value = opponentRole;
+/*        Team2PlayerNamesList[0].text = opponent;
+        RoleDropdownHandler rdh = Team2PlayerRolesList[0].GetComponent<RoleDropdownHandler>();
+        rdh.SetValueWithoutTrigger((int) opponentRole); //assumes a single player for now
         Team2PlayerRolesList[0].RefreshShownValue();
+        ValidatePlayButton();
+        */
+    }
+
+    public PlayerRole GetRole(Player p)
+    {
+        object myRoleObject;
+        bool status = p.CustomProperties.TryGetValue("R", out myRoleObject);
+        PlayerRole role = PlayerRole.None;
+        if(status) {
+            string myRoleString = myRoleObject.ToString();
+            switch (myRoleString) {
+                case "Blackhat":
+                    role = PlayerRole.Blackhat;
+                    break;
+                case "Whitehat":
+                    role = PlayerRole.Whitehat;
+                    break;
+                case "Observer":
+                    role = PlayerRole.Observer;
+                    break;
+                default:
+                    role = PlayerRole.None;
+                    break;
+            }
+        }
+        return role;
+    }
+
+    public void SetWaitingForPlayersLists()
+    {
+        UninteractDropdowns();
+        ResetPlayerNamesList();
+        PlayerRole myRole = GetRole(PhotonNetwork.LocalPlayer);
+        int index1 = 0;
+        int index2 = 0;
+
+        Team1PlayerRolesList[index1].interactable = true;
+        SetPlayerInfoDisplay(PlayerName, Team1PlayerNamesList, myRole, Team1PlayerRolesList, index1++);
+
+        foreach(Player p in PhotonNetwork.CurrentRoom.Players.Values) {
+            if(p.NickName != PhotonNetwork.LocalPlayer.NickName) {
+                PlayerRole pRole = GetRole(p);
+                if(pRole == myRole)
+                    SetPlayerInfoDisplay(p.NickName, Team1PlayerNamesList, pRole, Team1PlayerRolesList, index1++);
+                else
+                    SetPlayerInfoDisplay(p.NickName, Team2PlayerNamesList, pRole, Team2PlayerRolesList, index2++);
+                    
+            }
+        }
+        foreach(AIPlayer aip in AIPlayers) {
+            if(aip.role == myRole)
+                SetPlayerInfoDisplay(aip.name, Team1PlayerNamesList, aip.role, Team1PlayerRolesList, index1++);
+            else
+                SetPlayerInfoDisplay(aip.name, Team2PlayerNamesList, aip.role, Team2PlayerRolesList, index2++);
+        }
         ValidatePlayButton();
     }
 
-    public void UpdateRoom()
+    public void SetPlayerInfoDisplay(string name, List<Text> names, PlayerRole role, List<Dropdown> roles, int i)
     {
-        foreach (Player p in PhotonNetwork.CurrentRoom.Players.Values) {
-            Debug.Log(p.ToStringFull());
-        }
-
+        names[i].text = name;
+        RoleDropdownHandler rdh = roles[i].GetComponent<RoleDropdownHandler>();
+        rdh.playerName = name;
+        rdh.SetValueWithoutTrigger((int) role);
     }
 
-    public void InvalidateDropdownsExceptForMine()
+    public void OnValueChangedInRoleDropdown(string playerName, PlayerRole role, Dropdown dropdown, int index)
+    {
+        Debug.Log(playerName + " set role to " + role);
+        SetNetworkPlayerRole(role);
+        SetWaitingForPlayersLists();
+    }
+
+
+    //----------------------------------------------------------------------
+    public void UninteractDropdowns()
     {
         foreach(Dropdown dropdown in Team2PlayerRolesList) {
             dropdown.interactable = false;
         }
-
         foreach(Dropdown dropdown in Team1PlayerRolesList) {
             dropdown.interactable = false;
         }
-        int index = Team1PlayerNamesList.FindIndex(t => t.text == PlayerName);
-        Team1PlayerRolesList[index].interactable = true;
     }
 
     public void ResetPlayerNamesList()
@@ -200,23 +338,29 @@ public class NewLobbyMgr : MonoBehaviour
             txt.text = "";
         }
     }
-
+    //-------------------------------------------------------------------------
     public Button PlayButton;
     public int MinNumberOfPlayers;
     public void ValidatePlayButton()
     {
-        int count = 0;
-        foreach(Text txt in Team1PlayerNamesList) {
-            if(txt.text != "") count++;
-        }
-        if(count > MinNumberOfPlayers) PlayButton.interactable = true;
+
+        int count;
+        if(isAI)
+            count = PhotonNetwork.CurrentRoom.PlayerCount + 1;
+        else
+            count = PhotonNetwork.CurrentRoom.PlayerCount;
+        Debug.Log("ValidatePlayButton: NPlayers: " + count);
+
+        if(count >= MinNumberOfPlayers && isRoomCreator)
+            PlayButton.interactable = true;
     }
 
 
     public void OnPlayButton()
     {
         State = LobbyState.Play;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(1); //GraphPrototype
+        //UnityEngine.SceneManagement.SceneManager.LoadScene(1); //GraphPrototype
+        PhotonNetwork.LoadLevel(1);
         //...
     }
 

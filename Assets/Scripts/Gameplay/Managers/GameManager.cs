@@ -47,8 +47,9 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 		protected set => _waveStarted = value;
 	}
 
-	// Prefabs to spawn containing the managers specific to each side
-	public GameObject whiteHatPlayerPrefab, whiteHatAdvisorPrefab, blackHatPlayerPrefab, blackHatAdvisorPrefab, observerPrefab;
+    // Prefabs to spawn containing the managers specific to each side
+    public GameObject whiteHatPlayerPrefab;
+    public GameObject whiteHatAdvisorPrefab, blackHatPlayerPrefab, blackHatAdvisorPrefab, observerPrefab;
 
 
 	// When the scene starts spawn the correct side
@@ -152,7 +153,10 @@ public class GameManager : Core.Utilities.SingletonPun<GameManager> {
 
 
 	// Function which starts the next wave (Network Synced, ignores calls from players who aren't the host)
-	public void StartNextWave() { if(NetworkingManager.isHost) photonView.RPC("RPC_GameManager_StartNextWave", RpcTarget.AllBuffered); }
+	public void StartNextWave() {
+        if(NetworkingManager.isHost)
+            photonView.RPC("RPC_GameManager_StartNextWave", RpcTarget.AllBuffered);
+    }
 	[PunRPC] void RPC_GameManager_StartNextWave(){
 		Debug.Log("Starting Next Wave!");
 
