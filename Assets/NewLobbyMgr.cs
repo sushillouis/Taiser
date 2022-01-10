@@ -221,8 +221,6 @@ public class NewLobbyMgr : MonoBehaviour
         SetNetworkPlayerRole(PlayerRole.Whitehat);
         WaitForPlayers(GameName);
 
-
-
         if(isAI)
             Invoke("MakeAIPlayerAndActivatePlayButton", 1);
     }
@@ -234,17 +232,10 @@ public class NewLobbyMgr : MonoBehaviour
         string opponent = "AI";
         PlayerRole opponentRole = PlayerRole.Blackhat; // fixed for now
         AIPlayer aip = new AIPlayer();
-        aip.name = "AI";
-        aip.role = PlayerRole.Blackhat;
+        aip.name = opponent;
+        aip.role = opponentRole;
         AIPlayers.Add(aip);
         SetWaitingForPlayersLists();
-
-/*        Team2PlayerNamesList[0].text = opponent;
-        RoleDropdownHandler rdh = Team2PlayerRolesList[0].GetComponent<RoleDropdownHandler>();
-        rdh.SetValueWithoutTrigger((int) opponentRole); //assumes a single player for now
-        Team2PlayerRolesList[0].RefreshShownValue();
-        ValidatePlayButton();
-        */
     }
 
     public PlayerRole GetRole(Player p)
@@ -343,7 +334,6 @@ public class NewLobbyMgr : MonoBehaviour
     public int MinNumberOfPlayers;
     public void ValidatePlayButton()
     {
-
         int count;
         if(isAI)
             count = PhotonNetwork.CurrentRoom.PlayerCount + 1;

@@ -107,7 +107,7 @@ public class Packet : MonoBehaviourPun, SelectionManager.ISelectable {
 					ScoreManager.instance.ProcessScoreEvent(isMalicious ? ScoreManager.ScoreEvent.MaliciousSuccess : ScoreManager.ScoreEvent.GoodSuccess);
 					// TODO Remove
 					destination.LogPacket(details);
-                    NewGameMgr.inst.LogPacket(details, isMalicious, destination.DestinationId);
+                    //NewGameMgr.inst.LogPacket(details, isMalicious, destination.DestinationId);
 					//Debug.Log("Packet logged.");
 				}
 				// If the packet is malicious play a sound

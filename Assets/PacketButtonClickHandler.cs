@@ -25,7 +25,7 @@ public class PacketButtonClickHandler : MonoBehaviour
         
     }
 
-    public NewPacket packet;
+    public LightWeightPacket packet;
     public void OnPacketButtonClick()
     {
         NewGameMgr.inst.OnPacketClicked(packet);

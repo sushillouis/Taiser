@@ -130,8 +130,8 @@ public class InstrumentationManager : Core.Utilities.SingletonPun<Instrumentatio
 
 
 	void OnApplicationQuit() {
-		if(GameManager.instance?.currentWave > GameManager.instance?.maximumWaves) LogInstrumentationEventIfHost("GameManager", "GameEnd");
-		SaveToFile();
+        //if(GameManager.instance?.currentWave > GameManager.instance?.maximumWaves) LogInstrumentationEventIfHost("GameManager", "GameEnd");
+		//SaveToFile();
 	}
 
 	void OnWaveStart() { LogInstrumentationEventIfHost("GameManager", "WaveStart", "", "" + GameManager.instance?.currentWave); }
