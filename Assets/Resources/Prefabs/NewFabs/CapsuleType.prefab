@@ -156,7 +156,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a6bece77b45e61840b8dab3818659dfb, type: 2}
+  - {fileID: 2100000, guid: ec8b2ece22c3f3a47a98cef3bff7a863, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -254,10 +254,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Pid: 0
-  TColor: 1
-  Size: 2
-  Shape: 2
-  isMalicious: 0
+  packet:
+    size: 2
+    color: 1
+    shape: 2
   ShapeRef: {fileID: 4156058107478640284}
   CurrentPath:
     source: {fileID: 0}

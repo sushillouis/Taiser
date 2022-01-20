@@ -25,7 +25,7 @@ public class BlackhatAI : MonoBehaviour
     public int perWaveMaxSpawns;
     public float malPacketProbability;
 
-    public LightWeightPacket malRule = new LightWeightPacket();
+    public LightWeightPacket maliciousRule = new LightWeightPacket();
     public LightWeightPacket currentRule = new LightWeightPacket();
     public List<int> malSizeWeights;
     public List<int> malColorWeights;
@@ -61,28 +61,28 @@ public class BlackhatAI : MonoBehaviour
         lwp.shape = (PacketShape) NewGameMgr.inst.TRandom.Next(0, NewGameMgr.inst.PacketShapes.Count);
         lwp.color = (PacketColor) NewGameMgr.inst.TRandom.Next(0, NewGameMgr.inst.PacketColors.Count);
         lwp.size =  (PacketSize) NewGameMgr.inst.TRandom.Next(0, NewGameMgr.inst.PacketSizes.Count);
-        lwp.isMalicious = false;
+        //lwp.isMalicious = false;
         return lwp;
     }
 
     public void SetCurrentPacketRule()
     {
         LightWeightPacket lwp = CreateRandomRule();
-        while(lwp.isEqual(malRule)) lwp = CreateRandomRule(); //any packet except the malicious packet
+        while(lwp.isEqual(maliciousRule)) lwp = CreateRandomRule(); //any packet except the malicious packet
         currentRule = lwp; //shallow copy
     }
 
 
     public void SetMalPacketRule()
     {
-        malRule = CreateRandomRule(); //shallow copy
-        malRule.isMalicious = true; // bad rule, bad, bad
+        maliciousRule = CreateRandomRule(); //shallow copy
+        //maliciousRule.isMalicious = true; // bad rule, bad, bad
     }
 
     public void SpawnMalPacket(TSource src)
     {
         //SetMalPacketRule();
-        src.SpawnPacket(malRule);
+        src.SpawnPacket(maliciousRule);
 
     }
 
@@ -99,7 +99,7 @@ public class BlackhatAI : MonoBehaviour
             if(destination.maliciousFilteredCount > currentFilteredThreshold[destination.myId]) {
                 SetMalPacketRule();
                 currentFilteredThreshold[destination.myId] = destination.maliciousFilteredCount + threshold;
-                Debug.Log("Dest: " + destination.gameName + ": Changed mal Rule: " + malRule.ToString());
+                Debug.Log("Dest: " + destination.gameName + ": Changed mal Rule: " + maliciousRule.ToString());
             }
             blackhatScores[destination.myId] = destination.maliciousUnfilteredCount / (destination.maliciousCount + 1f);
             whitehatScores[destination.myId] = destination.maliciousFilteredCount / (destination.maliciousCount + 1f);

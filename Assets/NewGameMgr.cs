@@ -10,8 +10,15 @@ public class LightWeightPacket
     public PacketSize size;
     public PacketColor color;
     public PacketShape shape;
-    public bool isMalicious;
+    public bool isMalicious
+    {
+        get { return isEqual(BlackhatAI.inst.maliciousRule); }
+        //set { }
+    }
 
+    //    {
+    //        return isEqual(BlackhatAI.inst.maliciousRule);
+    //    }
     public bool isEqual(LightWeightPacket other)
     {
         return (color == other.color && shape == other.shape && size == other.size);
@@ -20,13 +27,13 @@ public class LightWeightPacket
     {
         return "" + size.ToString() + ", " + color.ToString() + ", " + shape.ToString();
     }
-    //public LightWeightPacket(LightWeightPacket other)
-    //{
-    //    color = other.color;
-    //    shape = other.shape;
-    //    size = other.size;
-    //    isMalicious = other.isMalicious;
-    //}
+    public void copy(LightWeightPacket other)
+    {
+        color = other.color;
+        shape = other.shape;
+        size = other.size;
+        //isMalicious = other.isMalicious;
+    }
 
 
 }
@@ -84,6 +91,9 @@ public class NewGameMgr : MonoBehaviour
     int spawnCount = 0;
     public TSource source;
     public TDestination destination;
+    /// <summary>
+    /// Deprecated hard. No longer works.
+    /// </summary>
     public void InitTest()
     {
         if (Time.frameCount % 50 == 0 && spawnCount < 20) {
@@ -103,7 +113,9 @@ public class NewGameMgr : MonoBehaviour
     int maxSpawns = 40;
     public System.Random TRandom;
 
-
+    /// <summary>
+    /// Deprecated hard. No longer works. Do not use. 
+    /// </summary>
     public void InitTest2() //spawn a wave
     {
         TPacket tp = SpawnRandomPacket();
@@ -190,7 +202,9 @@ public class NewGameMgr : MonoBehaviour
         PacketSize size = PacketSizes[sizeIndex];
 
         TPacket tp = NewEntityMgr.inst.CreatePacket(shape, color, size);
-        tp.isMalicious = (TRandom.NextDouble() < maliciousFraction);
+        //Cannot test standalone now
+        //tp.packet.copy(BlackhatAI.inst.malRule);
+        // isMalicious = (TRandom.NextDouble() < maliciousFraction);
 
         return tp;
     }

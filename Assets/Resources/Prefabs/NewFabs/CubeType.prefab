@@ -141,10 +141,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Pid: 0
-  TColor: 1
-  Size: 2
-  Shape: 0
-  isMalicious: 0
+  packet:
+    size: 2
+    color: 1
+    shape: 2
   ShapeRef: {fileID: 4863944422429507223}
   CurrentPath:
     source: {fileID: 0}

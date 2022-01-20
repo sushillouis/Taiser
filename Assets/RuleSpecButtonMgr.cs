@@ -67,11 +67,14 @@ public class RuleSpecButtonMgr : MonoBehaviour
         RuleSpecFromPlayer.shape = (PacketShape) shape;
     }
 
-    public void ApplyUserRule(LightWeightPacket lwp)
-    {
-        CurrentDestination.FilterOnRule(lwp);
-    }
+    //public void DepApplyUserRule(LightWeightPacket lwp)
+    //{
+    //    CurrentDestination.FilterOnRule(lwp);
+    //}
 
+    /// <summary>
+    /// Called from TaiserInGameStartPanel from SetFirewall button
+    /// </summary>
     public void ApplyCurrentUserRule()
     {
         CurrentDestination.FilterOnRule(RuleSpecFromPlayer);

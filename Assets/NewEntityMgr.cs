@@ -56,9 +56,8 @@ public class NewEntityMgr : MonoBehaviour
                 break;
         }
         if(null != tPacket) {
-            tPacket.Init(packetId, color, size);
+            tPacket.Init(packetId++, color, size);
             Packets.Add(tPacket);
-            packetId++;
         }
         return tPacket;
     }
@@ -110,7 +109,7 @@ public class NewEntityMgr : MonoBehaviour
     
     public void ReturnPoolPacket(TPacket packet)
     {
-        PacketPools[packet.Shape].Add(packet);
+        PacketPools[packet.packet.shape].Add(packet);
         packet.transform.SetParent(PacketPoolParent.transform);
         packet.normalizedHeading = Vector3.zero;
         packet.transform.localPosition = Vector3.zero;

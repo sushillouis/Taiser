@@ -39,16 +39,13 @@ public class TPacket : MonoBehaviour
         MoveTo();
     }
 
-    public override string ToString()
-    {
-        return "" + TColor.ToString() + ", " + Size.ToString() + ", " + Shape.ToString();
-    }
 
     public uint Pid;
-    public PacketColor TColor;
-    public PacketSize Size;
-    public PacketShape Shape;
-    public bool isMalicious;
+    //    public PacketColor TColor;
+    //    public PacketSize Size;
+    //    public PacketShape Shape;
+    public LightWeightPacket packet = new LightWeightPacket();
+
 
     public GameObject ShapeRef; //for scaling size
 
@@ -66,8 +63,8 @@ public class TPacket : MonoBehaviour
 
     public void ReInit(PacketColor color, PacketSize size)
     {
-        TColor = color;
-        Size = size;
+        packet.color = color;
+        packet.size = size;
         transform.localPosition = Vector3.zero;
         SetColor(color);
         SetSize(size);

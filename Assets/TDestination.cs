@@ -25,22 +25,23 @@ public class TDestination : MonoBehaviour
     public void OnCollisionEnter(Collision collision)
     {
         //Debug.Log("TDestination Collided with " + collision.gameObject.name);
-        TPacket packet = collision.transform.parent.gameObject.GetComponent<TPacket>();
-        if(null != packet) {
+        TPacket tPack = collision.transform.parent.gameObject.GetComponent<TPacket>();
+        if(null != tPack) {
             packetCount += 1;
             //if packet is not malicious
-            if(!packet.isMalicious) {
-                TLogPacket(packet);
-            } else if (packet.isMalicious && !isPacketFiltered(packet)) {
+            //Debug.Log("Collided packet: " + tPack.packet.ToString() + ", isMalicious: " + tPack.packet.isMalicious);
+            if(!tPack.packet.isMalicious) {
+                TLogPacket(tPack);
+            } else if (tPack.packet.isMalicious && !isPacketFiltered(tPack)) {
                 maliciousCount += 1;
                 maliciousUnfilteredCount += 1;
                 GrowButton();
-                TLogPacket(packet);
-            } else if (packet.isMalicious && isPacketFiltered(packet)) {
+                TLogPacket(tPack);
+            } else if (tPack.packet.isMalicious && isPacketFiltered(tPack)) {
                 maliciousCount += 1;
                 maliciousFilteredCount += 1;
             }
-            NewEntityMgr.inst.ReturnPoolPacket(packet); // return to pool: reparent, set velocity to zero
+            NewEntityMgr.inst.ReturnPoolPacket(tPack); // return to pool: reparent, set velocity to zero
         }
     }
 
@@ -63,10 +64,10 @@ public class TDestination : MonoBehaviour
     public void TLogPacket(TPacket taiserPacket)
     {
         LightWeightPacket packet = new LightWeightPacket();
-        packet.color = taiserPacket.TColor;
-        packet.shape = taiserPacket.Shape;
-        packet.size = taiserPacket.Size;
-        packet.isMalicious = taiserPacket.isMalicious;
+        packet.color = taiserPacket.packet.color;
+        packet.shape = taiserPacket.packet.shape;
+        packet.size = taiserPacket.packet.size;
+        //packet.isMalicious = taiserPacket.isMalicious;
         AddFIFOSizeLimitedQueue(PacketQueue, packet, QueueSizeLimit);
         // limit is what can be displayed in the button list 
     }
@@ -96,12 +97,13 @@ public class TDestination : MonoBehaviour
     public int maliciousCount = 0;
     public int maliciousUnfilteredCount = 0;
     public int packetCount = 0;
-    public bool isPacketFiltered(TPacket packet)
+    public bool isPacketFiltered(TPacket tPack)
     {
-        return isCurrentFilterValid && 
-            (packet.Size == CurrentFilter.size && 
-            packet.TColor == CurrentFilter.color && 
-            packet.Shape == CurrentFilter.shape);
+        return isCurrentFilterValid && tPack.packet.isEqual(CurrentFilter);
+        /*
+            (tPack.packet.Size == CurrentFilter.size && 
+            tPack.packet.sizeTColor == CurrentFilter.color && 
+            tPack.Shape == CurrentFilter.shape);*/
     }
 
     public void ResetCounts()

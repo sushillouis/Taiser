@@ -19,10 +19,10 @@ public class TSource : MonoBehaviour
     public string gameName;
     public void SpawnPacket(LightWeightPacket lwp)
     {
-        //Debug.Log("Source: " + myId + " spawning packet: " + lwp.ToString());
+        //if(lwp.isMalicious)
+        //Debug.Log("Source: " + myId + " Spawning Malicious packet: " + lwp.ToString());
         TPath path = NewGameMgr.inst.FindRandomPath(this);
         TPacket tp = NewEntityMgr.inst.CreatePacket(lwp.shape, lwp.color, lwp.size);//from pool
-        tp.isMalicious = lwp.isMalicious;
 
         tp.transform.parent = this.transform;
         tp.InitPath(path); // set heading changes at waypoints

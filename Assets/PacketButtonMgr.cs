@@ -55,7 +55,7 @@ public class PacketButtonMgr : MonoBehaviour
             packetButtons[index].packet.shape = lwp.shape;
             packetButtons[index].packet.size = lwp.size;
 
-            packetButtons[index].packet.isMalicious = lwp.isMalicious; // more understandable when reading than using setter property
+            //packetButtons[index].packet.isMalicious = lwp.isMalicious; // more understandable when reading than using setter property
             packetButtons[index].SetHighlightColor();
             packetButtons[index].transform.parent.gameObject.SetActive(true); //make this button panel visible
 
