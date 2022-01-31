@@ -18,6 +18,8 @@ public class BlackhatAI : MonoBehaviour
         SetCurrentPacketRule();
         SetMalPacketRule();
         InitScoring();
+        //AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
+
     }
 
     //----------------------------------------------------
@@ -41,7 +43,7 @@ public class BlackhatAI : MonoBehaviour
     void Update()
     {
         if(packetCount < 300) {
-            CheckChangeMalRule();
+            CheckChangeMalRule2();
             foreach(TSource src in NewGameMgr.inst.Sources) { //only valid sources
                 if(Flip(spawnProbabilityPerSource)) {
                     if(Flip(malPacketProbability)) {
@@ -54,6 +56,7 @@ public class BlackhatAI : MonoBehaviour
             }
         }
     }
+
 
     public LightWeightPacket CreateRandomRule()
     {
@@ -76,6 +79,7 @@ public class BlackhatAI : MonoBehaviour
     public void SetMalPacketRule()
     {
         maliciousRule = CreateRandomRule(); //shallow copy
+        PacketButtonMgr.inst.ResetHighlightColor();
         //maliciousRule.isMalicious = true; // bad rule, bad, bad
     }
 
@@ -92,6 +96,34 @@ public class BlackhatAI : MonoBehaviour
         src.SpawnPacket(currentRule);
     }
 
+    public int totalMaliciousCount;
+    public int totalMaliciousFilteredCount; //over all destinations
+    public int totalMaliciousUnFilteredCount; //over all destinations
+    public int totalCurrentFilteredThreshold;
+
+
+
+    public void CheckChangeMalRule2()
+    {
+        totalMaliciousFilteredCount = 0;
+        totalMaliciousCount = 0;
+        totalMaliciousUnFilteredCount = 0;
+        foreach(TDestination destination in NewGameMgr.inst.Destinations) {
+            totalMaliciousFilteredCount += destination.maliciousFilteredCount;
+            totalMaliciousUnFilteredCount += destination.maliciousUnfilteredCount; //is also malicious - filtered
+            totalMaliciousCount += destination.maliciousCount;
+        }
+        if(totalMaliciousFilteredCount > totalCurrentFilteredThreshold) {
+            SetMalPacketRule();
+            totalCurrentFilteredThreshold += threshold;
+            Debug.Log("Blackhat: Changed mal Rule: " + maliciousRule.ToString());
+            NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.MaliciousRuleChanged);
+        }
+        wscore = totalMaliciousFilteredCount / (totalMaliciousCount + 1f);
+        bscore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 1f);
+        NewGameMgr.inst.SetScores(bscore, wscore);
+
+    }
 
     public void CheckChangeMalRule()
     {

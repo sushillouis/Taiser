@@ -39,6 +39,7 @@ public class PacketButtonMgr : MonoBehaviour
     public void ResetPacketButtons()
     {
         foreach(PacketButtonClickHandler pbch in packetButtons) {
+            pbch.SetGreenHighlightColor();//togreen
             pbch.transform.parent.gameObject.SetActive(false);
         }
     }
@@ -64,6 +65,14 @@ public class PacketButtonMgr : MonoBehaviour
                 break;
         }
         destination.PacketQueue.Clear(); // Once you click on a button, you lose all packets
+    }
+
+    public void ResetHighlightColor()
+    {
+        foreach(PacketButtonClickHandler pbch in packetButtons) {
+            if(pbch.isActiveAndEnabled)
+                pbch.SetHighlightColor();
+        }
     }
 
 

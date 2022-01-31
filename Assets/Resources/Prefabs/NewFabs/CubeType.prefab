@@ -144,7 +144,7 @@ MonoBehaviour:
   packet:
     size: 2
     color: 1
-    shape: 2
+    shape: 0
   ShapeRef: {fileID: 4863944422429507223}
   CurrentPath:
     source: {fileID: 0}

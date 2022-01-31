@@ -11,6 +11,7 @@ public class TDestination : MonoBehaviour
         maliciousCount = 0;
         maliciousFilteredCount = 0;
         maliciousUnfilteredCount = 0;
+        originalCubeScale = maliciousCube.transform.localScale;
     }
 
     // Update is called once per frame
@@ -35,8 +36,10 @@ public class TDestination : MonoBehaviour
             } else if (tPack.packet.isMalicious && !isPacketFiltered(tPack)) {
                 maliciousCount += 1;
                 maliciousUnfilteredCount += 1;
-                GrowButton();
+                GrowCube();
                 TLogPacket(tPack);
+                NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousUnfiltered);
+
             } else if (tPack.packet.isMalicious && isPacketFiltered(tPack)) {
                 maliciousCount += 1;
                 maliciousFilteredCount += 1;
@@ -45,17 +48,24 @@ public class TDestination : MonoBehaviour
         }
     }
 
-    public Vector3 scaleDelta;
-    public Vector3 maxScale;
-
-    public void GrowButton()
+    public GameObject maliciousCube;
+    public Vector3 scaleCubeDelta;
+    public Vector3 maxCubeScale;
+    public Vector3 originalCubeScale;
+    public void GrowCube()
     {
-        if(button?.transform.localScale.x < maxScale.x)
-            button.transform.localScale += scaleDelta;
+        if(maliciousCube?.transform.localScale.y < maxCubeScale.y)
+            maliciousCube.transform.localScale += scaleCubeDelta;
     }
-    public void ResetButton()
+    public void ResetMaliciousCube(LightWeightPacket lwp)
     {
-        button.transform.localScale = Vector3.one;
+        if(lwp.isEqual(BlackhatAI.inst.maliciousRule)) {
+            maliciousCube.transform.localScale = originalCubeScale;
+            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
+        } else {
+            NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
+        }
+
     }
 
     public int QueueSizeLimit = 21;

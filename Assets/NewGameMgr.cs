@@ -13,12 +13,8 @@ public class LightWeightPacket
     public bool isMalicious
     {
         get { return isEqual(BlackhatAI.inst.maliciousRule); }
-        //set { }
     }
 
-    //    {
-    //        return isEqual(BlackhatAI.inst.maliciousRule);
-    //    }
     public bool isEqual(LightWeightPacket other)
     {
         return (color == other.color && shape == other.shape && size == other.size);
@@ -32,10 +28,7 @@ public class LightWeightPacket
         color = other.color;
         shape = other.shape;
         size = other.size;
-        //isMalicious = other.isMalicious;
     }
-
-
 }
 
 [System.Serializable]
@@ -66,16 +59,15 @@ public class NewGameMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        State = GameState.Start;
         Initialize();
-
     }
     public void Initialize()
     {
         InitSizeColorDictionary();
         TRandom = new System.Random(RandomSeed);
 
-        State = GameState.Start;
+        State = GameState.Watching;
+        HidePrototypes();
     }
     // Update is called once per frame
 
@@ -86,6 +78,15 @@ public class NewGameMgr : MonoBehaviour
 
     }
     //----------------------------------------------------------------------------------------------------
+    public List<GameObject> ToHide = new List<GameObject>();
+    public void HidePrototypes()
+    {
+        foreach(GameObject go in ToHide) {
+            foreach (MeshRenderer mr in go.GetComponentsInChildren<MeshRenderer>()) {
+                mr.enabled = false;
+            }
+        }
+    }
     //----------------------------------------------------------------------------------------------------
 
     int spawnCount = 0;
@@ -189,8 +190,8 @@ public class NewGameMgr : MonoBehaviour
         transform.GetComponentInChildren<Renderer>().material.color = testColor;
     }
 
-    public Vector3 XDirection = Vector3.zero;
-    public Vector3 ZDirection = new Vector3(0, 90, 0);
+    public Vector3 XOrientation = Vector3.zero;
+    public Vector3 ZOrientation = new Vector3(0, 90, 0);
 
     public TPacket SpawnRandomPacket()
     {

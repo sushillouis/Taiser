@@ -34,11 +34,20 @@ public class PacketButtonClickHandler : MonoBehaviour
     public ColorBlock buttonColorBlock;
     public void SetHighlightColor()
     {
+        ColorBlock bcb = button.colors;
         if(packet.isMalicious) {
-            ColorBlock bcb = button.colors;
             bcb.highlightedColor = Color.red;
-            button.colors = bcb;
+        } else {
+            bcb.highlightedColor = Color.green;
         }
+        button.colors = bcb;
+
+    }
+    public void SetGreenHighlightColor()
+    {
+        ColorBlock bcb = button.colors;
+        bcb.highlightedColor = Color.green;
+        button.colors = bcb;
     }
 
 }

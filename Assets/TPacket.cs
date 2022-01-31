@@ -129,9 +129,9 @@ public class TPacket : MonoBehaviour
         normalizedHeading = NextHeadings[NextIndex++];
         // set rotations only when vel changes
         if(normalizedHeading.x != 0)//orients correctly by being multiplied by normalizedHeading which is +1 or -1
-            transform.localEulerAngles = NewGameMgr.inst.XDirection;
+            transform.localEulerAngles = NewGameMgr.inst.XOrientation;
         if(normalizedHeading.z != 0)
-            transform.localEulerAngles = NewGameMgr.inst.ZDirection;
+            transform.localEulerAngles = NewGameMgr.inst.ZOrientation;
     }
 
 

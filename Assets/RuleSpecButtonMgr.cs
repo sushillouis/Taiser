@@ -78,7 +78,8 @@ public class RuleSpecButtonMgr : MonoBehaviour
     public void ApplyCurrentUserRule()
     {
         CurrentDestination.FilterOnRule(RuleSpecFromPlayer);
-        CurrentDestination.ResetButton();
+        //CurrentDestination.ResetButton();
+        CurrentDestination.ResetMaliciousCube(RuleSpecFromPlayer);
         NewGameMgr.inst.State = NewGameMgr.GameState.Watching;
     }
 
