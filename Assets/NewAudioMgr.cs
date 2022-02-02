@@ -14,7 +14,7 @@ public class NewAudioMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        PlayAmbient();
     }
 
     // Update is called once per frame
@@ -30,12 +30,21 @@ public class NewAudioMgr : MonoBehaviour
     public AudioClip BadFilterRule;
     public AudioClip GoodFilterRule;
 
+    public AudioClip Countdown;
+    public AudioClip Winning;
+    public AudioClip Losing;
+
+    public AudioSource ambient;
+    public AudioClip ambientClip;
 
     public void PlayOneShot(AudioClip clip)
     {
         source.PlayOneShot(clip);
     }
     
-
+    void PlayAmbient()
+    {
+        ambient.PlayDelayed(10f);
+    }
 
 }

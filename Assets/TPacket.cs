@@ -78,6 +78,8 @@ public class TPacket : MonoBehaviour
     public void SetColor(PacketColor col)
     {
         transform.GetComponentInChildren<Renderer>().material.color = NewGameMgr.inst.ColorVector[col];
+        transform.GetComponentInChildren<Renderer>().material.SetColor("_EmissiveColor", NewGameMgr.inst.ColorVector[col] * 1.5f);
+
     }
 
     /// <summary>

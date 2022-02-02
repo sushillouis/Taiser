@@ -19,10 +19,40 @@ public class BlackhatAI : MonoBehaviour
         SetMalPacketRule();
         InitScoring();
         //AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
-
+        
     }
 
-    //----------------------------------------------------
+
+    public void DoWave()
+    {
+        if(packetCount < 300) {
+            CheckChangeMalRule2();
+            foreach(TSource src in NewGameMgr.inst.Sources) { //only valid sources
+                if(Flip(spawnProbabilityPerSource)) {
+                    if(Flip(malPacketProbability)) {
+                        SpawnMalPacket(src);
+                    } else {
+                        SpawnRandomPacket(src);
+                    }
+                    packetCount++;
+                }
+            }
+        } else {
+            EndWave();//empty all sources before you declare end of wave
+        }
+    }
+    public void StartWave()
+    {
+        packetCount = 0;
+        SetMalPacketRule();
+    }
+
+    public void EndWave()
+    {
+        NewGameMgr.inst.State = NewGameMgr.GameState.FlushingSourcesToEndWave;
+    }
+    //-----------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------
     public float spawnProbabilityPerSource;
     public int perWaveMaxSpawns;
     public float malPacketProbability;
@@ -39,22 +69,12 @@ public class BlackhatAI : MonoBehaviour
     }
 
     public int packetCount = 0;
+    
     //// Update is called once per frame
     void Update()
     {
-        if(packetCount < 300) {
-            CheckChangeMalRule2();
-            foreach(TSource src in NewGameMgr.inst.Sources) { //only valid sources
-                if(Flip(spawnProbabilityPerSource)) {
-                    if(Flip(malPacketProbability)) {
-                        SpawnMalPacket(src);
-                    } else {
-                        SpawnRandomPacket(src);
-                    }
-                    packetCount++;
-                }
-            }
-        }
+        //DoWave();
+
     }
 
 

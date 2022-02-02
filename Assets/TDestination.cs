@@ -43,6 +43,9 @@ public class TDestination : MonoBehaviour
             } else if (tPack.packet.isMalicious && isPacketFiltered(tPack)) {
                 maliciousCount += 1;
                 maliciousFilteredCount += 1;
+                ShrinkCube();
+                NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousFiltered);
+
             }
             NewEntityMgr.inst.ReturnPoolPacket(tPack); // return to pool: reparent, set velocity to zero
         }
@@ -57,10 +60,15 @@ public class TDestination : MonoBehaviour
         if(maliciousCube?.transform.localScale.y < maxCubeScale.y)
             maliciousCube.transform.localScale += scaleCubeDelta;
     }
+    public void ShrinkCube()
+    {
+        if(maliciousCube?.transform.localScale.y > originalCubeScale.y)
+            maliciousCube.transform.localScale -= scaleCubeDelta;
+    }
     public void ResetMaliciousCube(LightWeightPacket lwp)
     {
         if(lwp.isEqual(BlackhatAI.inst.maliciousRule)) {
-            maliciousCube.transform.localScale = originalCubeScale;
+            //maliciousCube.transform.localScale = originalCubeScale;
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
         } else {
             NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
