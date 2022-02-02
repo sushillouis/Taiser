@@ -109,7 +109,7 @@ public class TDestination : MonoBehaviour
     public void FilterOnRule(LightWeightPacket lwp)
     {
         isCurrentFilterValid = true;
-        CurrentFilter = lwp;
+        CurrentFilter.copy(lwp);
     }
     public int maliciousFilteredCount = 0;
     public int maliciousCount = 0;

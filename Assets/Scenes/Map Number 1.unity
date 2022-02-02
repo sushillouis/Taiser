@@ -9361,6 +9361,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1151949599990927772, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
+      propertyPath: gameName
+      value: Lower West Side
+      objectReference: {fileID: 0}
+    - target: {fileID: 1151949599990927772, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
       propertyPath: maxCubeScale.y
       value: 8.33
       objectReference: {fileID: 0}
@@ -10977,6 +10981,10 @@ PrefabInstance:
     - target: {fileID: 1602253053, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1151949599990927772, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
+      propertyPath: myId
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1151949599990927772, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
       propertyPath: button

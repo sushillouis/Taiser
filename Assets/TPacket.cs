@@ -127,13 +127,15 @@ public class TPacket : MonoBehaviour
     public List<Vector3> NextHeadings = new List<Vector3>();
     public int NextIndex = 0;
     public void SetNextVelocityOnPath()
-    { 
-        normalizedHeading = NextHeadings[NextIndex++];
-        // set rotations only when vel changes
-        if(normalizedHeading.x != 0)//orients correctly by being multiplied by normalizedHeading which is +1 or -1
-            transform.localEulerAngles = NewGameMgr.inst.XOrientation;
-        if(normalizedHeading.z != 0)
-            transform.localEulerAngles = NewGameMgr.inst.ZOrientation;
+    {
+        if(NextIndex < NextHeadings.Count) {
+            normalizedHeading = NextHeadings[NextIndex++];
+            // set rotations only when vel changes
+            if(normalizedHeading.x != 0)//orients correctly by being multiplied by normalizedHeading which is +1 or -1
+                transform.localEulerAngles = NewGameMgr.inst.XOrientation;
+            if(normalizedHeading.z != 0)
+                transform.localEulerAngles = NewGameMgr.inst.ZOrientation;
+        }
     }
 
 
