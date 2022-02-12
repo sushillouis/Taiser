@@ -24,6 +24,7 @@ public class NewLobbyMgr : MonoBehaviour
     void Start()
     {
         State = LobbyState.StartOrQuit;
+        SetPriorStateMap();
     }
 
     // Update is called once per frame
@@ -71,12 +72,26 @@ public class NewLobbyMgr : MonoBehaviour
         Application.Quit();
     }
 
+    public void OnBackButton()
+    {
+        State = PriorStateMap[State];
+    }
+    public Dictionary<LobbyState, LobbyState> PriorStateMap = new Dictionary<LobbyState, LobbyState>();
+    public void SetPriorStateMap()
+    {
+        PriorStateMap.Add(LobbyState.StartOrQuit, LobbyState.StartOrQuit);
+        PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
+        PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
+        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.CreateOrJoin);
+    }
+
+
     public InputField AliasInputFieldText;
     public Text PlayerNameText;
     public Text GameNamePlaceholderText;
 
     public string GameName;
-    public string PlayerName;
+    public static string PlayerName;
 
     public void OnJoinButton()
     {

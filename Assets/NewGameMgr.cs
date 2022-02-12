@@ -23,6 +23,7 @@ public class LightWeightPacket
     {
         return "" + size.ToString() + ", " + color.ToString() + ", " + shape.ToString();
     }
+
     public void copy(LightWeightPacket other)
     {
         color = other.color;
@@ -330,6 +331,7 @@ public class NewGameMgr : MonoBehaviour
     public void OnPacketClicked(LightWeightPacket packet)
     {
         DisplayPacketInformation(packet); // expand on this
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PacketInspect.ToString(), packet.ToString());
     }
 
     public void DisplayPacketInformation(LightWeightPacket packet)
@@ -364,6 +366,7 @@ public class NewGameMgr : MonoBehaviour
         PacketButtonMgr.inst.OnAttackableDestinationClicked(destination); // multiple things are happening
         RuleSpecButtonMgr.inst.CurrentDestination = destination;
         FilterRuleSpecTitle.text = destination.gameName;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousBuilding.ToString(), destination.name);
         State = GameState.PacketExamining;
     }
 
@@ -387,7 +390,14 @@ public class NewGameMgr : MonoBehaviour
     }
     public void QuitRoom()
     {
-        Application.Quit();
+        InstrumentMgr.inst.WriteSession();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    public void OnMenuButtonClicked()
+    {
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.Menu.ToString());
+        State = GameState.Menu;
     }
 
     public void OnReady()
@@ -407,7 +417,7 @@ public class NewGameMgr : MonoBehaviour
 
 
     //----------------------------------------------------------------------------------------------------
-    //
+    //Deprecated. Only use to see how you might set up a test /Testing
     //----------------------------------------------------------------------------------------------------
     int spawnCount = 0;
     public TSource source;

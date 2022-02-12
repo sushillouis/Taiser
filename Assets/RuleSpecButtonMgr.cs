@@ -57,20 +57,19 @@ public class RuleSpecButtonMgr : MonoBehaviour
     public void OnSizeClick(int size)
     {
         RuleSpecFromPlayer.size = (PacketSize) size;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), RuleSpecFromPlayer.size.ToString());
     }
     public void OnColorClick(int color)
     {
         RuleSpecFromPlayer.color = (PacketColor) color;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), RuleSpecFromPlayer.color.ToString());
     }
     public void OnShapeClick(int shape)
     {
         RuleSpecFromPlayer.shape = (PacketShape) shape;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), RuleSpecFromPlayer.shape.ToString());
     }
 
-    //public void DepApplyUserRule(LightWeightPacket lwp)
-    //{
-    //    CurrentDestination.FilterOnRule(lwp);
-    //}
 
     /// <summary>
     /// Called from TaiserInGameStartPanel from SetFirewall button
@@ -78,8 +77,16 @@ public class RuleSpecButtonMgr : MonoBehaviour
     public void ApplyCurrentUserRule()
     {
         CurrentDestination.FilterOnRule(RuleSpecFromPlayer);
-        //CurrentDestination.ResetButton();
-        CurrentDestination.ResetMaliciousCube(RuleSpecFromPlayer);
+
+        if(RuleSpecFromPlayer.isEqual(BlackhatAI.inst.maliciousRule)) {
+            InstrumentMgr.inst.AddRecord(TaiserEventTypes.FirewallSetCorrect.ToString());
+            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
+        } else {
+            InstrumentMgr.inst.AddRecord(TaiserEventTypes.FirewallSetInCorrect.ToString());
+            NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
+        }
+
+
         NewGameMgr.inst.State = NewGameMgr.GameState.InWave;
     }
 

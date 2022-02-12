@@ -513,6 +513,38 @@ PrefabInstance:
       propertyPath: m_Name
       value: WaitingForPlayersTaisersPanel
       objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394906, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 119819434}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnBackButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: NewLobbyMgr, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
 --- !u!224 &224375303 stripped
@@ -1010,6 +1042,38 @@ PrefabInstance:
     - target: {fileID: 755304585183304663, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_Name
       value: CreateOrJoinGameTaiserPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394906, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 119819434}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnBackButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: NewLobbyMgr, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
@@ -3460,11 +3524,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 755304585183304662, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 2245
+      value: 4459
       objectReference: {fileID: 0}
     - target: {fileID: 755304585183304662, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 983
       objectReference: {fileID: 0}
     - target: {fileID: 755304585183304662, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5377,6 +5441,38 @@ PrefabInstance:
     - target: {fileID: 755304585183304663, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_Name
       value: EnterAliasTaiserPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394906, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 119819434}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnBackButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: NewLobbyMgr, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586003394908, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}

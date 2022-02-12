@@ -45,10 +45,12 @@ public class BlackhatAI : MonoBehaviour
     {
         packetCount = 0;
         SetMalPacketRule();
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
     }
 
     public void EndWave()
     {
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.EndWave.ToString());
         NewGameMgr.inst.State = NewGameMgr.GameState.FlushingSourcesToEndWave;
     }
     //-----------------------------------------------------------------------------------------
@@ -100,6 +102,7 @@ public class BlackhatAI : MonoBehaviour
     {
         maliciousRule = CreateRandomRule(); //shallow copy
         PacketButtonMgr.inst.ResetHighlightColor();
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.SetNewMaliciousRule.ToString());
         //maliciousRule.isMalicious = true; // bad rule, bad, bad
     }
 

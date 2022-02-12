@@ -67,13 +67,7 @@ public class TDestination : MonoBehaviour
     }
     public void ResetMaliciousCube(LightWeightPacket lwp)
     {
-        if(lwp.isEqual(BlackhatAI.inst.maliciousRule)) {
-            //maliciousCube.transform.localScale = originalCubeScale;
-            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
-        } else {
-            NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
-        }
-
+        maliciousCube.transform.localScale = originalCubeScale;
     }
 
     public int QueueSizeLimit = 21;
