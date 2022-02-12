@@ -6930,7 +6930,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   source: {fileID: 1122375880}
-  maliciousUnfiltered: {fileID: 8300000, guid: b43d102aac6b145468dcaa94a5cccae1, type: 3}
+  maliciousUnfiltered: {fileID: 8300000, guid: 84e427d6b66ab4066b6a4dcd0ce819ee, type: 3}
   maliciousFiltered: {fileID: 8300000, guid: 19f89c6e740e7447f9e12a8310d3e973, type: 3}
   MaliciousRuleChanged: {fileID: 8300000, guid: a235d590ef2a04d1b85b61ef4c21337c, type: 3}
   BadFilterRule: {fileID: 8300000, guid: 80e397195ea2940b69ee7bdbded856a5, type: 3}
@@ -6939,7 +6939,6 @@ MonoBehaviour:
   Winning: {fileID: 8300000, guid: eabf1734e914b9f43ad5ce2c572a649f, type: 3}
   Losing: {fileID: 8300000, guid: 19684cbcfd77ce84d82c744685197714, type: 3}
   ambient: {fileID: 1122375881}
-  ambientClip: {fileID: 0}
 --- !u!82 &1122375880
 AudioSource:
   m_ObjectHideFlags: 0

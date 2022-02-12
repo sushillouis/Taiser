@@ -35,7 +35,7 @@ public class NewAudioMgr : MonoBehaviour
     public AudioClip Losing;
 
     public AudioSource ambient;
-    public AudioClip ambientClip;
+    //public AudioClip ambientClip;
 
     public void PlayOneShot(AudioClip clip)
     {
@@ -44,7 +44,8 @@ public class NewAudioMgr : MonoBehaviour
     
     void PlayAmbient()
     {
-        ambient.PlayDelayed(10f);
+        //ambient.PlayDelayed(10f);
+        ambient.Play();
     }
 
 }
