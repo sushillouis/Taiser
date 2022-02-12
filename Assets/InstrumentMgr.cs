@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 using System.IO;
 using System.Text;
+using System.Xml;
 
 //----------------------------------------------------
-//should use csv helper
+//Could use csv helper, but seems too much for our 
+//simple needs and adds unneeded dependency
 //https://joshclose.github.io/CsvHelper/
 //----------------------------------------------------
 
@@ -28,8 +31,8 @@ public class TaiserRecord
     /// From start of game
     /// </summary>
     public float secondsFromStart;
-    public string eventName;
-    public List<string> eventModifiers;
+    public string eventName; //Is the .ToString() of TaiserEventTypes below
+    public List<string> eventModifiers; // Only one event type has event modifiers right now
 }
 
 [System.Serializable]
@@ -44,7 +47,7 @@ public enum TaiserEventTypes
     PacketInspect,      //Packet info
     StartWave,
     EndWave,
-    SetNewMaliciousRule,
+    SetNewMaliciousRule, // set by blackhat
 }
 
 public class InstrumentMgr : MonoBehaviour
@@ -59,7 +62,6 @@ public class InstrumentMgr : MonoBehaviour
     void Start()
     {
         CreateOrFindTaiserFolder();
-
     }
 
     // Update is called once per frame
@@ -106,34 +108,85 @@ public class InstrumentMgr : MonoBehaviour
         record.secondsFromStart = Time.realtimeSinceStartup;
         session.records.Add(record);
     }
+    //-----------------------------------------------------------------
 
+    //public string csvString;
+    IEnumerator WriteToServer()
+    {
+        XmlDocument map = new XmlDocument();
+        map.LoadXml("<level></level>");
+        byte[] levelData = Encoding.UTF8.GetBytes(MakeHeaderString() + MakeRecords());
+        string fileName = new string(session.name.ToCharArray()); // Path.GetRandomFileName().Substring(0, 8);
+        fileName = fileName + ".csv";
+
+        WWWForm form = new WWWForm();
+        Debug.Log("Created new WWW Form");
+        form.AddField("action", "level upload");
+        form.AddField("file", "file");
+        form.AddBinaryData("file", levelData, fileName, "text/csv");
+        Debug.Log("Binary data added");
+        WWW w = new WWW("https://www.cse.unr.edu/~sushil/taiser/DataLoad.php", form);
+        yield return w;
+
+        if(w.error != null) {
+            Debug.Log("Error: " + w.error);
+        } else {
+            Debug.Log("No errors");
+            if(w.uploadProgress == 1 || w.isDone) {
+                yield return new WaitForSeconds(5);
+                Debug.Log("Waited five seconds");
+            }
+        }
+        
+
+
+    }
+
+    //-----------------------------------------------------------------
+    public static bool isDebug = true;
     public void WriteSession()
     {
-        session.whitehatScore = BlackhatAI.inst.wscore;
-        session.blackhatScore = BlackhatAI.inst.bscore;
-        session.name = NewLobbyMgr.PlayerName;
-        using(StreamWriter sw = new StreamWriter(File.Open(Path.Combine(TaiserFolder, session.name+".csv"), FileMode.CreateNew), Encoding.UTF8)) {
+        session.whitehatScore = NewGameMgr.inst.WhitehatScore; // BlackhatAI.inst.wscore;
+        session.blackhatScore = NewGameMgr.inst.BlackhatScore; // BlackhatAI.inst.bscore;
+        session.name = (isDebug ? "sjl" : NewLobbyMgr.PlayerName);
+        using(StreamWriter sw = new StreamWriter(File.Open(Path.Combine(TaiserFolder, session.name+".csv"), FileMode.Create), Encoding.UTF8)) {
             WriteHeader(sw);
             WriteRecords(sw);
         }
-    }
 
+        StartCoroutine("WriteToServer");
+    }
+    
     public void WriteHeader(StreamWriter sw)
     {
-        sw.WriteLine(session.name + ", " + session.role + ", " + session.dayAndTime);
-        sw.WriteLine("Whitehat Score, " + session.whitehatScore.ToString("00.0") + 
-            ", Blackhat Score, " + session.blackhatScore.ToString("00.0"));
-        sw.WriteLine("Time, Event, Modifiers");
+        sw.WriteLine(MakeHeaderString());
+    }
 
+    string eoln = "\r\n"; //CSV RFC: https://datatracker.ietf.org/doc/html/rfc4180
+    public string MakeHeaderString()
+    {
+        string header = "";
+        header += session.name + ", " + session.role + ", " + session.dayAndTime + eoln;
+        header += "Whitehat Score, " + session.whitehatScore.ToString("00.0") +
+            ", Blackhat Score, " + session.blackhatScore.ToString("00.0") + eoln;
+        header += "Time, Event, Modifiers" + eoln;
+        return header;
     }
     
     public void WriteRecords(StreamWriter sw)
     {
+        sw.WriteLine(MakeRecords());
+    }
+
+    public string MakeRecords()
+    {
+        string lines = "";
         foreach(TaiserRecord tr in session.records) {
             string mods = CSVString(tr.eventModifiers);
-            sw.WriteLine(tr.secondsFromStart.ToString("0000.0") + ", "
-                + tr.eventName + mods);
+            lines += tr.secondsFromStart.ToString("0000.0") + ", " + tr.eventName + mods + eoln;
         }
+        return lines;
+
     }
 
     public string CSVString(List<string> mods)

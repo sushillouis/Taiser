@@ -365,6 +365,7 @@ public class NewLobbyMgr : MonoBehaviour
     {
         State = LobbyState.Play;
         //UnityEngine.SceneManagement.SceneManager.LoadScene(1); //GraphPrototype
+        InstrumentMgr.isDebug = false;
         PhotonNetwork.LoadLevel(1);
         //...
     }

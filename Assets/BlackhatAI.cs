@@ -17,7 +17,7 @@ public class BlackhatAI : MonoBehaviour
     {
         SetCurrentPacketRule();
         SetMalPacketRule();
-        InitScoring();
+        //InitScoring();
         //AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
         
     }
@@ -119,80 +119,39 @@ public class BlackhatAI : MonoBehaviour
         src.SpawnPacket(currentRule);
     }
 
-    public int totalMaliciousCount;
-    public int totalMaliciousFilteredCount; //over all destinations
-    public int totalMaliciousUnFilteredCount; //over all destinations
     public int totalCurrentFilteredThreshold;
-
-
-
+    public int threshold = 20;
     public void CheckChangeMalRule2()
     {
-        totalMaliciousFilteredCount = 0;
-        totalMaliciousCount = 0;
-        totalMaliciousUnFilteredCount = 0;
-        foreach(TDestination destination in NewGameMgr.inst.Destinations) {
-            totalMaliciousFilteredCount += destination.maliciousFilteredCount;
-            totalMaliciousUnFilteredCount += destination.maliciousUnfilteredCount; //is also malicious - filtered
-            totalMaliciousCount += destination.maliciousCount;
-        }
-        if(totalMaliciousFilteredCount > totalCurrentFilteredThreshold) {
+        if(NewGameMgr.inst.totalMaliciousFilteredCount > totalCurrentFilteredThreshold) {
             SetMalPacketRule();
             totalCurrentFilteredThreshold += threshold;
             Debug.Log("Blackhat: Changed mal Rule: " + maliciousRule.ToString());
             NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.MaliciousRuleChanged);
         }
-        wscore = totalMaliciousFilteredCount / (totalMaliciousCount + 1f);
-        bscore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 1f);
-        NewGameMgr.inst.SetScores(bscore, wscore);
-
     }
 
-    public void CheckChangeMalRule()
-    {
-        foreach(TDestination destination in NewGameMgr.inst.Destinations) {
-            if(destination.maliciousFilteredCount > currentFilteredThreshold[destination.myId]) {
-                SetMalPacketRule();
-                currentFilteredThreshold[destination.myId] = destination.maliciousFilteredCount + threshold;
-                Debug.Log("Dest: " + destination.gameName + ": Changed mal Rule: " + maliciousRule.ToString());
-            }
-            blackhatScores[destination.myId] = destination.maliciousUnfilteredCount / (destination.maliciousCount + 1f);
-            whitehatScores[destination.myId] = destination.maliciousFilteredCount / (destination.maliciousCount + 1f);
-            //+ 1f in denominator to not divide by 0 and get promoted to float result
-        }
-        bscore = ScoreCombine(blackhatScores);
-        wscore = ScoreCombine(whitehatScores);
-        NewGameMgr.inst.SetScores(bscore, wscore);
-        //NewGameMgr.inst.SetScores(score(blackhatScore), score(whitehatScore));
-    }
 
-    public float ScoreCombine(List<float> scores)
-    {
-        float score = 0;
-        foreach(float s in scores) {
-            score += s;
-        }
-        return 100f * score / scores.Count;
-    }
 
-    public void InitScoring()
-    {
-        currentFilteredThreshold.Clear();
-        blackhatScores.Clear();
-        whitehatScores.Clear();
-        foreach(TDestination dest in NewGameMgr.inst.Destinations) {
-            currentFilteredThreshold.Add(threshold);
-            blackhatScores.Add(0);
-            whitehatScores.Add(0);
-        }
-    }
+    //public void InitScoring()
+    //{
+    //    currentFilteredThreshold.Clear();
+    //    blackhatScores.Clear();
+    //    whitehatScores.Clear();
+    //    foreach(TDestination dest in NewGameMgr.inst.Destinations) {
+    //        currentFilteredThreshold.Add(threshold);
+    //        blackhatScores.Add(0);
+    //        whitehatScores.Add(0);
+    //    }
+    //}
 
-    public List<int> currentFilteredThreshold = new List<int>();
-    public int threshold = 20;
+    //public List<int> currentFilteredThreshold = new List<int>();
 
-    public List<float> blackhatScores = new List<float>();
-    public List<float> whitehatScores = new List<float>();
-    public float bscore;
-    public float wscore;
+
+    //public List<float> blackhatScores = new List<float>();
+    //public List<float> whitehatScores = new List<float>();
 
 }
+
+
+

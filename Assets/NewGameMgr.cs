@@ -74,6 +74,7 @@ public class NewGameMgr : MonoBehaviour
 
     void Update()
     {
+        UpdateScore();
         if(State == GameState.InWave)
             BlackhatAI.inst.DoWave();
 
@@ -113,44 +114,49 @@ public class NewGameMgr : MonoBehaviour
     }
 
     public Text VictoryOrDefeatText;
-
+    public Text AnotherWaveAwaitsMessageText;
     public void EndWave()
     {
         Debug.Log("Ending Wave: " + currentWaveNumber);
         State = GameState.WaveEnd;
         SetWaveEndScores();
-        if(BlackhatAI.inst.wscore > BlackhatAI.inst.bscore) {
+        if(WhitehatScore > BlackhatScore) { 
             VictoryOrDefeatText.text = "Victory!";
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Winning);
         } else {
             VictoryOrDefeatText.text = "Defeat!";
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Losing);
         }
-        Invoke("WaitToStartNextWave", 10f);
+        currentWaveNumber += 1;
+        if(currentWaveNumber >= maxWaves)
+            AnotherWaveAwaitsMessageText.text = "Wait... To Wave Goodbye!";
+        else
+            AnotherWaveAwaitsMessageText.text = "Wait... Get Ready for Wave " + (1+currentWaveNumber).ToString("0")
+                + " of " + maxWaves.ToString("0");
+
+        Invoke("WaitToStartNextWave", 8f);
     }
 
     public RectTransform blackhatBarPanel;
-    public Vector3 blackhatScoreScaler = Vector3.one;
+    public Vector3 waveEndBlackhatScoreScaler = Vector3.one;
     public RectTransform whiteHatBarPanel;
-    public Vector3 whitehatScoreScaler = Vector3.one;
+    public Vector3 waveEndWhitehatScoreScaler = Vector3.one;
     public void SetWaveEndScores()
     {
-        blackhatScoreScaler.y = BlackhatAI.inst.bscore;
-        blackhatBarPanel.localScale = blackhatScoreScaler;
-        whitehatScoreScaler.y = BlackhatAI.inst.wscore;
-        whiteHatBarPanel.localScale = whitehatScoreScaler;
+        SetScores(BlackhatScore, WhitehatScore);
+        waveEndBlackhatScoreScaler.y = BlackhatScore;
+        blackhatBarPanel.localScale = waveEndBlackhatScoreScaler;
+        waveEndWhitehatScoreScaler.y = WhitehatScore;
+        whiteHatBarPanel.localScale = waveEndWhitehatScoreScaler;
     }
 
     void WaitToStartNextWave()
     {
-        currentWaveNumber += 1;
         Debug.Log("Waiting to start next wave: " + currentWaveNumber);
         if(currentWaveNumber < maxWaves)
             StartWave();
         else
             State = GameState.Menu;
-
-
     }
 
 
@@ -370,13 +376,54 @@ public class NewGameMgr : MonoBehaviour
         State = GameState.PacketExamining;
     }
 
+    
+    //-------------------------------------------------------------------------------------
     public Text whitehatScoreText;
     public Text blackhatScoreText;
+    public RectTransform WhitehatWatchingScorePanel;
+    public RectTransform BlackhatWatchingScorePanel;
+    public float minScaley = 0.0f;
     public void SetScores(float blackhatScore, float whitehatScore)
     {
-        whitehatScoreText.text = whitehatScore.ToString("0.0");
-        blackhatScoreText.text = blackhatScore.ToString("0.0");
+        //whitehatScoreText.text = whitehatScore.ToString("0.0");
+        //blackhatScoreText.text = blackhatScore.ToString("0.0");
+        SetBars(BlackhatWatchingScorePanel, blackhatScore, WhitehatWatchingScorePanel, whitehatScore);
     }
+    public Vector3 inWaveWhitehatScaler = Vector3.one;
+    public Vector3 inWaveBlackhatScaler = Vector3.one;
+    public void SetBars(RectTransform blackhatBarPanel, float blackhatScore, 
+        RectTransform whitehatBarPanel, float whitehatScore)
+    {
+        inWaveWhitehatScaler.x = whitehatScore + minScaley;
+        whitehatBarPanel.localScale = inWaveWhitehatScaler;
+        inWaveBlackhatScaler.x = blackhatScore + minScaley;
+        blackhatBarPanel.localScale = inWaveBlackhatScaler;
+    }
+
+    public float WhitehatScore = 0;
+    public float BlackhatScore = 0;
+
+    public int totalMaliciousCount;
+    public int totalMaliciousFilteredCount; //over all destinations
+    public int totalMaliciousUnFilteredCount; //over all destinations
+
+    public void UpdateScore()
+    {
+        totalMaliciousFilteredCount = 0;
+        totalMaliciousCount = 0;
+        totalMaliciousUnFilteredCount = 0;
+        foreach(TDestination destination in Destinations) {
+            totalMaliciousFilteredCount += destination.maliciousFilteredCount;
+            totalMaliciousUnFilteredCount += destination.maliciousUnfilteredCount; //is also malicious - filtered
+            totalMaliciousCount += destination.maliciousCount;
+        }
+
+        WhitehatScore = totalMaliciousFilteredCount / (totalMaliciousCount + 1f);
+        BlackhatScore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 1f);
+        SetScores(BlackhatScore, WhitehatScore);
+    }
+
+
 
     //-------------------------------------------------------------------------------------
     public void OnMenuBackButton()
