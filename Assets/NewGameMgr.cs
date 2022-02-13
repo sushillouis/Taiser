@@ -122,10 +122,10 @@ public class NewGameMgr : MonoBehaviour
         SetWaveEndScores();
         if(WhitehatScore > BlackhatScore) { 
             VictoryOrDefeatText.text = "Victory!";
-            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Winning);
+            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Winning, 2.0f);
         } else {
             VictoryOrDefeatText.text = "Defeat!";
-            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Losing);
+            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Losing, 8.0f);
         }
         currentWaveNumber += 1;
         if(currentWaveNumber >= maxWaves)
