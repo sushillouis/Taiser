@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerBase> {
+	
+	
 	// -- NamedAudioClip --
 
 
@@ -130,7 +132,7 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 		// Function which cancels any gradual volume fades
 		// NOTE: By default it will leave the volume wherever it happened to be, but if <snapVolume> is true then the volume will be snapped to its desired value
 		public void CancelFadeVolume(bool snapVolume = false){
-			if(fadeVolumeCoroutine == null) return;
+			if(fadeVolumeCoroutine is null) return;
 
 			owner.StopCoroutine(fadeVolumeCoroutine);
 			fadeVolumeCoroutine = null;
@@ -202,7 +204,7 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 			// If there is a fade duration, then start the fade routine...
 			if(fadeDuration > 0){
 				// Make sure there is a clip that we are fading from (pick the first clip and sets its volume to 0)
-				if(source.clip == null){
+				if(source.clip is null){
 					var e = tracks.GetEnumerator();
 					e.MoveNext();
 					source.clip = e.Current.Value;
@@ -219,7 +221,7 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 
 		// Function which cancels a track crossfade
 		public void CancelTrackSwitch(){
-			if(trackFade == null) return;
+			if(trackFade is null) return;
 
 			owner.StopCoroutine(trackFade);
 			fadeBetweenTracksEnd();
@@ -237,8 +239,8 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 			fadeBetweenTracks_SecondarySource.Stop();
 			fadeBetweenTracks_SecondarySource.transform.parent = source.transform.parent;
 			fadeBetweenTracks_SecondarySource.clip = newTrack;
-			fadeBetweenTracks_SecondarySource.Play();
 			fadeBetweenTracks_SecondarySource.volume = 0;
+			fadeBetweenTracks_SecondarySource.Play();
 
 			// Save the volume we are fading from
 			float initialVolume = source.volume;
@@ -271,6 +273,9 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 			fadeBetweenTracks_SecondarySource = null;
 			// Make 100% sure that we are at exactly the requested volume
 			source.volume = volume;
+
+			// Mark that we have finished fading
+			trackFade = null;
 		}
 
 
@@ -290,7 +295,7 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 
 		// Function which cancels the current cycle
 		public void CancelCycleTracks(){
-			if(trackCycle == null) return;
+			if(trackCycle is null) return;
 
 			source.loop = trackCycler_SavedLoop; // Ensure that the saved looping state is saved
 			owner.StopCoroutine(trackCycle);
@@ -309,8 +314,13 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 				// Switch to that track
 				SwitchTrack(name, fadeDuration, /*Don't cancel track cycling*/ false);
 
-				// Wait for the track to finish playing
-				while(source.clip.length - source.time > fadeDuration) { yield return null; }
+				// Wait for the fade to finish
+				while(!(trackFade is null))
+					yield return null; 
+
+				// Wait for the track to be fadeDuration away from being finished playing
+				while(source.clip.length - source.time > fadeDuration)
+					yield return null; 
 			}
 
 			// Restore the saved loop state
@@ -337,7 +347,7 @@ public class AudioManagerBase : Core.Utilities.PersistentSingleton<AudioManagerB
 
 		// Attempt to add tracks (null exception handling in place so that it can properly handle an empty array from the inspector)
 		try{
-			if(clips != null)
+			if(!(clips is null))
 				player.AddTracks(clips);
 		} catch (System.NullReferenceException) {}
 
