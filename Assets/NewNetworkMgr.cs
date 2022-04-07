@@ -9,6 +9,7 @@ using ExitGames.Client.Photon;
 public class NewNetworkMgr : MonoBehaviourPunCallbacks
 {
     public static NewNetworkMgr inst;
+    public bool doMultiplayer = false;
     private void Awake()
     {
         inst = this;
@@ -17,7 +18,15 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        Connect();   
+        if(doMultiplayer)
+            Connect();
+        else
+            SetupSinglePlayer();
+    }
+
+    public void SetupSinglePlayer()
+    {
+
     }
 
     // Update is called once per frame

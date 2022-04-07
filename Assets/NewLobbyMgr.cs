@@ -9,7 +9,7 @@ using Photon.Pun;
 public class AIPlayer
 {
     public string name;
-    public NewLobbyMgr.PlayerRole role;
+    public NewLobbyMgr.PlayerRoles role;
 }
 
 public class NewLobbyMgr : MonoBehaviour
@@ -92,12 +92,15 @@ public class NewLobbyMgr : MonoBehaviour
 
     public string GameName;
     public static string PlayerName;
+    public static PlayerRoles PlayerRole;
+    public RectTransform JoinGameSubPanel;
 
     public void OnJoinButton()
     {
+
         PlayerName = AliasInputFieldText.text.Trim();
         PlayerNameText.text = PlayerName;
-        PhotonNetwork.LocalPlayer.NickName = PlayerName;
+        PlayerRole = PlayerRoles.Whitehat;
 
         GameName = PlayerName + "_Taiser";
         GameNamePlaceholderText.text = GameName;
@@ -106,17 +109,21 @@ public class NewLobbyMgr : MonoBehaviour
         //if(!NetworkingManager.gameOpened)
         //    NetworkingManager.gameOpened = true;
 
-        Debug.Log("Joined Lobby with name: " + PhotonNetwork.LocalPlayer.NickName);
 
-
-        UpdateRoomList();
+        if(!NewNetworkMgr.inst.doMultiplayer) {
+            PhotonNetwork.LocalPlayer.NickName = PlayerName;
+            JoinGameSubPanel.gameObject.SetActive(false);
+        } else {
+            Debug.Log("Joined Lobby with name: " + PhotonNetwork.LocalPlayer.NickName);
+            UpdateRoomList();
+        }
         
         State = LobbyState.CreateOrJoin;
         //...
     }
 
     //------------------------------------------------------------------
-    public enum PlayerRole
+    public enum PlayerRoles
     {
         Whitehat = 0,
         Blackhat,
@@ -124,7 +131,7 @@ public class NewLobbyMgr : MonoBehaviour
         None
     }
 
-    public void SetNetworkPlayerRole(PlayerRole role)
+    public void SetNetworkPlayerRole(PlayerRoles role)
     {
         ExitGames.Client.Photon.Hashtable playerProps = new ExitGames.Client.Photon.Hashtable();
         playerProps.Add("R", role.ToString());
@@ -136,7 +143,7 @@ public class NewLobbyMgr : MonoBehaviour
     {
         string roomName = RoomButtonsList[buttonId].GetComponentInChildren<Text>().text.Trim();
         Debug.Log(PhotonNetwork.NickName + " is joining " + roomName);
-        SetNetworkPlayerRole(PlayerRole.Blackhat);
+        SetNetworkPlayerRole(PlayerRoles.Blackhat);
         NewNetworkMgr.inst.JoinTaiserRoom(roomName);
 
         WaitForPlayers(roomName);
@@ -230,14 +237,19 @@ public class NewLobbyMgr : MonoBehaviour
         GameName =
             (GameNameInputField.text.Length == 0 ? GameName : GameNameInputField.text);
         //NetworkingManager.instance.CreateRoom(GameName, /*max players*/ 2, true);
-        NewNetworkMgr.inst.CreateTaiserRoom(GameName, MaxPlayersPerRoom);
-        isRoomCreator = true;
-
-        SetNetworkPlayerRole(PlayerRole.Whitehat);
-        WaitForPlayers(GameName);
+        if(NewNetworkMgr.inst.doMultiplayer) {
+            NewNetworkMgr.inst.CreateTaiserRoom(GameName, MaxPlayersPerRoom);
+            isRoomCreator = true;
+            SetNetworkPlayerRole(PlayerRoles.Whitehat);
+        } 
 
         if(isAI)
             Invoke("MakeAIPlayerAndActivatePlayButton", 1);
+        else
+            Invoke("MakeHumanPlayerAndActivatePlayButton", 1);
+
+        WaitForPlayers(GameName);
+
     }
 
     //-----------------------------------------------------------
@@ -245,7 +257,7 @@ public class NewLobbyMgr : MonoBehaviour
     public void MakeAIPlayerAndActivatePlayButton()
     {
         string opponent = "AI";
-        PlayerRole opponentRole = PlayerRole.Blackhat; // fixed for now
+        PlayerRoles opponentRole = PlayerRoles.Blackhat; // fixed for now
         AIPlayer aip = new AIPlayer();
         aip.name = opponent;
         aip.role = opponentRole;
@@ -253,25 +265,38 @@ public class NewLobbyMgr : MonoBehaviour
         SetWaitingForPlayersLists();
     }
 
-    public PlayerRole GetRole(Player p)
+    public void MakeHumanPlayerAndActivatePlayButton()
+    {
+        string opponent = "Alex";
+        PlayerRoles opponentRole = PlayerRoles.Blackhat; // fixed for now
+        AIPlayer aip = new AIPlayer(); //same as our pretend human alex
+        aip.name = opponent;
+        aip.role = opponentRole;
+        AIPlayers.Add(aip);
+        SetWaitingForPlayersLists();
+    }
+
+
+
+    public PlayerRoles GetRole(Player p)
     {
         object myRoleObject;
         bool status = p.CustomProperties.TryGetValue("R", out myRoleObject);
-        PlayerRole role = PlayerRole.None;
+        PlayerRoles role = PlayerRoles.None;
         if(status) {
             string myRoleString = myRoleObject.ToString();
             switch (myRoleString) {
                 case "Blackhat":
-                    role = PlayerRole.Blackhat;
+                    role = PlayerRoles.Blackhat;
                     break;
                 case "Whitehat":
-                    role = PlayerRole.Whitehat;
+                    role = PlayerRoles.Whitehat;
                     break;
                 case "Observer":
-                    role = PlayerRole.Observer;
+                    role = PlayerRoles.Observer;
                     break;
                 default:
-                    role = PlayerRole.None;
+                    role = PlayerRoles.None;
                     break;
             }
         }
@@ -282,22 +307,30 @@ public class NewLobbyMgr : MonoBehaviour
     {
         UninteractDropdowns();
         ResetPlayerNamesList();
-        PlayerRole myRole = GetRole(PhotonNetwork.LocalPlayer);
+
+
         int index1 = 0;
         int index2 = 0;
+        PlayerRoles myRole;
 
-        Team1PlayerRolesList[index1].interactable = true;
-        SetPlayerInfoDisplay(PlayerName, Team1PlayerNamesList, myRole, Team1PlayerRolesList, index1++);
+        if(NewNetworkMgr.inst.doMultiplayer) {
+            myRole = GetRole(PhotonNetwork.LocalPlayer);
+            Team1PlayerRolesList[index1].interactable = true;
+            SetPlayerInfoDisplay(PlayerName, Team1PlayerNamesList, myRole, Team1PlayerRolesList, index1++);
 
-        foreach(Player p in PhotonNetwork.CurrentRoom.Players.Values) {
-            if(p.NickName != PhotonNetwork.LocalPlayer.NickName) {
-                PlayerRole pRole = GetRole(p);
-                if(pRole == myRole)
-                    SetPlayerInfoDisplay(p.NickName, Team1PlayerNamesList, pRole, Team1PlayerRolesList, index1++);
-                else
-                    SetPlayerInfoDisplay(p.NickName, Team2PlayerNamesList, pRole, Team2PlayerRolesList, index2++);
-                    
+            foreach(Player p in PhotonNetwork.CurrentRoom.Players.Values) {
+                if(p.NickName != PhotonNetwork.LocalPlayer.NickName) {
+                    PlayerRoles pRole = GetRole(p);
+                    if(pRole == myRole)
+                        SetPlayerInfoDisplay(p.NickName, Team1PlayerNamesList, pRole, Team1PlayerRolesList, index1++);
+                    else
+                        SetPlayerInfoDisplay(p.NickName, Team2PlayerNamesList, pRole, Team2PlayerRolesList, index2++);
+
+                }
             }
+        } else {//single player against )pretend-human)/ai opponent
+            myRole = PlayerRole;
+            SetPlayerInfoDisplay(PlayerName, Team1PlayerNamesList, myRole, Team1PlayerRolesList, index1++);
         }
         foreach(AIPlayer aip in AIPlayers) {
             if(aip.role == myRole)
@@ -308,7 +341,7 @@ public class NewLobbyMgr : MonoBehaviour
         ValidatePlayButton();
     }
 
-    public void SetPlayerInfoDisplay(string name, List<Text> names, PlayerRole role, List<Dropdown> roles, int i)
+    public void SetPlayerInfoDisplay(string name, List<Text> names, PlayerRoles role, List<Dropdown> roles, int i)
     {
         names[i].text = name;
         RoleDropdownHandler rdh = roles[i].GetComponent<RoleDropdownHandler>();
@@ -316,7 +349,7 @@ public class NewLobbyMgr : MonoBehaviour
         rdh.SetValueWithoutTrigger((int) role);
     }
 
-    public void OnValueChangedInRoleDropdown(string playerName, PlayerRole role, Dropdown dropdown, int index)
+    public void OnValueChangedInRoleDropdown(string playerName, PlayerRoles role, Dropdown dropdown, int index)
     {
         Debug.Log(playerName + " set role to " + role);
         SetNetworkPlayerRole(role);
@@ -350,14 +383,19 @@ public class NewLobbyMgr : MonoBehaviour
     public void ValidatePlayButton()
     {
         int count;
-        if(isAI)
-            count = PhotonNetwork.CurrentRoom.PlayerCount + 1;
-        else
-            count = PhotonNetwork.CurrentRoom.PlayerCount;
-        Debug.Log("ValidatePlayButton: NPlayers: " + count);
+        if(NewNetworkMgr.inst.doMultiplayer) {
+            if(isAI)
+                count = PhotonNetwork.CurrentRoom.PlayerCount + 1;
+            else
+                count = PhotonNetwork.CurrentRoom.PlayerCount;
+            Debug.Log("ValidatePlayButton: NPlayers: " + count);
 
-        if(count >= MinNumberOfPlayers && isRoomCreator)
+            if(count >= MinNumberOfPlayers && isRoomCreator)
+                PlayButton.interactable = true;
+        } else {
             PlayButton.interactable = true;
+        }
+        Debug.Log("Creating Game");
     }
 
 

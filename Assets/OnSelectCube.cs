@@ -21,5 +21,5 @@ public class OnSelectCube : MonoBehaviour, IPointerClickHandler
     {
         NewGameMgr.inst.OnAttackableDestinationClicked(destination);
     }
-    
+   
 }
