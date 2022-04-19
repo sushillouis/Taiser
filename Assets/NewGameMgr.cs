@@ -111,6 +111,7 @@ public class NewGameMgr : MonoBehaviour
             timerSecs -= 1;
             CountdownLabel.text = timerSecs.ToString("0");
         }
+        
     }
 
     public Text VictoryOrDefeatText;
@@ -326,6 +327,7 @@ public class NewGameMgr : MonoBehaviour
             WatchingPanel.isVisible = (_state == GameState.InWave || _state == GameState.FlushingSourcesToEndWave);
             //add menu panel
             MenuPanel.isVisible = (_state == GameState.Menu);
+
 
 
         }

@@ -39,8 +39,8 @@ public class NewLobbyMgr : MonoBehaviour
         EnterAlias,
         CreateOrJoin,
         WaitingForPlayers,
-        MissionObjective,
         Play,
+        MissionObjective,
         None
     }
 
@@ -66,12 +66,12 @@ public class NewLobbyMgr : MonoBehaviour
 
     public void OnStartButton()
     {
-        State = LobbyState.MissionObjective;
+        State = LobbyState.EnterAlias;
     }
 
     public void OnNextButton()
     {
-        State = LobbyState.EnterAlias;
+        State = LobbyState.MissionObjective;
     }
 
     public void OnQuitButton()
@@ -87,10 +87,10 @@ public class NewLobbyMgr : MonoBehaviour
     public void SetPriorStateMap()
     {
         PriorStateMap.Add(LobbyState.StartOrQuit, LobbyState.StartOrQuit);
-        PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.MissionObjective);
         PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
         PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
         PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.CreateOrJoin);
+        PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.MissionObjective);
     }
 
 
