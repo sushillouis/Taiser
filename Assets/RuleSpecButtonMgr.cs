@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -78,7 +77,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     {
         CurrentDestination.FilterOnRule(RuleSpecFromPlayer);
 
-        if(RuleSpecFromPlayer.isEqual(BlackhatAI.inst.maliciousRule)) {
+        if(RuleSpecFromPlayer.isEqual(CurrentDestination.MaliciousRule)) { 
             InstrumentMgr.inst.AddRecord(TaiserEventTypes.FirewallSetCorrect.ToString());
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
         } else {
@@ -86,7 +85,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
             NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
         }
 
-
+        CurrentDestination.isBeingExamined = false;
         NewGameMgr.inst.State = NewGameMgr.GameState.InWave;
     }
 

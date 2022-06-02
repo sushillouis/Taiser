@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,8 +27,8 @@ public class PacketButtonClickHandler : MonoBehaviour
     public void OnPacketButtonClick()
     {
         NewGameMgr.inst.OnPacketClicked(packet);
-
     }
+
     public ColorBlock buttonColorBlock;
     public void SetHighlightColor()
     {

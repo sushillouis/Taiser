@@ -1,27 +1,92 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+
+public enum DestinationStates
+{
+    Idle = 0,
+    Up,
+    Paused,
+    Down,
+    isBeingExamined,
+    isFilteringAndBeingExamined
+}
 
 public class TDestination : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
     {
-        maliciousCount = 0;
-        maliciousFilteredCount = 0;
-        maliciousUnfilteredCount = 0;
+        ResetCounts();
         originalCubeScale = maliciousCube.transform.localScale;
     }
+
+    public void Reset()
+    {
+        ResetCounts();
+        maliciousCube.transform.localScale = originalCubeScale;
+        isBeingExamined = false;
+        isFilterValid = false;
+        dt = timeInterval;
+        destinationState = DestinationStates.Idle;
+    }
+
+    public void StartWave()
+    {
+        destinationState = DestinationStates.Up;
+        dt = timeInterval;
+        MaliciousRule = BlackhatAI.inst.CreateMaliciousPacketRuleForDestination(this);
+        isBeingExamined = false;
+        isFilterValid = false;// ?
+    }
+
+    public void EndWave()
+    {
+        destinationState = DestinationStates.Idle;
+    }
+
+    public void PauseMaliciousClock()
+    {
+        destinationState = DestinationStates.Paused;
+    }
+    public void UnPauseMaliciousClock()
+    {
+        destinationState = DestinationStates.Up;
+    }
+
+    //----------------------------------------------------------------------------
+    public LightWeightPacket MaliciousRule;
+    public float dt = 0;
+    public int timeInterval = 17; //For mal rule change, set this in editor to tune game, every 25 seconds change rule
+    public int timeSpread = 5;
+    public bool isBeingExamined = false;
+
+    public DestinationStates destinationState = DestinationStates.Idle;
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(destinationState == DestinationStates.Up) {
+            if(dt <= 0) {
+                dt = GenerateTimeInterval();
+                MaliciousRule = BlackhatAI.inst.CreateMaliciousPacketRuleForDestination(this);
+                if(NewGameMgr.inst.State == NewGameMgr.GameState.PacketExamining && isBeingExamined) {// This needs to be tested (5/25/2022)
+                    PacketButtonMgr.inst.ResetHighlightColor();
+                    //Debug.Log(inGameName + ": Resetting highlight colors");
+                }
+                //Debug.Log(gameName + " dest, created new Mal rule: " + MaliciousRule.ToString());
+            } else {
+                dt -= Time.deltaTime;
+            }
+        }
     }
+
+    float GenerateTimeInterval()
+    {
+        return (float) NewGameMgr.inst.TRandom.Next(timeInterval - timeSpread, timeInterval + timeSpread);
+    }
+
     public int myId;
-    public Button button;
-    public string gameName;
+    public string inGameName;
 
     public void OnCollisionEnter(Collision collision)
     {
@@ -46,7 +111,7 @@ public class TDestination : MonoBehaviour
                 ShrinkCube();
                 NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousFiltered);
 
-            }
+            } // ! malicious but filtered ==> oopsie penalty in score
             NewEntityMgr.inst.ReturnPoolPacket(tPack); // return to pool: reparent, set velocity to zero
         }
     }
@@ -62,7 +127,8 @@ public class TDestination : MonoBehaviour
     }
     public void ShrinkCube()
     {
-        if(maliciousCube?.transform.localScale.y > originalCubeScale.y)
+        Vector3 newScale = maliciousCube.transform.localScale - scaleCubeDelta;
+        if(maliciousCube?.transform.localScale.y > originalCubeScale.y && newScale.y > 0.1)
             maliciousCube.transform.localScale -= scaleCubeDelta;
     }
     public void ResetMaliciousCube(LightWeightPacket lwp)
@@ -75,11 +141,7 @@ public class TDestination : MonoBehaviour
 
     public void TLogPacket(TPacket taiserPacket)
     {
-        LightWeightPacket packet = new LightWeightPacket();
-        packet.color = taiserPacket.packet.color;
-        packet.shape = taiserPacket.packet.shape;
-        packet.size = taiserPacket.packet.size;
-        //packet.isMalicious = taiserPacket.isMalicious;
+        LightWeightPacket packet = new LightWeightPacket(taiserPacket.packet);
         AddFIFOSizeLimitedQueue(PacketQueue, packet, QueueSizeLimit);
         // limit is what can be displayed in the button list 
     }
@@ -90,38 +152,38 @@ public class TDestination : MonoBehaviour
         packetList.Add(packet);
     }
 
-    public void OnAttackableDestinationClicked()
-    {
-        if(PacketQueue.Count > 0) {
-            Debug.Log("Destination: " + myId + " clicked, Packet Queue[0]: " + PacketQueue[0].ToString());
-            NewGameMgr.inst.OnAttackableDestinationClicked(this);
-        }
-    }
+    //public void OnAttackableDestinationClicked()
+    //{
+    //    if(PacketQueue.Count > 0) {
+    //        Debug.Log("Destination: " + myId + " clicked, Packet Queue[0]: " + PacketQueue[0].ToString());
+    //        NewGameMgr.inst.OnAttackableDestinationClicked(this);
+    //    }
+    //}
 
     public LightWeightPacket CurrentFilter;
-    public bool isCurrentFilterValid = false; //set to false at the beginning of every wave
+    public bool isFilterValid = false; //set to false at the beginning of every wave
+
     public void FilterOnRule(LightWeightPacket lwp)
     {
-        isCurrentFilterValid = true;
+        isFilterValid = true;
         CurrentFilter.copy(lwp);
     }
     public int maliciousFilteredCount = 0;
     public int maliciousCount = 0;
     public int maliciousUnfilteredCount = 0;
     public int packetCount = 0;
+
     public bool isPacketFiltered(TPacket tPack)
     {
-        return isCurrentFilterValid && tPack.packet.isEqual(CurrentFilter);
-        /*
-            (tPack.packet.Size == CurrentFilter.size && 
-            tPack.packet.sizeTColor == CurrentFilter.color && 
-            tPack.Shape == CurrentFilter.shape);*/
+        return isFilterValid && tPack.packet.isEqual(CurrentFilter);
     }
 
     public void ResetCounts()
     {
         maliciousCount = 0;
         maliciousFilteredCount = 0;
+        maliciousUnfilteredCount = 0;
     }
+
 
 }

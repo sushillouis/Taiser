@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PacketButtonMgr : MonoBehaviour
 {
@@ -50,13 +48,10 @@ public class PacketButtonMgr : MonoBehaviour
         int index = 0;
         ResetPacketButtons(); // make all taiser button panels invisible
         destination.PacketQueue.Reverse();
-        foreach (LightWeightPacket lwp in destination.PacketQueue) { 
+        foreach (LightWeightPacket lwp in destination.PacketQueue) {
             //Debug.Log("Button for: " + lwp.size + ", " + lwp.color + ", " + lwp.shape);
-            packetButtons[index].packet.color = lwp.color;
-            packetButtons[index].packet.shape = lwp.shape;
-            packetButtons[index].packet.size = lwp.size;
-
-            //packetButtons[index].packet.isMalicious = lwp.isMalicious; // more understandable when reading than using setter property
+            packetButtons[index].packet.copy(lwp);
+            //Debug.Log("Dest: " + destination.gameName + ", packetDest: " + lwp.destination.gameName + ", isMal: " + lwp.isMalicious );
             packetButtons[index].SetHighlightColor();
             packetButtons[index].transform.parent.gameObject.SetActive(true); //make this button panel visible
 
@@ -67,7 +62,8 @@ public class PacketButtonMgr : MonoBehaviour
         destination.PacketQueue.Clear(); // Once you click on a button, you lose all packets
     }
 
-    public void ResetHighlightColor()
+    //To Do
+    public void ResetHighlightColor()//should be called if game state is packet inspection and new mal rule arrives with destination
     {
         foreach(PacketButtonClickHandler pbch in packetButtons) {
             if(pbch.isActiveAndEnabled)

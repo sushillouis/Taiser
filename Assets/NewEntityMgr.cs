@@ -31,7 +31,7 @@ public class NewEntityMgr : MonoBehaviour
     public TPacket CubePrefab;
     public TPacket SpherePrefab;
 
-    public TSource PacketPoolParent;
+    public GameObject PacketPoolParent;
 
     public List<TPacket> Packets = new List<TPacket>();
     public static uint packetId = 0;
