@@ -40,7 +40,8 @@ public class NewLobbyMgr : MonoBehaviour
         CreateOrJoin,
         WaitingForPlayers,
         Play,
-        MissionObjective,
+        //MissionObjective,
+        BriefingPanel,
         None
     }
 
@@ -55,14 +56,16 @@ public class NewLobbyMgr : MonoBehaviour
             EnterAliasPanel.isVisible = (_state == LobbyState.EnterAlias);
             CreateOrJoinGamePanel.isVisible = (_state == LobbyState.CreateOrJoin);
             WaitingForPlayersPanel.isVisible = (_state == LobbyState.WaitingForPlayers);
-            MissionObjectivePanel.isVisible = (_state == LobbyState.MissionObjective);
+            //MissionObjectivePanel.isVisible = (_state == LobbyState.MissionObjective);
+            BriefingPanel.isVisible = (_state == LobbyState.BriefingPanel);
         }
     }
     public TaiserPanel StartPanel;
     public TaiserPanel EnterAliasPanel;
     public TaiserPanel CreateOrJoinGamePanel;
     public TaiserPanel WaitingForPlayersPanel;
-    public TaiserPanel MissionObjectivePanel;
+    //public TaiserPanel MissionObjectivePanel;
+    public TaiserPanel BriefingPanel; 
 
     public void OnStartButton()
     {
@@ -71,7 +74,7 @@ public class NewLobbyMgr : MonoBehaviour
 
     public void OnNextButton()
     {
-        State = LobbyState.MissionObjective;
+        State = LobbyState.BriefingPanel;
     }
 
     public void OnQuitButton()
@@ -90,7 +93,8 @@ public class NewLobbyMgr : MonoBehaviour
         PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
         PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
         PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.CreateOrJoin);
-        PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.MissionObjective);
+        //PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.MissionObjective);
+        PriorStateMap.Add(LobbyState.BriefingPanel, LobbyState.BriefingPanel);
     }
 
 
