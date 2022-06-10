@@ -218,6 +218,50 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 12417428}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &21024693
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 21024694}
+  - component: {fileID: 21024695}
+  m_Layer: 0
+  m_Name: URLMgr
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &21024694
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 21024693}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1967780532}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &21024695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 21024693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13d4423fc4fb2d84f871cd7d05b1dbdd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _TutorialURL: https://drive.google.com/file/d/1t4u124cUkji6fozI_VMwfXJe8d83sXDX/view
 --- !u!1 &21814139
 GameObject:
   m_ObjectHideFlags: 0
@@ -10354,6 +10398,7 @@ Transform:
   - {fileID: 1589106001}
   - {fileID: 1047629568}
   - {fileID: 1122375878}
+  - {fileID: 21024694}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -13545,6 +13590,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6379491125943949685, guid: af8e80005d3523146932456d6969237f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6379491126157205546, guid: af8e80005d3523146932456d6969237f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -13568,6 +13617,10 @@ PrefabInstance:
     - target: {fileID: 6379491126157205546, guid: af8e80005d3523146932456d6969237f, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6379491126157205547, guid: af8e80005d3523146932456d6969237f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6379491126283197587, guid: af8e80005d3523146932456d6969237f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -13629,6 +13682,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: NewGameMgr, Assembly-CSharp
       objectReference: {fileID: 0}
+    - target: {fileID: 6379491127592092299, guid: af8e80005d3523146932456d6969237f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6379491127636174315, guid: af8e80005d3523146932456d6969237f, type: 3}
       propertyPath: m_Text
       value: Audio Settings
@@ -13636,6 +13693,18 @@ PrefabInstance:
     - target: {fileID: 6379491127686110389, guid: af8e80005d3523146932456d6969237f, type: 3}
       propertyPath: m_Text
       value: Help
+      objectReference: {fileID: 0}
+    - target: {fileID: 6379491127730125783, guid: af8e80005d3523146932456d6969237f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 21024695}
+    - target: {fileID: 6379491127730125783, guid: af8e80005d3523146932456d6969237f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OpenTutorial
+      objectReference: {fileID: 0}
+    - target: {fileID: 6379491127730125783, guid: af8e80005d3523146932456d6969237f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: TutorialURLButton, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 6379491127922952046, guid: af8e80005d3523146932456d6969237f, type: 3}
       propertyPath: m_AnchorMax.y
