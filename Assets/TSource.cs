@@ -53,8 +53,8 @@ public class TSource : MonoBehaviour
 
     public void EndWave()
     {
-        sourceState = SourceStates.Idle;
-        packetCount = 0;
+        Debug.Log("Ending wave at source: " + gameObject.name);
+        Reset();
     }
 
     public void Reset()

@@ -103,13 +103,15 @@ public class TDestination : MonoBehaviour
                 maliciousUnfilteredCount += 1;
                 GrowCube();
                 TLogPacket(tPack);
-                NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousUnfiltered);
+                EffectsMgr.inst.MaliciousUnfilteredPacket(this, tPack.packet);
+                //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousUnfiltered);
 
             } else if (tPack.packet.isMalicious && isPacketFiltered(tPack)) {
                 maliciousCount += 1;
                 maliciousFilteredCount += 1;
                 ShrinkCube();
-                NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousFiltered);
+                EffectsMgr.inst.MaliciousFilteredPacket(this, tPack.packet);
+                //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousFiltered);
 
             } // ! malicious but filtered ==> oopsie penalty in score
             NewEntityMgr.inst.ReturnPoolPacket(tPack); // return to pool: reparent, set velocity to zero

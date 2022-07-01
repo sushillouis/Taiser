@@ -12,15 +12,15 @@ public class RuleSpecButtonMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
-    
+
     [System.Serializable]
     public class ButtonList
     {
@@ -52,41 +52,51 @@ public class RuleSpecButtonMgr : MonoBehaviour
     }
 
     public TDestination CurrentDestination;//Set by NewGameMgr OnAttackableDestinationClicked
-    public LightWeightPacket RuleSpecFromPlayer = new LightWeightPacket();
+    public LightWeightPacket PlayerRuleSpec = new LightWeightPacket();
+    public LightWeightPacket AdvisorRuleSpec = new LightWeightPacket();
     public void OnSizeClick(int size)
     {
-        RuleSpecFromPlayer.size = (PacketSize) size;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), RuleSpecFromPlayer.size.ToString());
+        PlayerRuleSpec.size = (PacketSize) size;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), PlayerRuleSpec.size.ToString());
     }
     public void OnColorClick(int color)
     {
-        RuleSpecFromPlayer.color = (PacketColor) color;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), RuleSpecFromPlayer.color.ToString());
+        PlayerRuleSpec.color = (PacketColor) color;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), PlayerRuleSpec.color.ToString());
     }
     public void OnShapeClick(int shape)
     {
-        RuleSpecFromPlayer.shape = (PacketShape) shape;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), RuleSpecFromPlayer.shape.ToString());
+        PlayerRuleSpec.shape = (PacketShape) shape;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.RuleSpec.ToString(), PlayerRuleSpec.shape.ToString());
+    }
+
+
+    public void SetDestAndAdvisorRule(TDestination destination, bool isCorrect)
+    {
+        CurrentDestination = destination;
+        if(isCorrect) {
+            AdvisorRuleSpec = destination.MaliciousRule;
+        } else {
+            AdvisorRuleSpec = BlackhatAI.inst.CreateNonMaliciousPacketRuleForDestination(destination);
+        }
+
+    }
+
+    /// <summary>
+    /// Called from TaiserFilterRuleSpecPanel from SetFirewall button
+    /// </summary>
+    public void ApplyCurrentUserRule()
+    {
+        NewGameMgr.inst.ApplyFirewallRule(CurrentDestination, PlayerRuleSpec, false);
+
     }
 
 
     /// <summary>
-    /// Called from TaiserInGameStartPanel from SetFirewall button
+    /// Called from TaiserFilterRuleSpecPanel from Accept Advice button
     /// </summary>
-    public void ApplyCurrentUserRule()
+    public void ApplyAdvice()
     {
-        CurrentDestination.FilterOnRule(RuleSpecFromPlayer);
-
-        if(RuleSpecFromPlayer.isEqual(CurrentDestination.MaliciousRule)) { 
-            InstrumentMgr.inst.AddRecord(TaiserEventTypes.FirewallSetCorrect.ToString());
-            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
-        } else {
-            InstrumentMgr.inst.AddRecord(TaiserEventTypes.FirewallSetInCorrect.ToString());
-            NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
-        }
-
-        CurrentDestination.isBeingExamined = false;
-        NewGameMgr.inst.State = NewGameMgr.GameState.InWave;
+        NewGameMgr.inst.ApplyFirewallRule(CurrentDestination, AdvisorRuleSpec, true);
     }
-
 }

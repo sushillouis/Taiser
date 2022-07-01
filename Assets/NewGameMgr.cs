@@ -87,6 +87,9 @@ public class NewGameMgr : MonoBehaviour
     void Update()
     {
         UpdateScore();
+        if(endedSources >= Sources.Count || isCorrectIndex >= isCorrectList.Count) {
+            EndWave();
+        }
         //if(State == GameState.InWave) {
         //BlackhatAI.inst.DoWave();
         //}
@@ -115,12 +118,12 @@ public class NewGameMgr : MonoBehaviour
 
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
-        //BlackhatAI.inst.StartWave();
+
         CountdownLabel.text = timerSecs.ToString("0");
         InvokeRepeating("CountdownLabeller", 0.1f, 1f);
     }
 
-    public int timerSecs = 5;
+    int timerSecs = 5;
     public Text CountdownLabel;
 
     void CountdownLabeller()
@@ -131,6 +134,7 @@ public class NewGameMgr : MonoBehaviour
             State = GameState.InWave;
             StartWaveAtSources();
             StartWaveAtDestinations();
+            timerSecs = 5;
         } else {
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Countdown);
             timerSecs -= 1;
@@ -192,18 +196,24 @@ public class NewGameMgr : MonoBehaviour
     {
         endedSources += 1;
         if(endedSources >= Sources.Count) {
-            endedSources = 0;
+            endedSources = 0; // not needed, done in EndWave->ResetVars()
             EndWave();
         }
     }
 
+    public void ResetVars()
+    {
+        endedSources = 0;
+        isCorrectIndex = 0;
+    }
 
     public Text VictoryOrDefeatText;
     public Text AnotherWaveAwaitsMessageText;
     public void EndWave()
     {
-        Debug.Log("Ending Wave: " + currentWaveNumber);
+        Debug.Log("Ending Wave: " + currentWaveNumber + ", isCorrectIndex: " + isCorrectIndex + ", endedSrcs: " + endedSources);
         State = GameState.WaveEnd;
+        ResetVars();
         SetWaveEndScores();
         EndWaveAtSources();
         //We call EndWaveAtDestinations in WaitToStartNextWave to give packets time to reach destinations
@@ -211,7 +221,7 @@ public class NewGameMgr : MonoBehaviour
 
         if(WhitehatScore > BlackhatScore) { 
             VictoryOrDefeatText.text = "Victory!";
-            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Winning, 2.0f);
+            NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Winning, 1.0f);
         } else {
             VictoryOrDefeatText.text = "Defeat!";
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Losing, 5.0f);
@@ -241,7 +251,7 @@ public class NewGameMgr : MonoBehaviour
 
     void WaitToStartNextWave()
     {
-        EndWaveAtDestinations();
+        EndWaveAtDestinations(); //Give a chance for all packets to get to destinations
         SetWaveEndScores();
         Debug.Log("Waiting to start next wave: " + currentWaveNumber);
         if(currentWaveNumber < maxWaves) {
@@ -449,11 +459,11 @@ public class NewGameMgr : MonoBehaviour
 
     public void OnPacketClicked(LightWeightPacket packet)
     {
-        DisplayPacketInformation(packet); // expand on this
+        DisplayPacketInformation(packet, ClickedPacketRuleTextList); // expand on this
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.PacketInspect.ToString(), packet.ToString());
     }
 
-    public void DisplayPacketInformation(LightWeightPacket packet)
+    public void DisplayPacketInformation(LightWeightPacket packet, List<Text> RuleTextList)
     {
         RuleTextList[0].text = packet.size.ToString();
         RuleTextList[0].fontSize = FontSizes[(int) packet.size];
@@ -464,14 +474,22 @@ public class NewGameMgr : MonoBehaviour
     public List<int> FontSizes = new List<int>();
     public List<Color> TextColors = new List<Color>();
 
-    public List<Text> RuleTextList = new List<Text>();
-    public GameObject RuleTextListRoot;
-    [ContextMenu("SetupButtonArray")]
-    public void SetupButtonArray()
+    public List<Text> ClickedPacketRuleTextList = new List<Text>();
+    public List<Text> AdvisorRuleTextList = new List<Text>();
+
+
+    public GameObject PacketRuleTextListRoot;
+    public GameObject AdvisorRuleTextListRoot;
+    [ContextMenu("SetupRuleTextLists")]
+    public void SetupRuleTextLists()
     {
-        RuleTextList.Clear();
-        foreach(Text t in RuleTextListRoot.GetComponentsInChildren<Text>()) {
-            RuleTextList.Add(t);
+        ClickedPacketRuleTextList.Clear();
+        foreach(Text t in PacketRuleTextListRoot.GetComponentsInChildren<Text>()) {
+            ClickedPacketRuleTextList.Add(t);
+        }
+        AdvisorRuleTextList.Clear();
+        foreach(Text t in AdvisorRuleTextListRoot.GetComponentsInChildren<Text>()) {
+            AdvisorRuleTextList.Add(t);
         }
     }
 
@@ -480,17 +498,44 @@ public class NewGameMgr : MonoBehaviour
     // PROBLEM: Double indirection to handle design issues
 
     public Text FilterRuleSpecTitle;
+    public List<bool> isCorrectList = new List<bool>(); // which advice is correct, set by programmer in editor
+    public int isCorrectIndex = 0;
     public void OnAttackableDestinationClicked(TDestination destination)
     {
         destination.isBeingExamined = true;
-        PacketButtonMgr.inst.OnAttackableDestinationClicked(destination); // multiple things are happening
-        RuleSpecButtonMgr.inst.CurrentDestination = destination;
+        PacketButtonMgr.inst.SetupPacketButtonsForInspection(destination); // Setup packet buttons on the top panel
+        RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination, isCorrectList[isCorrectIndex++]);
+        DisplayPacketInformation(RuleSpecButtonMgr.inst.AdvisorRuleSpec, AdvisorRuleTextList);
         FilterRuleSpecTitle.text = destination.inGameName;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousBuilding.ToString(), destination.name);
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), destination.inGameName);
         State = GameState.PacketExamining;
     }
 
-    
+    public void ApplyFirewallRule(TDestination destination, LightWeightPacket packet, bool isAdvice)
+    {
+        destination.FilterOnRule(packet);
+
+        if(packet.isEqual(destination.MaliciousRule)) {
+            if(isAdvice)
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallCorrectAndSet.ToString());
+            else
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallCorrectAndSet.ToString());
+            EffectsMgr.inst.GoodFilterApplied(destination, packet);
+            //NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
+        } else {
+            if(isAdvice)
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallIncorrectAndSet.ToString());
+            else
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet.ToString());
+            EffectsMgr.inst.BadFilterApplied(destination, packet);
+            //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
+        }
+
+        destination.isBeingExamined = false;
+        State = GameState.InWave;
+    }
+
+
     //-------------------------------------------------------------------------------------
     public RectTransform WhitehatWatchingScorePanel;
     public RectTransform BlackhatWatchingScorePanel;
@@ -528,8 +573,8 @@ public class NewGameMgr : MonoBehaviour
             totalMaliciousCount += destination.maliciousCount;
         }
 
-        WhitehatScore = totalMaliciousFilteredCount / (totalMaliciousCount + 0.001f);
-        BlackhatScore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 0.001f);
+        WhitehatScore = totalMaliciousFilteredCount / (totalMaliciousCount + 0.000001f);
+        BlackhatScore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 0.000001f);
         SetScores(BlackhatScore, WhitehatScore);
     }
 
@@ -557,83 +602,11 @@ public class NewGameMgr : MonoBehaviour
         State = GameState.Menu;
     }
 
-    //public void OnReady()
-    //{
-
-    //    AudioManager.instance.uiSoundFXPlayer.PlayTrackImmediate("SettingsUpdated");
-
-    //    //if(NetworkingManager.instance)
-    //    //    NetworkingManager.instance.setReady(true);
-    //    //else
-    //    //    GameManager.instance.StartNextWave();
-
-    //    State = GameState.WaveStart;
-    //    //InitTest();
-    //}
-
-
-
-    //----------------------------------------------------------------------------------------------------
-    //Deprecated. Only use to see how you might set up a test /Testing
-    //----------------------------------------------------------------------------------------------------
-    //int spawnCount = 0;
-    //public TSource source;
-    //public TDestination destination;
-    ///// <summary>
-    ///// Deprecated hard. No longer works.
-    ///// </summary>
-    //public void InitTest()
-    //{
-    //    if(Time.frameCount % 50 == 0 && spawnCount < 20) {
-    //        TPacket tp = NewEntityMgr.inst.CreatePacket(PacketShape.Cube);
-    //        tp.transform.parent = source.transform;
-    //        tp.InitPath(Paths[0]);
-    //        Debug.Log("Packet from pool: " + tp.Pid);
-    //        tp.transform.parent = Paths[0].source.transform;
-    //        tp.SetNextVelocityOnPath();
-    //        spawnCount += 1;
-    //    }
-    //}
-
-    //public float maliciousFraction = 0.5f;
-    //int spawnInterval = 10;
+   
     public int RandomSeed = 1234;
     //int maxSpawns = 40;
     public System.Random TRandom;
 
-    ///// <summary>
-    ///// Deprecated hard. No longer works. Do not use. 
-    ///// </summary>
-    //public void InitTest2() //spawn a wave
-    //{
-    //    TPacket tp = SpawnRandomPacket();
-    //    spawnCount += 1;
-    //    //Debug.Log("Spawned: " + tp.Shape + ", " + tp.TColor + ", " + tp.Size + ", Bad: " + tp.isMalicious);
-    //    int pathIndex = TRandom.Next(0, Paths.Count);
-    //    TPath tPath = Paths[pathIndex];
-
-    //    tp.transform.parent = tPath.source.transform;
-
-    //    tp.InitPath(tPath);//
-    //    tp.SetNextVelocityOnPath();
-    //}
-
-    //public TPacket SpawnRandomPacket()
-    //{
-    //    int shapeIndex = TRandom.Next(0, PacketShapes.Count);
-    //    PacketShape shape = PacketShapes[shapeIndex];
-    //    int colorIndex = TRandom.Next(0, PacketColors.Count);
-    //    PacketColor color = PacketColors[colorIndex];
-    //    int sizeIndex = TRandom.Next(0, PacketSizes.Count);
-    //    PacketSize size = PacketSizes[sizeIndex];
-
-    //    TPacket tp = NewEntityMgr.inst.CreatePacket(shape, color, size);
-    //    //Cannot test standalone now
-    //    //tp.packet.copy(BlackhatAI.inst.malRule);
-    //    // isMalicious = (TRandom.NextDouble() < maliciousFraction);
-
-    //    return tp;
-    //}
 
 
     public TPath FindRandomPath(TSource source)

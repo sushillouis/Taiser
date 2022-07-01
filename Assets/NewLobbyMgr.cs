@@ -6,10 +6,18 @@ using UnityEngine.UI;
 using Photon.Realtime;
 using Photon.Pun;
 
-public class AIPlayer
+public class TaiserPlayer
 {
     public string name;
     public NewLobbyMgr.PlayerRoles role;
+    public NewLobbyMgr.PlayerSpecies species;
+
+    public TaiserPlayer (string pName, NewLobbyMgr.PlayerRoles pRole, NewLobbyMgr.PlayerSpecies pSpecies)
+    {
+        name = pName;
+        role = pRole;
+        species = pSpecies;
+    }
 }
 
 public class NewLobbyMgr : MonoBehaviour
@@ -43,6 +51,15 @@ public class NewLobbyMgr : MonoBehaviour
         MissionObjective,
         None
     }
+
+    public enum PlayerSpecies
+    {
+        AI = 0,
+        Human,
+        Unknown,
+        None
+    }
+
 
     public LobbyState _state;
     public LobbyState State
@@ -99,7 +116,7 @@ public class NewLobbyMgr : MonoBehaviour
     public Text GameNamePlaceholderText;
 
     public string GameName;
-    public static string PlayerName;
+    public static string PlayerName  = "sjl";
     public static PlayerRoles PlayerRole;
     public RectTransform JoinGameSubPanel;
 
@@ -160,7 +177,8 @@ public class NewLobbyMgr : MonoBehaviour
     public void WaitForPlayers(string gameName)
     {
         GameName = gameName; //assigned twice if you are game creator
-        WaitingForPlayersText.text = "Game: " + GameName + ", waiting for players";
+        int x = Random.Range(100, 500);
+        WaitingForPlayersText.text = "Exp: " + x.ToString("0, ") + GameName + ".    Waiting for teammates";
         //InvalidateDropdownsExceptForMine();
         State = LobbyState.WaitingForPlayers;
 
@@ -214,7 +232,8 @@ public class NewLobbyMgr : MonoBehaviour
     public List<Text> Team2PlayerNamesList = new List<Text>();
     public List<Dropdown> Team2PlayerRolesList = new List<Dropdown>();
 
-    public List<AIPlayer> AIPlayers = new List<AIPlayer>();
+    public List<TaiserPlayer> TaiserPlayerList = new List<TaiserPlayer>();
+    //public List<TaiserPlayer> TeammatePlayers = new List<TaiserPlayer>();
 
     public void ConnectTeam(RectTransform panel, List<Text> players, List<Dropdown> teamDropdowns)
     {
@@ -238,6 +257,7 @@ public class NewLobbyMgr : MonoBehaviour
     public Text WaitingForPlayersText;
     public int MaxPlayersPerRoom;
     public bool isRoomCreator = false;
+
     // Function called whenever the create room button is pressed, it updates the player's name and creates a room
     public void OnCreateRoomButton()
     {
@@ -251,36 +271,73 @@ public class NewLobbyMgr : MonoBehaviour
             SetNetworkPlayerRole(PlayerRoles.Whitehat);
         } 
 
-        if(isAI)
-            Invoke("MakeAIPlayerAndActivatePlayButton", 1);
-        else
-            Invoke("MakeHumanPlayerAndActivatePlayButton", 1);
+        switch (opponentType) {
+            case PlayerSpecies.AI:
+                Invoke("MakeAIPlayerAndActivatePlayButton", 0.1f);
+                break;
+            case PlayerSpecies.Human:
+                Invoke("MakeHumanPlayerAndActivatePlayButton", 1);
+                break;
+            case PlayerSpecies.Unknown:
+                Invoke("MakeUnknownPlayerAndActivatePlayButton", 2);
+                break;
+            default:
+                Invoke("MakeAIPlayerAndActivatePlayButton", 0.1f);
+                break;
+
+        }
+
+        switch(teammateType) {
+            case PlayerSpecies.AI:
+                int x = Random.Range(0, 40);
+                MakePlayerAndActivatePlayButton("CyberAI " + x.ToString("0"), PlayerRoles.Whitehat, PlayerSpecies.AI, false);
+                break;
+            case PlayerSpecies.Human:
+                MakePlayerAndActivatePlayButton("Alex", PlayerRoles.Whitehat, PlayerSpecies.Human, false);
+                break;
+            case PlayerSpecies.Unknown:
+                MakePlayerAndActivatePlayButton("Unknown", PlayerRoles.Whitehat, PlayerSpecies.Unknown, false);
+                break;
+            default:
+                break;
+
+        }
+
 
         WaitForPlayers(GameName);
 
     }
 
     //-----------------------------------------------------------
-    public bool isAI;
+    public PlayerSpecies opponentType;
+    public PlayerSpecies teammateType;
+
+    public void MakePlayerAndActivatePlayButton(string name, PlayerRoles role, PlayerSpecies species, bool isOpponent)
+    {
+        TaiserPlayer player = new TaiserPlayer(name, role, species);
+        TaiserPlayerList.Add(player);
+        SetWaitingForPlayersLists();
+    }
+
     public void MakeAIPlayerAndActivatePlayButton()
     {
-        string opponent = "AI";
-        PlayerRoles opponentRole = PlayerRoles.Blackhat; // fixed for now
-        AIPlayer aip = new AIPlayer();
-        aip.name = opponent;
-        aip.role = opponentRole;
-        AIPlayers.Add(aip);
+        TaiserPlayer aip = new TaiserPlayer("AI", PlayerRoles.Blackhat, PlayerSpecies.AI);
+        TaiserPlayerList.Add(aip);
         SetWaitingForPlayersLists();
     }
 
     public void MakeHumanPlayerAndActivatePlayButton()
     {
-        string opponent = "Alex";
-        PlayerRoles opponentRole = PlayerRoles.Blackhat; // fixed for now
-        AIPlayer aip = new AIPlayer(); //same as our pretend human alex
-        aip.name = opponent;
-        aip.role = opponentRole;
-        AIPlayers.Add(aip);
+        TaiserPlayer aip = new TaiserPlayer("Alex", PlayerRoles.Blackhat, PlayerSpecies.Human); //same as our pretend human alex
+        TaiserPlayerList.Add(aip);
+        SetWaitingForPlayersLists();
+    }
+
+
+    public void MakeUnknownPlayerAndActivatePlayButton()
+    {
+        TaiserPlayer aip = new TaiserPlayer("Unknown", PlayerRoles.Blackhat, PlayerSpecies.Unknown); 
+        TaiserPlayerList.Add(aip);
         SetWaitingForPlayersLists();
     }
 
@@ -336,16 +393,19 @@ public class NewLobbyMgr : MonoBehaviour
 
                 }
             }
-        } else {//single player against )pretend-human)/ai opponent
+        } else {//single player against (pretend-human)/ai opponent
             myRole = PlayerRole;
             SetPlayerInfoDisplay(PlayerName, Team1PlayerNamesList, myRole, Team1PlayerRolesList, index1++);
         }
-        foreach(AIPlayer aip in AIPlayers) {
-            if(aip.role == myRole)
-                SetPlayerInfoDisplay(aip.name, Team1PlayerNamesList, aip.role, Team1PlayerRolesList, index1++);
+
+        foreach(TaiserPlayer tp in TaiserPlayerList) {
+            if(tp.role == myRole)
+                SetPlayerInfoDisplay(tp.name, Team1PlayerNamesList, tp.role, Team1PlayerRolesList, index1++);
             else
-                SetPlayerInfoDisplay(aip.name, Team2PlayerNamesList, aip.role, Team2PlayerRolesList, index2++);
+                SetPlayerInfoDisplay(tp.name, Team2PlayerNamesList, tp.role, Team2PlayerRolesList, index2++);
         }
+
+
         ValidatePlayButton();
     }
 
@@ -392,7 +452,7 @@ public class NewLobbyMgr : MonoBehaviour
     {
         int count;
         if(NewNetworkMgr.inst.doMultiplayer) {
-            if(isAI)
+            if(opponentType == PlayerSpecies.AI)
                 count = PhotonNetwork.CurrentRoom.PlayerCount + 1;
             else
                 count = PhotonNetwork.CurrentRoom.PlayerCount;

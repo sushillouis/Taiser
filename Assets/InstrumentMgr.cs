@@ -18,7 +18,7 @@ public class TaiserSession
 {
     public string name;
     public Role role;
-    public System.DateTime dayAndTime;
+    public string dayAndTime;
     public float whitehatScore;
     public float blackhatScore;
     public List<TaiserRecord> records;
@@ -40,14 +40,17 @@ public enum TaiserEventTypes
 {
     RuleSpec = 0, //which button?
     Filter,       //which rule?
-    MaliciousBuilding,  //which building?
+    MaliciousDestinationClicked,  //which building?
     Menu,
-    FirewallSetCorrect,
-    FirewallSetInCorrect,
+    UserBuiltFirewallCorrectAndSet,
+    UserBuiltFirewallIncorrectAndSet,
     PacketInspect,      //Packet info
     StartWave,
     EndWave,
     SetNewMaliciousRule, // set by blackhat
+    AdvisedFirewallCorrectAndSet,
+    AdvisedFirewallIncorrectAndSet,
+    AdviseTaken,
 }
 
 public class InstrumentMgr : MonoBehaviour
@@ -118,6 +121,7 @@ public class InstrumentMgr : MonoBehaviour
         byte[] levelData = Encoding.UTF8.GetBytes(MakeHeaderString() + MakeRecords());
         string fileName = new string(session.name.ToCharArray()); // Path.GetRandomFileName().Substring(0, 8);
         fileName = fileName + ".csv";
+        Debug.Log("FileName: " + fileName);
 
         WWWForm form = new WWWForm();
         Debug.Log("Created new WWW Form");
@@ -130,8 +134,10 @@ public class InstrumentMgr : MonoBehaviour
 
         if(w.error != null) {
             Debug.Log("Error: " + w.error);
+            Debug.Log(w.text);
         } else {
             Debug.Log("No errors");
+            Debug.Log(w.text);
             if(w.uploadProgress == 1 || w.isDone) {
                 yield return new WaitForSeconds(5);
                 Debug.Log("Waited five seconds");
@@ -143,12 +149,14 @@ public class InstrumentMgr : MonoBehaviour
     }
 
     //-----------------------------------------------------------------
-    public static bool isDebug = true;
+    public static bool isDebug = false;
     public void WriteSession()
     {
-        session.whitehatScore = NewGameMgr.inst.WhitehatScore; // BlackhatAI.inst.wscore;
-        session.blackhatScore = NewGameMgr.inst.BlackhatScore; // BlackhatAI.inst.bscore;
+        session.whitehatScore = NewGameMgr.inst.WhitehatScore * 100f; // BlackhatAI.inst.wscore;
+        session.blackhatScore = NewGameMgr.inst.BlackhatScore * 100f; // BlackhatAI.inst.bscore;
         session.name = (isDebug ? "sjl" : NewLobbyMgr.PlayerName);
+        session.dayAndTime = System.DateTime.Now.ToString();
+
         using(StreamWriter sw = new StreamWriter(File.Open(Path.Combine(TaiserFolder, session.name+".csv"), FileMode.Create), Encoding.UTF8)) {
             WriteHeader(sw);
             WriteRecords(sw);

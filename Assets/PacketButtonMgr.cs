@@ -43,7 +43,7 @@ public class PacketButtonMgr : MonoBehaviour
     }
 
     //gameplay packetButtons.count <= PacketQueue limit
-    public void OnAttackableDestinationClicked(TDestination destination)
+    public void SetupPacketButtonsForInspection(TDestination destination)
     {
         int index = 0;
         ResetPacketButtons(); // make all taiser button panels invisible
