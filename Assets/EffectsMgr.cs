@@ -16,8 +16,8 @@ public class EffectsMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetupTextConsole();
-        maxLinesOfText = ConsoleLines.Count;
+        //SetupTextConsole();
+        //maxLinesOfText = ConsoleLines.Count;
     }
 
     // Update is called once per frame
@@ -32,6 +32,7 @@ public class EffectsMgr : MonoBehaviour
     }
 
     //public Text console;
+    /*
     int maxLinesOfText;
     public Color TextColor;
     public RectTransform ConsoleRoot;
@@ -64,13 +65,14 @@ public class EffectsMgr : MonoBehaviour
         consoleTextQueue.Clear();
     }
 
-
+    */
     public void NewRule(TDestination destination, LightWeightPacket maliciousRule)
     {
         NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.MaliciousRuleChanged);
-        AddToConsole(destination.inGameName + ": New ATTACK");
+        //AddToConsole(destination.inGameName + ": New ATTACK");
     }
 
+    /*
     void AddToConsole(string s)
     {
         if(consoleTextQueue.Count >= maxLinesOfText) {
@@ -82,7 +84,7 @@ public class EffectsMgr : MonoBehaviour
             ConsoleLines[i++].text = txt;
         }
     }
-
+    */
 
     public void MaliciousUnfilteredPacket(TDestination destination, LightWeightPacket maliciousPacket)
     {
@@ -99,7 +101,7 @@ public class EffectsMgr : MonoBehaviour
     public void GoodFilterApplied(TDestination destination, LightWeightPacket filterRule)
     {
         NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
-        AddToConsole(destination.inGameName + ": GOOD Rule");
+        //AddToConsole(destination.inGameName + ": GOOD Rule");
         //console.CrossFadeColor(Color.green, 0f, false, false);
         //console.CrossFadeAlpha(1f, 0f, false);
     }
@@ -107,7 +109,7 @@ public class EffectsMgr : MonoBehaviour
     public void BadFilterApplied(TDestination destination, LightWeightPacket filterRule)
     {
         NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
-        AddToConsole(destination.inGameName + ": BAD Rule");
+        //AddToConsole(destination.inGameName + ": BAD Rule");
     }
 
 }

@@ -20,7 +20,6 @@ public class BlackhatAI : MonoBehaviour
 
     }
 
-
     public LightWeightPacket CreateRandomRuleForDestination(TDestination destination)
     {
         LightWeightPacket lwp = new LightWeightPacket();

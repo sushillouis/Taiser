@@ -2,19 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Role
+public enum PlayerRoles
 {
     Whitehat = 0,
     Blackhat,
     Observer
 }
 
-public enum PlayerType
+public enum PlayerSpecies
 {
     AI = 0,
-    Human
+    Human,
+    Unknown
 }
 //later we might add PlayerSide, side1 could have both Whitehats and Blackhats
+
+
+public class TaiserPlayer
+{
+    public string name;
+    public PlayerRoles role;
+    public PlayerSpecies species;
+    public List<PlayerSpecies> teammateSpeciesList = new List<PlayerSpecies>();
+
+    public TaiserPlayer(string pName, PlayerRoles pRole, PlayerSpecies pSpecies,
+        List<PlayerSpecies> teamSpeciesList = null)
+    {
+        name = pName;
+        role = pRole;
+        species = pSpecies;
+        teammateSpeciesList = teamSpeciesList;
+    }
+}
+
+
 
 public class PlayerMgr : MonoBehaviour
 {

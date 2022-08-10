@@ -58,6 +58,25 @@ public class SourcePathDebugMap
     public List<TPath> paths;
 }
 //-------------------------------------------------------------------------------------------
+
+[System.Serializable]
+public enum Difficulty
+{
+    Novice = 0,
+    Intermediate,
+    Advanced
+}
+
+[System.Serializable]
+public class DifficultyParameters
+{
+    public Difficulty levelName;
+    public int initTime;
+    public int meanTimeInterval;
+    public int timeSpread;
+}
+
+
 //-------------------------------------------------------------------------------------------
 public class NewGameMgr : MonoBehaviour
 {
@@ -98,6 +117,27 @@ public class NewGameMgr : MonoBehaviour
         //EndWave();
 
     }
+
+    //-------------------------------------------------------------------------------------------------
+    public Difficulty difficulty;
+    public List<DifficultyParameters> difficultyParamaters = new List<DifficultyParameters>();
+    public void SetDifficulty(Difficulty level)
+    {
+        Debug.Log("Setting difficulty to: " + level);
+        difficulty = level;
+        DifficultyParameters parms = difficultyParamaters.Find(x => x.levelName == level);
+        foreach(TDestination destination in Destinations) {
+            destination.timeInterval = parms.meanTimeInterval;
+            destination.timeSpread = parms.timeSpread;
+            destination.initTime = parms.initTime;
+        }
+
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+
+
     //----------------------------------------------------------------------------------------------------
     /// <summary>
     /// Returns true with probability prob
@@ -115,6 +155,7 @@ public class NewGameMgr : MonoBehaviour
     public void StartWave()
     {
         State = GameState.WaveStart;
+        SetDifficulty(NewLobbyMgr.gameDifficulty);
 
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());

@@ -17,8 +17,10 @@ using System.Xml;
 public class TaiserSession
 {
     public string name;
-    public Role role;
+    public PlayerRoles role;
+    public PlayerSpecies teammateSpecies;
     public string dayAndTime;
+    public Difficulty gameDifficulty;
     public float whitehatScore;
     public float blackhatScore;
     public List<TaiserRecord> records;
@@ -50,6 +52,8 @@ public enum TaiserEventTypes
     SetNewMaliciousRule, // set by blackhat
     AdvisedFirewallCorrectAndSet,
     AdvisedFirewallIncorrectAndSet,
+    MaliciousPacketFiltered_GoodForUs,
+    MaliciousPacketUnfiltered_BadForUs,
     AdviseTaken,
 }
 
@@ -143,19 +147,23 @@ public class InstrumentMgr : MonoBehaviour
                 Debug.Log("Waited five seconds");
             }
         }
-        
-
-
     }
 
     //-----------------------------------------------------------------
-    public static bool isDebug = false;
+    public static bool isDebug = true;
     public void WriteSession()
     {
         session.whitehatScore = NewGameMgr.inst.WhitehatScore * 100f; // BlackhatAI.inst.wscore;
         session.blackhatScore = NewGameMgr.inst.BlackhatScore * 100f; // BlackhatAI.inst.bscore;
-        session.name = (isDebug ? "sjl" : NewLobbyMgr.PlayerName);
         session.dayAndTime = System.DateTime.Now.ToString();
+        session.gameDifficulty = NewGameMgr.inst.difficulty;
+        string tmp = System.DateTime.Now.ToLocalTime().ToString();
+        session.name = (isDebug ? "sjl" : NewLobbyMgr.thisPlayer.name + "_" + 
+            session.dayAndTime.Replace('/', '_').Replace(" ", "_").Replace(":", "_"));
+        session.role = PlayerRoles.Whitehat;
+        session.teammateSpecies = NewLobbyMgr.teammateSpecies;
+
+
 
         using(StreamWriter sw = new StreamWriter(File.Open(Path.Combine(TaiserFolder, session.name+".csv"), FileMode.Create), Encoding.UTF8)) {
             WriteHeader(sw);
@@ -174,7 +182,9 @@ public class InstrumentMgr : MonoBehaviour
     public string MakeHeaderString()
     {
         string header = "";
-        header += session.name + ", " + session.role + ", " + session.dayAndTime + eoln;
+        header += session.name + ", " + session.role + ", "  +  session.dayAndTime + eoln;
+        header += "Teammate Species: ," + session.teammateSpecies + eoln;
+        header += "Game Difficulty: ," + session.gameDifficulty + eoln;
         header += "Whitehat Score, " + session.whitehatScore.ToString("00.0") +
             ", Blackhat Score, " + session.blackhatScore.ToString("00.0") + eoln;
         header += "Time, Event, Modifiers" + eoln;

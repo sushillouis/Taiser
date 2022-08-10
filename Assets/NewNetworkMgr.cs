@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Photon.Pun;
-using Photon.Realtime;
-using ExitGames.Client.Photon;
-
+//using Photon.Pun;
+//using Photon.Realtime;
+//using ExitGames.Client.Photon;
+/*
 public class NewNetworkMgr : MonoBehaviourPunCallbacks
 {
     public static NewNetworkMgr inst;
@@ -113,7 +113,7 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
             " got OnRoomListUpdate called with list: " + roomList.ToStringFull<RoomInfo>());
         foreach(RoomInfo ri in roomList) {
             NewLobbyMgr.inst.CachedRoomList.Add(ri);
-        }
+        } 
         NewLobbyMgr.inst.UpdateRoomList();
     }
 
@@ -149,3 +149,4 @@ public class NewNetworkMgr : MonoBehaviourPunCallbacks
 
 
 }
+*/

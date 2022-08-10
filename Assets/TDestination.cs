@@ -56,6 +56,7 @@ public class TDestination : MonoBehaviour
     //----------------------------------------------------------------------------
     public LightWeightPacket MaliciousRule;
     public float dt = 0;
+    public int initTime = 20;
     public int timeInterval = 17; //For mal rule change, set this in editor to tune game, every 25 seconds change rule
     public int timeSpread = 5;
     public bool isBeingExamined = false;
@@ -104,6 +105,7 @@ public class TDestination : MonoBehaviour
                 GrowCube();
                 TLogPacket(tPack);
                 EffectsMgr.inst.MaliciousUnfilteredPacket(this, tPack.packet);
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousPacketUnfiltered_BadForUs.ToString(), inGameName);
                 //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousUnfiltered);
 
             } else if (tPack.packet.isMalicious && isPacketFiltered(tPack)) {
@@ -111,6 +113,7 @@ public class TDestination : MonoBehaviour
                 maliciousFilteredCount += 1;
                 ShrinkCube();
                 EffectsMgr.inst.MaliciousFilteredPacket(this, tPack.packet);
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousPacketFiltered_GoodForUs.ToString(), inGameName);
                 //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.maliciousFiltered);
 
             } // ! malicious but filtered ==> oopsie penalty in score

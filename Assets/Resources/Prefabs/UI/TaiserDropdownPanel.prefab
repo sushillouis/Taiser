@@ -1075,6 +1075,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dropdown: {fileID: 0}
   playerName: 
+  role: 0
   shouldTrigger: 1
 --- !u!1 &7004102589319399261
 GameObject:

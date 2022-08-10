@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RoleDropdownHandler : MonoBehaviour
+public class DifficultyDropdownHandler : MonoBehaviour
 {
 
     public Dropdown dropdown;
-    public string playerName; //has to be set before OnValueChanged is called
 
-    public PlayerRoles role;
+    public Difficulty gameDifficulty;
+
     private void Awake()
     {
         dropdown = GetComponent<Dropdown>();
@@ -18,7 +18,7 @@ public class RoleDropdownHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
@@ -29,24 +29,24 @@ public class RoleDropdownHandler : MonoBehaviour
 
     public void OnValueChanged(int index)
     {
-
         if(shouldTrigger) {
             switch(dropdown.options[index].text.Trim()) {
-                case "Whitehat":
-                    role = PlayerRoles.Whitehat;
+                case "Novice":
+                    gameDifficulty = Difficulty.Novice;
                     break;
-                case "Blackhat":
-                    role = PlayerRoles.Blackhat;
+                case "Intermediate":
+                    gameDifficulty = Difficulty.Intermediate;
                     break;
-                case "Observer":
-                    role = PlayerRoles.Observer;
+                case "Advanced":
+                    gameDifficulty = Difficulty.Advanced;
                     break;
                 default:
-                    role = PlayerRoles.Whitehat;
+                    gameDifficulty = Difficulty.Advanced;
                     break;
             }
 
-            NewLobbyMgr.inst.OnValueChangedInRoleDropdown(playerName, role, dropdown, index);
+            NewLobbyMgr.gameDifficulty = gameDifficulty;
+            NewLobbyMgr.inst.publicGameDifficulty = gameDifficulty;
         }
 
 
@@ -60,6 +60,7 @@ public class RoleDropdownHandler : MonoBehaviour
         dropdown.RefreshShownValue();
         shouldTrigger = true;
     }
+
 
 
 }

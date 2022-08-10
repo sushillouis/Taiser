@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RoleDropdownHandler : MonoBehaviour
+public class TeammateChoiceDropdownHandler : MonoBehaviour
 {
-
     public Dropdown dropdown;
     public string playerName; //has to be set before OnValueChanged is called
+    public PlayerSpecies species;
 
-    public PlayerRoles role;
     private void Awake()
     {
         dropdown = GetComponent<Dropdown>();
@@ -18,7 +17,7 @@ public class RoleDropdownHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
@@ -32,21 +31,21 @@ public class RoleDropdownHandler : MonoBehaviour
 
         if(shouldTrigger) {
             switch(dropdown.options[index].text.Trim()) {
-                case "Whitehat":
-                    role = PlayerRoles.Whitehat;
+                case "Human":
+                    species = PlayerSpecies.Human;
                     break;
-                case "Blackhat":
-                    role = PlayerRoles.Blackhat;
+                case "AI":
+                    species = PlayerSpecies.AI;
                     break;
-                case "Observer":
-                    role = PlayerRoles.Observer;
+                case "Unknown":
+                    species = PlayerSpecies.Unknown;
                     break;
                 default:
-                    role = PlayerRoles.Whitehat;
+                    species = PlayerSpecies.Unknown;
                     break;
             }
 
-            NewLobbyMgr.inst.OnValueChangedInRoleDropdown(playerName, role, dropdown, index);
+            NewLobbyMgr.inst.OnValueChangedInTeammateSpeciesChoiceDropdown(playerName, species, dropdown, index);
         }
 
 
@@ -60,6 +59,7 @@ public class RoleDropdownHandler : MonoBehaviour
         dropdown.RefreshShownValue();
         shouldTrigger = true;
     }
+
 
 
 }
