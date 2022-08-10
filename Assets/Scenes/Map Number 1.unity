@@ -638,7 +638,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_Text
-      value: Prepare to defend...
+      value: Readying next wave...
       objectReference: {fileID: 0}
     - target: {fileID: 8689204609676008196, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_Pivot.x
@@ -6215,7 +6215,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_Text
-      value: Wait...prepare to defend
+      value: Wait...another wave awaits
       objectReference: {fileID: 0}
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_FontData.m_BestFit
