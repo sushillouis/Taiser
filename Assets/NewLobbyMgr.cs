@@ -276,8 +276,7 @@ public class NewLobbyMgr : MonoBehaviour
     public void WaitForPlayers(string gameName)
     {
         GameName = gameName; //assigned twice if you are game creator
-        int x = Random.Range(100, 500);
-        WaitingForPlayersText.text = "Exp: " + x.ToString("0, for ") + thisPlayer.name + ".    Waiting for teammates...";
+        WaitingForPlayersText.text = thisPlayer.name + ". Waiting for opponent...";
         //InvalidateDropdownsExceptForMine();
         State = LobbyState.WaitingForPlayers;
 

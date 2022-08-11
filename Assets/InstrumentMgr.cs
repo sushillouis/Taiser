@@ -93,7 +93,7 @@ public class InstrumentMgr : MonoBehaviour
 
     }
 
-    public List<TaiserRecord> records = new List<TaiserRecord>();
+    //public List<TaiserRecord> records = new List<TaiserRecord>();
     public TaiserSession session = new TaiserSession();
 
     public void AddRecord(string eventName, List<string> modifiers)
@@ -101,7 +101,7 @@ public class InstrumentMgr : MonoBehaviour
         TaiserRecord record = new TaiserRecord();
         record.eventName = eventName;
         record.eventModifiers = modifiers;
-        record.secondsFromStart = Time.realtimeSinceStartup;
+        record.secondsFromStart = Time.time;// Time.realtimeSinceStartup;
         session.records.Add(record);
     }
 
@@ -112,7 +112,7 @@ public class InstrumentMgr : MonoBehaviour
         List<string> mods = new List<string>();
         mods.Add(modifier);
         record.eventModifiers = mods;
-        record.secondsFromStart = Time.realtimeSinceStartup;
+        record.secondsFromStart = Time.time; // Time.realtimeSinceStartup;
         session.records.Add(record);
     }
     //-----------------------------------------------------------------

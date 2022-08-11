@@ -298,6 +298,7 @@ public class NewGameMgr : MonoBehaviour
         if(currentWaveNumber < maxWaves) {
             StartWave();//Startwave unpauses destination clocks
         } else {
+            InstrumentMgr.inst.WriteSession();
             State = GameState.Menu;
             ResetGame();
         }
@@ -633,7 +634,7 @@ public class NewGameMgr : MonoBehaviour
     }
     public void QuitRoom()
     {
-        InstrumentMgr.inst.WriteSession();
+        //InstrumentMgr.inst.WriteSession();
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 

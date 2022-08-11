@@ -233,7 +233,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_Text
-      value: Waiting for teammate ...
+      value: Waiting for opponent ...
       objectReference: {fileID: 0}
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_FontData.m_MaxSize
@@ -3064,12 +3064,44 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_Font
+      value: 
+      objectReference: {fileID: 12800000, guid: 09afc0663fae07546a99012da0492533, type: 3}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_BestFit
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_MaxSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
       propertyPath: m_FontData.m_MinSize
-      value: 18
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_RichText
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_FontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
+      propertyPath: m_FontData.m_LineSpacing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
       propertyPath: m_FontData.m_VerticalOverflow
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1397882611661138542, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
       propertyPath: m_FontData.m_HorizontalOverflow
@@ -4923,6 +4955,10 @@ PrefabInstance:
       value: StartTaiserPanel
       objectReference: {fileID: 0}
     - target: {fileID: 755304586149311444, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
+      propertyPath: m_Text
+      value: Taiser v0.95
+      objectReference: {fileID: 0}
+    - target: {fileID: 755304586149311444, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_FontData.m_MinSize
       value: 2
       objectReference: {fileID: 0}
@@ -5226,7 +5262,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1193752227}
-  - component: {fileID: 1193752228}
   m_Layer: 0
   m_Name: NewNetworkMgr
   m_TagString: Untagged
@@ -5248,18 +5283,6 @@ Transform:
   m_Father: {fileID: 1476208628}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1193752228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1193752226}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53dcf4e9b876a134ba73e517620fef3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1195070590 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 755304585183304651, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
