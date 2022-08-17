@@ -233,7 +233,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_Text
-      value: Waiting for opponent ...
+      value: Waiting for teammate...
       objectReference: {fileID: 0}
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_FontData.m_MaxSize
@@ -3455,12 +3455,12 @@ PrefabInstance:
         then turn a blind eye to the cyber crime perpetrated by the same malicious
         actors. \"\nMieke Eoyang, Deputy assistant secretary of defense \n\nUNR has
         Funds from the National Science Foundation and the Department of Defense\n\nObjective:
-        Develop Artificial Intelligence for next generation cyber defense\n\nYou!
-        can help us evaluate and assess next gen cyber defense tools\nWork with an
+        Develop training programs for next generation cyber defense\n\nYou! can help
+        us evaluate and assess next gen cyber defense tools\nWork with a human or
         AI teammate to detect, filter, and eliminate malicious packets sent by nation
-        state and cyber criminal actors. \nHospitals, utilities, and defense infrastructure
-        may be under attack.  \n\n\nWork fast, work together, work accurately\nLives
-        are at stake\n  \n "
+        state and cyber criminal actors\n\nHospitals, utilities, and defense infrastructure
+        may be vulnerable\n\n\nWork fast, work together, work accurately\nLives are
+        at stake\n  \n "
       objectReference: {fileID: 0}
     - target: {fileID: 1140984959, guid: 621b7f1ff1a54074cbea51664e1bfed1, type: 3}
       propertyPath: m_FontData.m_BestFit
@@ -4956,7 +4956,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 755304586149311444, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_Text
-      value: Taiser v0.95
+      value: Taiser v0.96
       objectReference: {fileID: 0}
     - target: {fileID: 755304586149311444, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -5470,9 +5470,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_Text
-      value: 'AI or Human Teammate?
-
-        Easy, Medium, or Hard?'
+      value: "AI or Human Teammate? \nNovice, Intermediate,  or Advanced Difficulty?"
       objectReference: {fileID: 0}
     - target: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
       propertyPath: m_RaycastTarget
@@ -8936,7 +8934,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '  ?'
+  m_Text: Human
 --- !u!114 &481911746793640697
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9034,8 +9032,6 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: '  ?'
-      m_Image: {fileID: 0}
     - m_Text: Human
       m_Image: {fileID: 0}
     - m_Text: AI

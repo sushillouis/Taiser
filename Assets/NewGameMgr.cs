@@ -513,6 +513,15 @@ public class NewGameMgr : MonoBehaviour
         RuleTextList[1].color = TextColors[(int) packet.color];
         RuleTextList[2].text = packet.shape.ToString();
     }
+
+    public void ClearPacketInformation(List<Text> RuleTextList)
+    {
+        RuleTextList[0].text = "";
+        RuleTextList[1].text = "";
+        RuleTextList[2].text = "";
+
+    }
+
     public List<int> FontSizes = new List<int>();
     public List<Color> TextColors = new List<Color>();
 
@@ -542,15 +551,25 @@ public class NewGameMgr : MonoBehaviour
     public Text FilterRuleSpecTitle;
     public List<bool> isCorrectList = new List<bool>(); // which advice is correct, set by programmer in editor
     public int isCorrectIndex = 0;
+
+    public Text teammateNameText;
+
     public void OnAttackableDestinationClicked(TDestination destination)
     {
         destination.isBeingExamined = true;
         PacketButtonMgr.inst.SetupPacketButtonsForInspection(destination); // Setup packet buttons on the top panel
+        ClearPacketInformation(ClickedPacketRuleTextList);
         RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination, isCorrectList[isCorrectIndex++]);
+        SetTeammateName();
         DisplayPacketInformation(RuleSpecButtonMgr.inst.AdvisorRuleSpec, AdvisorRuleTextList);
         FilterRuleSpecTitle.text = destination.inGameName;
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), destination.inGameName);
         State = GameState.PacketExamining;
+    }
+
+    public void SetTeammateName()
+    {
+        teammateNameText.text = NewLobbyMgr.teammateName + "'s advice";
     }
 
     public void ApplyFirewallRule(TDestination destination, LightWeightPacket packet, bool isAdvice)

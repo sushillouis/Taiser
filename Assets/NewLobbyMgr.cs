@@ -31,7 +31,8 @@ public class NewLobbyMgr : MonoBehaviour
     [ContextMenu("TimeString")]
     public void TimeString()
     {
-        string tmp = System.DateTime.Now.ToLocalTime().ToString();
+        string tmp = System.DateTime.Now.ToUniversalTime().ToString(); //System.DateTime.Now.ToLocalTime().ToString();
+
         string tmp2 = tmp.Replace("/", "_");
         tmp2 = tmp2.Replace(" ", "_");
         tmp2 = tmp2.Replace(":", "_");
@@ -136,6 +137,7 @@ public class NewLobbyMgr : MonoBehaviour
     public static TaiserPlayer thisPlayer;
     public static Difficulty gameDifficulty;
     public static PlayerSpecies teammateSpecies;
+    public static string teammateName;
 
     //-----------------------------------------------------------
     public PlayerSpecies opponentSpecies;
@@ -153,6 +155,8 @@ public class NewLobbyMgr : MonoBehaviour
         PlrSpecies = PlayerSpecies.Human;
 
         thisPlayer = new TaiserPlayer(PlayerName, PlayerRole, PlrSpecies);
+        gameDifficulty = Difficulty.Novice;
+        teammateSpecies = PlayerSpecies.Human;
 
         GameName = PlayerName + "_Taiser";
         GameNamePlaceholderText.text = GameName;
@@ -198,6 +202,7 @@ public class NewLobbyMgr : MonoBehaviour
 
         //Make me
         TaiserPlayerList.Add(thisPlayer);
+        SetWaitingForPlayersLists();
 
 
         switch(opponentSpecies) {
@@ -218,11 +223,12 @@ public class NewLobbyMgr : MonoBehaviour
         switch(teammateSpecies) {
             case PlayerSpecies.AI:
                 int x = Random.Range(20, 99);
-                MakePlayerAndActivatePlayButton("CyberAI " + x.ToString("00"), PlayerRoles.Whitehat, PlayerSpecies.AI, false);
+                teammateName = "CyberAI " + x.ToString("00");
+                MakePlayerAndActivatePlayButton(teammateName, PlayerRoles.Whitehat, PlayerSpecies.AI, false);
                 break;
             case PlayerSpecies.Human:
-                string name = GeneratePlayerName();
-                MakePlayerAndActivatePlayButton(name, PlayerRoles.Whitehat, PlayerSpecies.Human, false);
+                teammateName = GeneratePlayerName();
+                MakePlayerAndActivatePlayButton(teammateName, PlayerRoles.Whitehat, PlayerSpecies.Human, false);
                 break;
             case PlayerSpecies.Unknown:
                 MakePlayerAndActivatePlayButton("Unknown", PlayerRoles.Whitehat, PlayerSpecies.Unknown, false);
@@ -276,7 +282,7 @@ public class NewLobbyMgr : MonoBehaviour
     public void WaitForPlayers(string gameName)
     {
         GameName = gameName; //assigned twice if you are game creator
-        WaitingForPlayersText.text = thisPlayer.name + ". Waiting for opponent...";
+        WaitingForPlayersText.text = thisPlayer.name + ". Waiting for teammate.";
         //InvalidateDropdownsExceptForMine();
         State = LobbyState.WaitingForPlayers;
 
@@ -378,7 +384,9 @@ public class NewLobbyMgr : MonoBehaviour
     {
         TaiserPlayer player = new TaiserPlayer(name, role, species);
         TaiserPlayerList.Add(player);
-        SetWaitingForPlayersLists();
+        Invoke("SetWaitingForPlayersLists", 5.0f);//this does not work right because SetWaitingForPlayerLists will add all current players
+        //the first time it is called though an Invoke or otherwise. So opponent's Invoke is the limiting factor 
+        //SetWaitingForPlayersLists();
     }
 
     public void MakeAIPlayerAndActivatePlayButton()

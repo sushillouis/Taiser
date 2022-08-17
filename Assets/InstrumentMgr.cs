@@ -155,7 +155,7 @@ public class InstrumentMgr : MonoBehaviour
     {
         session.whitehatScore = NewGameMgr.inst.WhitehatScore * 100f; // BlackhatAI.inst.wscore;
         session.blackhatScore = NewGameMgr.inst.BlackhatScore * 100f; // BlackhatAI.inst.bscore;
-        session.dayAndTime = System.DateTime.Now.ToString();
+        session.dayAndTime = System.DateTime.Now.ToUniversalTime().ToString();
         session.gameDifficulty = NewGameMgr.inst.difficulty;
         string tmp = System.DateTime.Now.ToLocalTime().ToString();
         session.name = (isDebug ? "sjl" : NewLobbyMgr.thisPlayer.name + "_" + 
