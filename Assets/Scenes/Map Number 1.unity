@@ -1753,6 +1753,12 @@ MonoBehaviour:
     initTime: 0
     meanTimeInterval: 23
     timeSpread: 5
+  RandomSeed: 1234
+  AIRandomizerSeed: 4321
+  HumanRandomizerSeed: 4321
+  CorrectAdviceProbability: 0.8
+  HumanCorrectAdviceProbability: 0.8
+  AICorrectAdviceProbability: 0.8
   maxWaves: 3
   currentWaveNumber: 0
   CountdownLabel: {fileID: 1634617403}
@@ -1857,9 +1863,8 @@ MonoBehaviour:
   PacketRuleTextListRoot: {fileID: 757759653}
   AdvisorRuleTextListRoot: {fileID: 865090443}
   FilterRuleSpecTitle: {fileID: 7663793756578089146}
-  isCorrectList: 01010100010100010101
-  isCorrectIndex: 0
   teammateNameText: {fileID: 552052474}
+  DelayInSeconds: 2
   WhitehatWatchingScorePanel: {fileID: 1381167945}
   BlackhatWatchingScorePanel: {fileID: 317242201}
   minScaley: 0
@@ -1870,7 +1875,6 @@ MonoBehaviour:
   totalMaliciousCount: 0
   totalMaliciousFilteredCount: 0
   totalMaliciousUnFilteredCount: 0
-  RandomSeed: 1234
 --- !u!1 &168106960
 GameObject:
   m_ObjectHideFlags: 0
@@ -12312,6 +12316,7 @@ MonoBehaviour:
     - {fileID: 6857954056209977007}
   nrows: 3
   ncols: 3
+  AcceptAdviceButton: {fileID: 8689204609647545002}
   CurrentDestination: {fileID: 0}
   PlayerRuleSpec:
     size: 0

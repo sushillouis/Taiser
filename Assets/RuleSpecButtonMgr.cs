@@ -32,6 +32,8 @@ public class RuleSpecButtonMgr : MonoBehaviour
     public int nrows = 3;
     public int ncols = 3;
 
+    public Button AcceptAdviceButton;
+
     [ContextMenu("SetupButtons")]
     public void SetupButtons()
     {

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -92,21 +93,40 @@ public class NewGameMgr : MonoBehaviour
     void Start()
     {
         Initialize();
+        
+
     }
     public void Initialize()
     {
         InitSizeColorDictionary();
         TRandom = new System.Random(RandomSeed);
+        if(!isRandomSeedInitialized) {
+            Debug.Log("Initializing Advice Randomizers");
+            isRandomSeedInitialized = true;
+            AIDecisionRandomizer = new System.Random(AIRandomizerSeed);
+            HumanDecisionRandomizer = new System.Random(HumanRandomizerSeed);
+        }
         HidePrototypes();
 
         StartWave();
+    }
+
+    [ContextMenu("TestFlip")]
+    public void TestFlip()
+    {
+        int count = 0;
+        int max = 100;
+        for(int i = 0; i < max; i++) {
+            if(Flip(0.8f)) count++;
+        }
+        Debug.Log("Flip Prob: " + count / (float) max);
     }
 
     // Update is called once per frame
     void Update()
     {
         UpdateScore();
-        if(endedSources >= Sources.Count || isCorrectIndex >= isCorrectList.Count) {
+        if(endedSources >= Sources.Count) { //}|| isCorrectIndex >= isCorrectList.Count) {
             EndWave();
         }
         //if(State == GameState.InWave) {
@@ -137,17 +157,43 @@ public class NewGameMgr : MonoBehaviour
     //-------------------------------------------------------------------------------------------------
 
 
+    public int RandomSeed = 1234;
+    public int AIRandomizerSeed = 4321;
+    public int HumanRandomizerSeed = 6789;
+
+    public float CorrectAdviceProbability = 0.8f;
+    public float HumanCorrectAdviceProbability = 0.8f;
+    public float AICorrectAdviceProbability = 0.8f;
+    public static bool isRandomSeedInitialized = false;
+
+
+    //int maxSpawns = 40;
+    public System.Random TRandom;
+    public System.Random AIDecisionRandomizer;
+    public System.Random HumanDecisionRandomizer;
 
     //----------------------------------------------------------------------------------------------------
     /// <summary>
     /// Returns true with probability prob
     /// </summary>
-    /// <param name="prob">Probability of return true</param>
+    /// <param name="prob">Probability of returning true</param>
     /// <returns></returns>
     public bool Flip(float prob)
     {
         return (TRandom.NextDouble() < prob);
     }
+
+    /// <summary>
+    /// Like Flip but takes a System.Random as first param
+    /// </summary>
+    /// <param name="Randomizer"></param>
+    /// <param name="prob"> Probability of returning true </param> 
+    /// <returns></returns>
+    public bool AdviceRandomizerFlip(System.Random Randomizer, float prob)
+    {
+        return (Randomizer.NextDouble() < prob);
+    }
+
     //----------------------------------------------------------------------------------------------------
     public int maxWaves = 3;
     public int currentWaveNumber = 0;
@@ -245,14 +291,15 @@ public class NewGameMgr : MonoBehaviour
     public void ResetVars()
     {
         endedSources = 0;
-        isCorrectIndex = 0;
+        //isCorrectIndex = 0;
     }
 
     public Text VictoryOrDefeatText;
     public Text AnotherWaveAwaitsMessageText;
     public void EndWave()
     {
-        Debug.Log("Ending Wave: " + currentWaveNumber + ", isCorrectIndex: " + isCorrectIndex + ", endedSrcs: " + endedSources);
+//        Debug.Log("Ending Wave: " + currentWaveNumber + ", isCorrectIndex: " + isCorrectIndex + ", endedSrcs: " + endedSources);
+        Debug.Log("Ending Wave: " + currentWaveNumber + ", endedSrcs: " + endedSources);
         State = GameState.WaveEnd;
         ResetVars();
         SetWaveEndScores();
@@ -549,22 +596,38 @@ public class NewGameMgr : MonoBehaviour
     // PROBLEM: Double indirection to handle design issues
 
     public Text FilterRuleSpecTitle;
-    public List<bool> isCorrectList = new List<bool>(); // which advice is correct, set by programmer in editor
-    public int isCorrectIndex = 0;
-
+    //public List<bool> isCorrectList = new List<bool>(); // which advice is correct, set by programmer in editor
+    //public int isCorrectIndex = 0;
     public Text teammateNameText;
+    public float DelayInSeconds = 3.5f;
 
     public void OnAttackableDestinationClicked(TDestination destination)
     {
         destination.isBeingExamined = true;
         PacketButtonMgr.inst.SetupPacketButtonsForInspection(destination); // Setup packet buttons on the top panel
         ClearPacketInformation(ClickedPacketRuleTextList);
-        RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination, isCorrectList[isCorrectIndex++]);
-        SetTeammateName();
-        DisplayPacketInformation(RuleSpecButtonMgr.inst.AdvisorRuleSpec, AdvisorRuleTextList);
+
+
+        //RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination, isCorrectList[isCorrectIndex++]);
+        StartCoroutine(ProvideAdviceWithDelay(destination));
+        
         FilterRuleSpecTitle.text = destination.inGameName;
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), destination.inGameName);
         State = GameState.PacketExamining;
+    }
+
+    IEnumerator ProvideAdviceWithDelay(TDestination destination)
+    {
+        ClearPacketInformation(AdvisorRuleTextList);
+        RuleSpecButtonMgr.inst.AcceptAdviceButton.interactable = false;
+        yield return new WaitForSeconds(DelayInSeconds);
+        RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination,
+            (NewLobbyMgr.teammateSpecies == PlayerSpecies.AI ?
+            AdviceRandomizerFlip(AIDecisionRandomizer, AICorrectAdviceProbability) :
+            AdviceRandomizerFlip(HumanDecisionRandomizer, HumanCorrectAdviceProbability)));
+        SetTeammateName();
+        DisplayPacketInformation(RuleSpecButtonMgr.inst.AdvisorRuleSpec, AdvisorRuleTextList);
+        RuleSpecButtonMgr.inst.AcceptAdviceButton.interactable = true;
     }
 
     public void SetTeammateName()
@@ -574,6 +637,8 @@ public class NewGameMgr : MonoBehaviour
 
     public void ApplyFirewallRule(TDestination destination, LightWeightPacket packet, bool isAdvice)
     {
+        if(packet == null) return; //------------------------------------------
+
         destination.FilterOnRule(packet);
 
         if(packet.isEqual(destination.MaliciousRule)) {
@@ -664,9 +729,6 @@ public class NewGameMgr : MonoBehaviour
     }
 
    
-    public int RandomSeed = 1234;
-    //int maxSpawns = 40;
-    public System.Random TRandom;
 
 
 
