@@ -285,7 +285,7 @@ public class NewLobbyMgr : MonoBehaviour
     public void WaitForPlayers(string gameName)
     {
         GameName = gameName; //assigned twice if you are game creator
-        WaitingForPlayersText.text = thisPlayer.name + ", Waiting for player...";
+        WaitingForPlayersText.text = thisPlayer.name + ". Waiting for teammate.";
         //InvalidateDropdownsExceptForMine();
         PlayButton.interactable = false;
         SpinnerPanel.gameObject.SetActive(true);
@@ -595,7 +595,6 @@ public class NewLobbyMgr : MonoBehaviour
         //SpinnerPanel.GetComponentInChildren<Animation>().Stop();
         SpinnerPanel.gameObject.SetActive(false);
         //}
-        WaitingForPlayersText.text = "Players are ready!";
         Debug.Log("Creating Game");
     }
 
