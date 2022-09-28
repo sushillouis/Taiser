@@ -184,7 +184,6 @@ public class NewLobbyMgr : MonoBehaviour
     public void OnCreateGameButton()
     {
         ShowBriefing();
-
     }
 
     // Function called whenever the create room button is pressed, it updates the player's name and creates a room
@@ -503,9 +502,6 @@ public class NewLobbyMgr : MonoBehaviour
     }
 
     public RectTransform SpinnerPanel;
-    // public RectTransform .;
-    
-
     public void StopSpinner()
     {
         SpinnerPanel.gameObject.SetActive(false);
