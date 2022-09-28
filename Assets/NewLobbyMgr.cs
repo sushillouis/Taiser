@@ -146,6 +146,8 @@ public class NewLobbyMgr : MonoBehaviour
 
     public RectTransform JoinGameSubPanel;
 
+    public GameObject TaiserButtonPanel;
+    
     public void OnJoinButton()
     {
 
@@ -182,6 +184,7 @@ public class NewLobbyMgr : MonoBehaviour
     public void OnCreateGameButton()
     {
         ShowBriefing();
+
     }
 
     // Function called whenever the create room button is pressed, it updates the player's name and creates a room
@@ -207,6 +210,7 @@ public class NewLobbyMgr : MonoBehaviour
 
         PlayButton.interactable = false;
         SpinnerPanel.gameObject.SetActive(true);
+        TaiserButtonPanel.gameObject.SetActive(false);
 
         switch(opponentSpecies) {
             case PlayerSpecies.AI:
@@ -285,10 +289,11 @@ public class NewLobbyMgr : MonoBehaviour
     public void WaitForPlayers(string gameName)
     {
         GameName = gameName; //assigned twice if you are game creator
-        WaitingForPlayersText.text = thisPlayer.name + ". Waiting for teammate.";
+        WaitingForPlayersText.text = thisPlayer.name + ", Waiting for player(s) to join...";
         //InvalidateDropdownsExceptForMine();
         PlayButton.interactable = false;
         SpinnerPanel.gameObject.SetActive(true);
+        TaiserButtonPanel.gameObject.SetActive(false);
         State = LobbyState.WaitingForPlayers;
 
     }
@@ -498,9 +503,13 @@ public class NewLobbyMgr : MonoBehaviour
     }
 
     public RectTransform SpinnerPanel;
+    // public RectTransform .;
+    
+
     public void StopSpinner()
     {
         SpinnerPanel.gameObject.SetActive(false);
+        TaiserButtonPanel.gameObject.SetActive(true);
     }
 
     public void SetPlayerInfoDisplay(string name, List<Text> names, PlayerRoles role, List<Dropdown> rolesDropdowns, 
@@ -594,6 +603,8 @@ public class NewLobbyMgr : MonoBehaviour
         PlayButton.interactable = true;
         //SpinnerPanel.GetComponentInChildren<Animation>().Stop();
         SpinnerPanel.gameObject.SetActive(false);
+        WaitingForPlayersText.text = "Player(s) are ready!";
+        TaiserButtonPanel.gameObject.SetActive(true);
         //}
         Debug.Log("Creating Game");
     }
