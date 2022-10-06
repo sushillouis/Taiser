@@ -522,7 +522,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1476208628}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &119819434
 MonoBehaviour:
@@ -542,7 +542,9 @@ MonoBehaviour:
   CreateOrJoinGamePanel: {fileID: 335845852}
   WaitingForPlayersPanel: {fileID: 224375307}
   MissionObjectivePanel: {fileID: 1876915037}
-  ChooseTeammateSpeciesPanel: {fileID: 1195070590}
+  ChooseTeammateSpeciesAndGameDifficultyPanel: {fileID: 1195070590}
+  TeammateChoiceDropdownPanel: {fileID: 4960052572669920905}
+  TeammateChoiceGameDifficultySubtitleText: {fileID: 419449778}
   AliasInputFieldText: {fileID: 1286167525}
   PlayerNameText: {fileID: 77297348}
   GameNamePlaceholderText: {fileID: 796971400}
@@ -553,7 +555,6 @@ MonoBehaviour:
   publicTeammateSpecies: 0
   publicGameDifficulty: 0
   JoinGameSubPanel: {fileID: 1719754701}
-  CachedRoomNameList: []
   RoomButtonsList:
   - {fileID: 1788592530}
   - {fileID: 1864621097}
@@ -2045,6 +2046,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &419449778 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1155010759, guid: aa320fc5949a9144384f51c20083a125, type: 3}
+  m_PrefabInstance: {fileID: 1281154653}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &443940857 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1397882611521083610, guid: 69a9789602868ed4fbf66ba9dbc54581, type: 3}
@@ -2376,67 +2388,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
---- !u!1 &558201251
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 558201253}
-  - component: {fileID: 558201252}
-  m_Layer: 0
-  m_Name: AudioManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &558201252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 558201251}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb535df96b1294648b2cb7c0d4da3c67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  initVolume: 0
-  musicClips:
-  - name: BGM
-    clip: {fileID: 8300000, guid: 02326039d13744943bf3295a3084a535, type: 3}
-  uiSoundFxClips:
-  - name: Win
-    clip: {fileID: 8300000, guid: 2667a0a008b044e218b63df62e2be749, type: 3}
-  - name: SettingsUpdated
-    clip: {fileID: 8300000, guid: 79180f511d89441b9aa23ccae1992fe0, type: 3}
-  - name: SettingsUpdateFailed
-    clip: {fileID: 8300000, guid: b99da9a57308d4ba1bee1cf1d9038376, type: 3}
-  soundFxClips:
-  - name: MaliciousDestroyed
-    clip: {fileID: 8300000, guid: 4f223f6c7a7ef3f4da3b3de467aaea76, type: 3}
-  - name: MaliciousSuccess
-    clip: {fileID: 8300000, guid: b9eff218e132a4e76be78840eca96fb2, type: 3}
-  - name: FirewallSpawn
-    clip: {fileID: 8300000, guid: a235d590ef2a04d1b85b61ef4c21337c, type: 3}
---- !u!4 &558201253
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 558201251}
-  m_LocalRotation: {x: -0.008726558, y: -0, z: -0, w: 0.999962}
-  m_LocalPosition: {x: -938.9917, y: -461.98407, z: 8.063983}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1476208628}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &572067300
 GameObject:
   m_ObjectHideFlags: 0
@@ -4560,6 +4511,14 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 119819434}
+    - target: {fileID: 8689204611315892473, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnPlayButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 8689204611315892473, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: NewLobbyMgr, Assembly-CSharp
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
 --- !u!224 &952453105 stripped
@@ -5018,7 +4977,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 755304586149311444, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_Text
-      value: Taiser v0.97
+      value: Taiser v0.99
       objectReference: {fileID: 0}
     - target: {fileID: 755304586149311444, guid: 031ffb16acce539429dfd1d45efb37ed, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -5343,7 +5302,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1476208628}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1195070590 stripped
 MonoBehaviour:
@@ -6040,7 +5999,11 @@ PrefabInstance:
       objectReference: {fileID: 119819434}
     - target: {fileID: 8689204611315892473, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnPlayButton
+      value: OnStartButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 8689204611315892473, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: NewLobbyMgr, Assembly-CSharp
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19ea3b1d06452f947b54040e185bde5b, type: 3}
@@ -6934,7 +6897,6 @@ Transform:
   m_LocalPosition: {x: 938.9917, y: 462.05444, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 558201253}
   - {fileID: 119819433}
   - {fileID: 1193752227}
   m_Father: {fileID: 0}
@@ -7404,6 +7366,30 @@ PrefabInstance:
     - target: {fileID: 100002, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
       propertyPath: m_Name
       value: Spinner 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22400000, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22400002, guid: d6acbcaaf0d98e34e8d95dc9e8ec0b5a, type: 3}
       propertyPath: m_Pivot.x
@@ -8687,7 +8673,7 @@ GameObject:
   - component: {fileID: 2077681944}
   - component: {fileID: 2077681943}
   m_Layer: 5
-  m_Name: TaiserLabelValuePanel (1)
+  m_Name: GameDifficultyPanel (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10118,7 +10104,7 @@ GameObject:
   - component: {fileID: 4960052572669920907}
   - component: {fileID: 4960052572669920906}
   m_Layer: 5
-  m_Name: TaiserLabelValuePanel
+  m_Name: TeammateSpeciesPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

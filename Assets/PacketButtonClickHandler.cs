@@ -26,7 +26,7 @@ public class PacketButtonClickHandler : MonoBehaviour
     public LightWeightPacket packet;
     public void OnPacketButtonClick()
     {
-        NewGameMgr.inst.OnPacketClicked(packet);
+        RuleSpecButtonMgr.inst.OnPacketClicked(packet);
     }
 
     public ColorBlock buttonColorBlock;

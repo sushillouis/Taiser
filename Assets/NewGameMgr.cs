@@ -100,12 +100,6 @@ public class NewGameMgr : MonoBehaviour
     {
         InitSizeColorDictionary();
         TRandom = new System.Random(RandomSeed);
-        if(!isRandomSeedInitialized) {
-            Debug.Log("Initializing Advice Randomizers");
-            isRandomSeedInitialized = true;
-            AIDecisionRandomizer = new System.Random(AIRandomizerSeed);
-            HumanDecisionRandomizer = new System.Random(HumanRandomizerSeed);
-        }
         HidePrototypes();
 
         StartWave();
@@ -158,19 +152,8 @@ public class NewGameMgr : MonoBehaviour
 
 
     public int RandomSeed = 1234;
-    public int AIRandomizerSeed = 4321;
-    public int HumanRandomizerSeed = 6789;
-
-    public float CorrectAdviceProbability = 0.8f;
-    public float HumanCorrectAdviceProbability = 0.8f;
     public float AICorrectAdviceProbability = 0.8f;
-    public static bool isRandomSeedInitialized = false;
-
-
-    //int maxSpawns = 40;
     public System.Random TRandom;
-    public System.Random AIDecisionRandomizer;
-    public System.Random HumanDecisionRandomizer;
 
     //----------------------------------------------------------------------------------------------------
     /// <summary>
@@ -183,16 +166,7 @@ public class NewGameMgr : MonoBehaviour
         return (TRandom.NextDouble() < prob);
     }
 
-    /// <summary>
-    /// Like Flip but takes a System.Random as first param
-    /// </summary>
-    /// <param name="Randomizer"></param>
-    /// <param name="prob"> Probability of returning true </param> 
-    /// <returns></returns>
-    public bool AdviceRandomizerFlip(System.Random Randomizer, float prob)
-    {
-        return (Randomizer.NextDouble() < prob);
-    }
+
 
     //----------------------------------------------------------------------------------------------------
     public int maxWaves = 3;
@@ -543,97 +517,7 @@ public class NewGameMgr : MonoBehaviour
         }
     }
 
-    //-------------------------------------------------------------------------------------
-    //--- When a packet button in the examining panel is clicked
-
-    public void OnPacketClicked(LightWeightPacket packet)
-    {
-        DisplayPacketInformation(packet, ClickedPacketRuleTextList); // expand on this
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PacketInspect.ToString(), packet.ToString());
-    }
-
-    public void DisplayPacketInformation(LightWeightPacket packet, List<Text> RuleTextList)
-    {
-        RuleTextList[0].text = packet.size.ToString();
-        RuleTextList[0].fontSize = FontSizes[(int) packet.size];
-        RuleTextList[1].text = packet.color.ToString();
-        RuleTextList[1].color = TextColors[(int) packet.color];
-        RuleTextList[2].text = packet.shape.ToString();
-    }
-
-    public void ClearPacketInformation(List<Text> RuleTextList)
-    {
-        RuleTextList[0].text = "";
-        RuleTextList[1].text = "";
-        RuleTextList[2].text = "";
-
-    }
-
-    public List<int> FontSizes = new List<int>();
-    public List<Color> TextColors = new List<Color>();
-
-    public List<Text> ClickedPacketRuleTextList = new List<Text>();
-    public List<Text> AdvisorRuleTextList = new List<Text>();
-
-
-    public GameObject PacketRuleTextListRoot;
-    public GameObject AdvisorRuleTextListRoot;
-    [ContextMenu("SetupRuleTextLists")]
-    public void SetupRuleTextLists()
-    {
-        ClickedPacketRuleTextList.Clear();
-        foreach(Text t in PacketRuleTextListRoot.GetComponentsInChildren<Text>()) {
-            ClickedPacketRuleTextList.Add(t);
-        }
-        AdvisorRuleTextList.Clear();
-        foreach(Text t in AdvisorRuleTextListRoot.GetComponentsInChildren<Text>()) {
-            AdvisorRuleTextList.Add(t);
-        }
-    }
-
-    //-------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------
-    // PROBLEM: Double indirection to handle design issues
-
-    public Text FilterRuleSpecTitle;
-    //public List<bool> isCorrectList = new List<bool>(); // which advice is correct, set by programmer in editor
-    //public int isCorrectIndex = 0;
-    public Text teammateNameText;
-    public float DelayInSeconds = 3.5f;
-
-    public void OnAttackableDestinationClicked(TDestination destination)
-    {
-        destination.isBeingExamined = true;
-        PacketButtonMgr.inst.SetupPacketButtonsForInspection(destination); // Setup packet buttons on the top panel
-        ClearPacketInformation(ClickedPacketRuleTextList);
-
-
-        //RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination, isCorrectList[isCorrectIndex++]);
-        StartCoroutine(ProvideAdviceWithDelay(destination));
-        
-        FilterRuleSpecTitle.text = destination.inGameName;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), destination.inGameName);
-        State = GameState.PacketExamining;
-    }
-
-    IEnumerator ProvideAdviceWithDelay(TDestination destination)
-    {
-        ClearPacketInformation(AdvisorRuleTextList);
-        RuleSpecButtonMgr.inst.AcceptAdviceButton.interactable = false;
-        yield return new WaitForSeconds(DelayInSeconds);
-        RuleSpecButtonMgr.inst.SetDestAndAdvisorRule(destination,
-            (NewLobbyMgr.teammateSpecies == PlayerSpecies.AI ?
-            AdviceRandomizerFlip(AIDecisionRandomizer, AICorrectAdviceProbability) :
-            AdviceRandomizerFlip(HumanDecisionRandomizer, HumanCorrectAdviceProbability)));
-        SetTeammateName();
-        DisplayPacketInformation(RuleSpecButtonMgr.inst.AdvisorRuleSpec, AdvisorRuleTextList);
-        RuleSpecButtonMgr.inst.AcceptAdviceButton.interactable = true;
-    }
-
-    public void SetTeammateName()
-    {
-        teammateNameText.text = NewLobbyMgr.teammateName + "'s advice";
-    }
+    
 
     public void ApplyFirewallRule(TDestination destination, LightWeightPacket packet, bool isAdvice)
     {
