@@ -102,6 +102,8 @@ public class NewGameMgr : MonoBehaviour
         TRandom = new System.Random(RandomSeed);
         HidePrototypes();
 
+        //ReadParametersFromServer();
+
         StartWave();
     }
 
@@ -152,7 +154,7 @@ public class NewGameMgr : MonoBehaviour
 
 
     public int RandomSeed = 1234;
-    public float AICorrectAdviceProbability = 0.8f;
+    //public float AICorrectAdviceProbability = 0.8f;
     public System.Random TRandom;
 
     //----------------------------------------------------------------------------------------------------
@@ -179,7 +181,7 @@ public class NewGameMgr : MonoBehaviour
 
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
-
+        SetWaveNumberEffect(Color.green);
         CountdownLabel.text = timerSecs.ToString("0");
         InvokeRepeating("CountdownLabeller", 0.1f, 1f);
     }
@@ -290,7 +292,7 @@ public class NewGameMgr : MonoBehaviour
         }
         currentWaveNumber += 1;
         if(currentWaveNumber >= maxWaves)
-            AnotherWaveAwaitsMessageText.text = "Wave Goodbye! Bye Bye now...";
+            AnotherWaveAwaitsMessageText.text = "You are done for now. Take a break.";
         else
             AnotherWaveAwaitsMessageText.text = "Get Ready for Wave " + (1+currentWaveNumber).ToString("0")
                 + " of " + maxWaves.ToString("0");
@@ -304,11 +306,33 @@ public class NewGameMgr : MonoBehaviour
     public Vector3 waveEndWhitehatScoreScaler = Vector3.one;
     public void SetWaveEndScores()
     {
-        SetScores(BlackhatScore, WhitehatScore);
-        waveEndBlackhatScoreScaler.y = BlackhatScore;
-        blackhatBarPanel.localScale = waveEndBlackhatScoreScaler;
-        waveEndWhitehatScoreScaler.y = WhitehatScore;
-        whiteHatBarPanel.localScale = waveEndWhitehatScoreScaler;
+        //SetScores(BlackhatScore, WhitehatScore);
+        //waveEndBlackhatScoreScaler.y = BlackhatScore;
+        //blackhatBarPanel.localScale = waveEndBlackhatScoreScaler;
+        //waveEndWhitehatScoreScaler.y = WhitehatScore;
+        //whiteHatBarPanel.localScale = waveEndWhitehatScoreScaler;
+
+        WhitehatSlider.maxValue += 50;
+        BlackhatSlider.maxValue += 50;
+
+
+    }
+
+    public List<RectTransform> WaveNumberIndicatorCirclePanels = new List<RectTransform>();
+    public RectTransform WaveNumberIndicatorRoot;
+
+    [ContextMenu("FindWaveNumberIndicators")]
+    public void FindWaveNumberIndicators()
+    {
+        WaveNumberIndicatorCirclePanels.Clear();
+        foreach(RectTransform rt in WaveNumberIndicatorRoot.GetComponentsInChildren<RectTransform>()) {
+            WaveNumberIndicatorCirclePanels.Add(rt);
+        }
+    }
+
+    public void SetWaveNumberEffect(Color col)
+    {
+        WaveNumberIndicatorCirclePanels[currentWaveNumber].GetComponent<Image>().color = col;
     }
 
     void WaitToStartNextWave()
@@ -333,6 +357,7 @@ public class NewGameMgr : MonoBehaviour
         foreach(TSource source in Sources) {
             source.Reset();
         }
+        penaltyCount = 0;
     }
 
     
@@ -500,6 +525,9 @@ public class NewGameMgr : MonoBehaviour
             PacketExaminerPanel.isVisible = (_state == GameState.PacketExamining);
             StartPanel.isVisible = (_state == GameState.Start);
             WatchingPanel.isVisible = (_state == GameState.InWave || _state == GameState.FlushingSourcesToEndWave);
+            ScorePanel.gameObject.SetActive(_state == GameState.WaveEnd
+                || _state == GameState.InWave
+                || _state == GameState.FlushingSourcesToEndWave);
             //add menu panel
             MenuPanel.isVisible = (_state == GameState.Menu);
 
@@ -538,6 +566,8 @@ public class NewGameMgr : MonoBehaviour
             else
                 InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet.ToString());
             EffectsMgr.inst.BadFilterApplied(destination, packet);
+            if(shouldApplyPenalty)
+                ApplyScorePenalty();
             //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.BadFilterRule);
         }
 
@@ -545,15 +575,34 @@ public class NewGameMgr : MonoBehaviour
         State = GameState.InWave;
     }
 
-
     //-------------------------------------------------------------------------------------
-    public RectTransform WhitehatWatchingScorePanel;
-    public RectTransform BlackhatWatchingScorePanel;
+    //public RectTransform WhitehatWatchingScorePanel;
+    //public RectTransform BlackhatWatchingScorePanel;
     public float minScaley = 0.0f;
     public void SetScores(float blackhatScore, float whitehatScore)
     {
-        SetBars(BlackhatWatchingScorePanel, blackhatScore, WhitehatWatchingScorePanel, whitehatScore);
+        //SetBars(BlackhatWatchingScorePanel, blackhatScore, WhitehatWatchingScorePanel, whitehatScore);
+        SetSliders();
+
     }
+
+    public RectTransform ScorePanel;
+    public Slider WhitehatSlider;
+    public Text WhitehatCountText;
+    public Slider BlackhatSlider;
+    public Text BlackhatCountText;
+
+    public Slider WaveProgressSlider;
+    public void SetSliders()
+    {
+        WhitehatSlider.value = totalMaliciousFilteredCount;
+        WhitehatCountText.text = totalMaliciousFilteredCount.ToString("00");
+        BlackhatSlider.value = (int) BlackhatScore; // totalMaliciousUnFilteredCount;
+        BlackhatCountText.text = ((int) BlackhatScore).ToString("00");//totalMaliciousUnFilteredCount.ToString("00");
+        WaveProgressSlider.value = Sources[0].packetCount / (float) Sources[0].maxPackets;
+
+    }
+
     public Vector3 inWaveWhitehatScaler = Vector3.one;
     public Vector3 inWaveBlackhatScaler = Vector3.one;
     public void SetBars(RectTransform blackhatBarPanel, float blackhatScore, 
@@ -583,12 +632,41 @@ public class NewGameMgr : MonoBehaviour
             totalMaliciousCount += destination.maliciousCount;
         }
 
-        WhitehatScore = totalMaliciousFilteredCount / (totalMaliciousCount + 0.000001f);
-        BlackhatScore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 0.000001f);
+        //WhitehatScore = totalMaliciousFilteredCount / (totalMaliciousCount + 0.000001f);
+        //BlackhatScore = totalMaliciousUnFilteredCount / (totalMaliciousCount + 0.000001f);
+        WhitehatScore = totalMaliciousFilteredCount;
+        BlackhatScore = totalMaliciousUnFilteredCount + (penalty * penaltyCount);
         SetScores(BlackhatScore, WhitehatScore);
     }
 
+    public bool shouldApplyPenalty = true;
+    public int penalty = 20;
+    public int penaltyCount = 0;
+    public RectTransform BlackFillArea;
+    public void ApplyScorePenalty()
+    {
+        penaltyCount++;
+        SetSliders();
+        WhitehatSlider.maxValue += penalty/2;
+        BlackhatSlider.maxValue += penalty/2;
+        BlackFillArea.GetComponent<Image>().color = Color.red;
+        StartCoroutine(ToggleFillColor());
+    }
 
+    public bool colorToggle = true;
+
+    IEnumerator ToggleFillColor()
+    {
+        for(int i = 0; i < penalty; i++) {
+            if(colorToggle) {
+                BlackFillArea.GetComponent<Image>().color = Color.red;
+            } else {
+                BlackFillArea.GetComponent<Image>().color = Color.black;
+            }
+            colorToggle = !colorToggle;
+            yield return new WaitForSeconds(0.25f);
+        }
+    }
 
     //-------------------------------------------------------------------------------------
     public void OnMenuBackButton()

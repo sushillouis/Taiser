@@ -34,6 +34,8 @@ public class NewAudioMgr : MonoBehaviour
     public AudioClip BadFilterRule;
     public AudioClip GoodFilterRule;
 
+    public AudioClip PenaltyBoing;
+
     public AudioClip Countdown;
     public AudioClip Winning;
     public AudioClip Losing;

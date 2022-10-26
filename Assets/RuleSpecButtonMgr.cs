@@ -270,10 +270,10 @@ public class RuleSpecButtonMgr : MonoBehaviour
 
     }
 
-    float MinHumanTime = 1f;
-    float MaxHumanTime = 1f;
-    float MinAITime = 1f;
-    float MaxAITime = 1f;
+    public float MinHumanTime = 1f;
+    public float MaxHumanTime = 1f;
+    public float MinAITime = 1f;
+    public float MaxAITime = 1f;
 
     public RectTransform Spinner;
     IEnumerator ProvideAdviceWithDelay()

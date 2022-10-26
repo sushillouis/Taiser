@@ -16,6 +16,7 @@ public class NewLobbyMgr : MonoBehaviour
     void Start()
     {
         State = LobbyState.StartOrQuit;
+        //State = LobbyState.Admin;
         SetPriorStateMap();
     }
 
@@ -39,6 +40,7 @@ public class NewLobbyMgr : MonoBehaviour
     {
         StartOrQuit = 0,
         EnterAlias,
+        Admin,            // if Alias is Administrator
         CreateOrJoin,
         MissionObjective,
         ChooseTeammateSpecies,
@@ -55,6 +57,7 @@ public class NewLobbyMgr : MonoBehaviour
         {
             _state = value;
             StartPanel.isVisible = (_state == LobbyState.StartOrQuit);
+            AdminPanel.isVisible = (_state == LobbyState.Admin);
             EnterAliasPanel.isVisible = (_state == LobbyState.EnterAlias);
             CreateOrJoinGamePanel.isVisible = (_state == LobbyState.CreateOrJoin);
             WaitingForPlayersPanel.isVisible = (_state == LobbyState.WaitingForPlayers);
@@ -62,6 +65,7 @@ public class NewLobbyMgr : MonoBehaviour
             ChooseTeammateSpeciesAndGameDifficultyPanel.isVisible = (_state == LobbyState.ChooseTeammateSpecies);
         }
     }
+    public TaiserPanel AdminPanel;
     public TaiserPanel StartPanel;
     public TaiserPanel EnterAliasPanel;
     public TaiserPanel CreateOrJoinGamePanel;
@@ -76,6 +80,11 @@ public class NewLobbyMgr : MonoBehaviour
     public void OnPlayButton()
     {
         State = LobbyState.EnterAlias;
+    }
+    public void OnAdminStoreButton()
+    {
+        AdminMgr.inst.WriteParamsToServer();
+        State = LobbyState.StartOrQuit;
     }
 
     public void OnNextButton()
@@ -116,6 +125,7 @@ public class NewLobbyMgr : MonoBehaviour
 
     //-----------------------------------------------------------
     public static string PlayerName = "sjl";
+    public string PlayerNameForDebug;
     public static TaiserPlayer thisPlayer;
     public static Difficulty gameDifficulty;
     public static PlayerSpecies teammateSpecies;
@@ -143,7 +153,13 @@ public class NewLobbyMgr : MonoBehaviour
         GameName = PlayerName + "_Taiser";
         GameNamePlaceholderText.text = GameName;
 
-        State = LobbyState.CreateOrJoin;
+        PlayerNameForDebug = PlayerName;
+
+        if(PlayerName.Trim().ToLower().Contains("admin")) {
+            State = LobbyState.Admin;
+        } else {
+            State = LobbyState.CreateOrJoin;
+        }
 
     }
 
@@ -208,14 +224,18 @@ public class NewLobbyMgr : MonoBehaviour
 
     }
 
+    public TextTypingAnimation TTAnimator;
+
     public void ShowBriefing()
     {
         State = LobbyState.MissionObjective;
+        TTAnimator.Animate = true;
     }
 
     public void OnBriefingDoneButton()
     {
         State = LobbyState.ChooseTeammateSpecies;
+        TTAnimator.Animate = false;
         if(!ChooseOnce)
             FixTeammateSpeciesUIElements();
 
@@ -465,11 +485,9 @@ public class NewLobbyMgr : MonoBehaviour
 
 
     //-------------------------------------------------------------------------
-    [Header("Decide once or on every destination click")]
-
-    public static bool ChooseOnce = true;
-
-    [Header("")]
+    [Header("---------------")]
+    public static bool ChooseOnce = false;
+    [Header("---------------")]
 
     public Button PlayButton;
     public int MinNumberOfPlayers;
@@ -478,6 +496,7 @@ public class NewLobbyMgr : MonoBehaviour
  
         PlayButton.interactable = true;
         SpinnerPanel.gameObject.SetActive(false);
+        WaitingForPlayersText.text = PlayerName + " found teammate: " + teammateName;
         Debug.Log("Creating Game");
     }
 
