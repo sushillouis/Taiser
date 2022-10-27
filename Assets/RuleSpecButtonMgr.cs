@@ -259,6 +259,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     {
         Debug.Log("Picked human");
         State = AdvisingState.Human;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "Human");
         StartCoroutine(ProvideAdviceWithDelay());
     }
     public void AskForAIAdvice()
@@ -266,6 +267,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
         Debug.Log("Picked AI");
         State = AdvisingState.AI;
         //Show AI advice after interval
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "AI");
         StartCoroutine(ProvideAdviceWithDelay());
 
     }

@@ -26,14 +26,14 @@ public class TDestination : MonoBehaviour
         maliciousCube.transform.localScale = originalCubeScale;
         isBeingExamined = false;
         isFilterValid = false;
-        dt = timeInterval;
+        dt = minTimeInterval;
         destinationState = DestinationStates.Idle;
     }
 
     public void StartWave()
     {
         destinationState = DestinationStates.Up;
-        dt = timeInterval;
+        dt = minTimeInterval;
         MaliciousRule = BlackhatAI.inst.CreateMaliciousPacketRuleForDestination(this);
         isBeingExamined = false;
         isFilterValid = false;// ?
@@ -57,8 +57,8 @@ public class TDestination : MonoBehaviour
     public LightWeightPacket MaliciousRule;
     public float dt = 0;
     public int initTime = 20;
-    public int timeInterval = 17; //For mal rule change, set this in editor to tune game, every 25 seconds change rule
-    public int timeSpread = 5;
+    public int minTimeInterval = 12; //For mal rule change, set this in editor to tune game, every 25 seconds change rule
+    public int maxTimeInterval = 22;
     public bool isBeingExamined = false;
 
     public DestinationStates destinationState = DestinationStates.Idle;
@@ -83,7 +83,7 @@ public class TDestination : MonoBehaviour
 
     float GenerateTimeInterval()
     {
-        return (float) NewGameMgr.inst.TRandom.Next(timeInterval - timeSpread, timeInterval + timeSpread);
+        return (float) NewGameMgr.inst.TRandom.Next(minTimeInterval, maxTimeInterval);
     }
 
     public int myId;

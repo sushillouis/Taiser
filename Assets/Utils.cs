@@ -25,7 +25,7 @@ public class Utils : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     IEnumerator FileWriter;
@@ -57,7 +57,7 @@ public class Utils : MonoBehaviour
             Debug.Log(w.text);
         } else {
             Debug.Log("No errors");
-            Debug.Log(w.text);
+            //Debug.Log(w.text);
             if(w.uploadProgress == 1 || w.isDone) {
                 yield return new WaitForSeconds(5);
                 Debug.Log("Waited five seconds");

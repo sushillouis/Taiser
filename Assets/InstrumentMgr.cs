@@ -55,6 +55,7 @@ public enum TaiserEventTypes
     MaliciousPacketFiltered_GoodForUs,
     MaliciousPacketUnfiltered_BadForUs,
     AdviseTaken,
+    AdviseFromHumanOrAI,
 }
 
 public class InstrumentMgr : MonoBehaviour
@@ -156,7 +157,7 @@ public class InstrumentMgr : MonoBehaviour
         session.whitehatScore = NewGameMgr.inst.WhitehatScore * 100f; // BlackhatAI.inst.wscore;
         session.blackhatScore = NewGameMgr.inst.BlackhatScore * 100f; // BlackhatAI.inst.bscore;
         session.dayAndTime = System.DateTime.Now.ToUniversalTime().ToString();
-        session.gameDifficulty = NewGameMgr.inst.difficulty;
+        //session.gameDifficulty = NewGameMgr.inst.difficulty;
         string tmp = System.DateTime.Now.ToLocalTime().ToString();
         session.name = (isDebug ? "sjl" : NewLobbyMgr.thisPlayer.name + "_" + 
             session.dayAndTime.Replace('/', '_').Replace(" ", "_").Replace(":", "_"));
@@ -184,7 +185,7 @@ public class InstrumentMgr : MonoBehaviour
         string header = "";
         header += session.name + ", " + session.role + ", "  +  session.dayAndTime + eoln;
         header += "Teammate Species: ," + session.teammateSpecies + eoln;
-        header += "Game Difficulty: ," + session.gameDifficulty + eoln;
+        //header += "Game Difficulty: ," + session.gameDifficulty + eoln;
         header += "Whitehat Score, " + session.whitehatScore.ToString("00.0") +
             ", Blackhat Score, " + session.blackhatScore.ToString("00.0") + eoln;
         header += "Time, Event, Modifiers" + eoln;

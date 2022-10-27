@@ -1,5 +1,7 @@
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,6 +80,34 @@ public class DifficultyParameters
 }
 
 
+public enum ParameterNames
+{
+    MaxWaves = 0,
+    Penalty,
+    MaliciousPacketProbability,
+    IntervalBetweenPackets,
+    MaxNumberOfPackets,
+    MinIntervalBetweenRuleChanges,
+    MaxIntervalBetweenRuleChanges,
+    //
+    AICorrectProbability,
+    HumanCorrectProbability,
+    MinHumanAdviceTimeInSeconds,
+    MaxHumanAdviceTimeInSeconds,
+    MinAIAdviceTimeInSeconds,
+    MaxAIAdviceTimeInSeconds,
+    //
+    AIRandomSeed,
+    HumanRandomSeed,
+}
+
+[System.Serializable]
+public class ParameterHolder
+{
+    public ParameterNames parameterName;
+    public float parameterValue = -1;
+}
+
 //-------------------------------------------------------------------------------------------
 public class NewGameMgr : MonoBehaviour
 {
@@ -102,9 +132,104 @@ public class NewGameMgr : MonoBehaviour
         TRandom = new System.Random(RandomSeed);
         HidePrototypes();
 
-        //ReadParametersFromServer();
-
+        ReadGameParametersFromServer();
         StartWave();
+
+    }
+    
+    public List<ParameterHolder> Parameters = new List<ParameterHolder>();
+
+    public void ReadGameParametersFromServer()
+    {
+        string content = Utils.inst.ReadFileFromServer("Parameters.csv");
+        StartCoroutine("WaitAndExtractParamsFromString");
+    }
+
+    IEnumerator WaitAndExtractParamsFromString()
+    {
+        yield return new WaitForSeconds(2.0f);//Can do better than this.
+        Parameters.Clear();
+        using(StringReader sr = new StringReader(Utils.inst.FileContent)) {
+            string line;
+            while((line = sr.ReadLine()) != null) {
+                string[] cells = line.Split(',');
+                ParameterHolder ph = new ParameterHolder();
+                ph.parameterName = (ParameterNames) int.Parse(cells[0].Trim());
+                ph.parameterValue = float.Parse(cells[2].Trim());
+                Parameters.Add(ph);
+            }
+        }
+        if(Parameters.Count > 0) 
+            SetGameParameters();
+    }
+    
+    public void SetGameParameters()
+    {
+        foreach(ParameterHolder ph in Parameters) {
+            switch(ph.parameterName) {
+                case ParameterNames.MaxWaves:
+                    maxWaves = (int) ph.parameterValue;
+                    break;
+                case ParameterNames.Penalty:
+                    penalty = (int) ph.parameterValue;
+                    break;
+                case ParameterNames.MaliciousPacketProbability:
+                    foreach(TSource source in Sources) {
+                        source.malPacketProbability = ph.parameterValue;
+                    }
+                    break;
+                case ParameterNames.IntervalBetweenPackets:
+                    Sources[0].timeInterval = ph.parameterValue;
+                    Sources[1].timeInterval = ph.parameterValue * 2;
+                    Sources[2].timeInterval = ph.parameterValue * 2;
+                    break;
+                case ParameterNames.MaxNumberOfPackets:
+                    Sources[0].maxPackets = (int) ph.parameterValue;
+                    Sources[1].maxPackets = (int) ph.parameterValue / 2;
+                    Sources[2].maxPackets = (int) ph.parameterValue / 2;
+                    break;
+                case ParameterNames.MinIntervalBetweenRuleChanges:
+                    foreach(TDestination destination in Destinations) {
+                        destination.minTimeInterval = (int) ph.parameterValue;
+                    }
+                    break;
+                case ParameterNames.MaxIntervalBetweenRuleChanges:
+                    foreach(TDestination destination in Destinations) {
+                        destination.maxTimeInterval = (int) ph.parameterValue;
+                    }
+                    break;
+                //----------------------------------------------------
+                case ParameterNames.AICorrectProbability:
+                    RuleSpecButtonMgr.inst.AICorrectAdviceProbability = ph.parameterValue;
+                    break;
+                case ParameterNames.HumanCorrectProbability:
+                    RuleSpecButtonMgr.inst.HumanCorrectAdviceProbability = ph.parameterValue;
+                    break;
+                case ParameterNames.MinHumanAdviceTimeInSeconds:
+                    RuleSpecButtonMgr.inst.MinHumanTime = ph.parameterValue;
+                    break;
+                case ParameterNames.MaxHumanAdviceTimeInSeconds:
+                    RuleSpecButtonMgr.inst.MaxHumanTime = ph.parameterValue;
+                    break;
+                case ParameterNames.MinAIAdviceTimeInSeconds:
+                    RuleSpecButtonMgr.inst.MinAITime = ph.parameterValue;
+                    break;
+                case ParameterNames.MaxAIAdviceTimeInSeconds:
+                    RuleSpecButtonMgr.inst.MaxAITime = ph.parameterValue;
+                    break;
+                //----------------------------------------------------
+                case ParameterNames.AIRandomSeed:
+                    RuleSpecButtonMgr.inst.AIRandomizerSeed = (int) ph.parameterValue;//4321
+                    break;
+                case ParameterNames.HumanRandomSeed:
+                    RuleSpecButtonMgr.inst.HumanRandomizerSeed = (int) ph.parameterValue;//6789
+                    break;
+
+                default:
+                    Debug.Log("Unknown game parameter name: " + ph.parameterName + ": " + ph.parameterValue);
+                    break;
+            }
+        }
     }
 
     [ContextMenu("TestFlip")]
@@ -125,17 +250,25 @@ public class NewGameMgr : MonoBehaviour
         if(endedSources >= Sources.Count) { //}|| isCorrectIndex >= isCorrectList.Count) {
             EndWave();
         }
-        //if(State == GameState.InWave) {
-        //BlackhatAI.inst.DoWave();
-        //}
-        //if(State == GameState.FlushingSourcesToEndWave)
-        //if(Sources[0].gameObject.GetComponentsInChildren<TPacket>().Length <= 0)
-        //EndWave();
 
-    }
+        if(UnityEngine.InputSystem.Keyboard.current.f10Key.wasReleasedThisFrame)
+            Time.timeScale = 1.0f - Time.timeScale;
+
+            //if(State == GameState.InWave) {
+            //BlackhatAI.inst.DoWave();
+            //}
+            //if(State == GameState.FlushingSourcesToEndWave)
+            //if(Sources[0].gameObject.GetComponentsInChildren<TPacket>().Length <= 0)
+            //EndWave();
+
+        }
 
     //-------------------------------------------------------------------------------------------------
-    public Difficulty difficulty;
+    /// <summary>
+    /// Deprecated
+    /// </summary>
+    /*
+     * public Difficulty difficulty;
     public List<DifficultyParameters> difficultyParamaters = new List<DifficultyParameters>();
     public void SetDifficulty(Difficulty level)
     {
@@ -143,13 +276,13 @@ public class NewGameMgr : MonoBehaviour
         difficulty = level;
         DifficultyParameters parms = difficultyParamaters.Find(x => x.levelName == level);
         foreach(TDestination destination in Destinations) {
-            destination.timeInterval = parms.meanTimeInterval;
-            destination.timeSpread = parms.timeSpread;
+            destination.minTimeInterval = parms.meanTimeInterval;
+            destination.maxTimeInterval = parms.timeSpread;
             destination.initTime = parms.initTime;
         }
 
     }
-
+    */
     //-------------------------------------------------------------------------------------------------
 
 
@@ -177,13 +310,13 @@ public class NewGameMgr : MonoBehaviour
     public void StartWave()
     {
         State = GameState.WaveStart;
-        SetDifficulty(NewLobbyMgr.gameDifficulty);
+        //SetDifficulty(NewLobbyMgr.gameDifficulty);
 
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
         SetWaveNumberEffect(Color.green);
         CountdownLabel.text = timerSecs.ToString("0");
-        InvokeRepeating("CountdownLabeller", 0.1f, 1f);
+        InvokeRepeating("CountdownLabeller", 0.1f, 1.1f);
     }
 
     int timerSecs = 5;
@@ -254,7 +387,7 @@ public class NewGameMgr : MonoBehaviour
     /// by counting number of times this method is called by sources.
     /// If this is > number of sources, reset to 0 and actually end the wave
     /// </summary>
-    int endedSources = 0;
+    public int endedSources = 0;
     public void EndSpawningAtSources()
     {
         endedSources += 1;
@@ -274,7 +407,7 @@ public class NewGameMgr : MonoBehaviour
     public Text AnotherWaveAwaitsMessageText;
     public void EndWave()
     {
-//        Debug.Log("Ending Wave: " + currentWaveNumber + ", isCorrectIndex: " + isCorrectIndex + ", endedSrcs: " + endedSources);
+        //Debug.Log("Ending Wave: " + currentWaveNumber + ", isCorrectIndex: " + isCorrectIndex + ", endedSrcs: " + endedSources);
         Debug.Log("Ending Wave: " + currentWaveNumber + ", endedSrcs: " + endedSources);
         State = GameState.WaveEnd;
         ResetVars();
@@ -500,6 +633,7 @@ public class NewGameMgr : MonoBehaviour
         PacketExamining,
         BeingAdvised,
         Menu,
+        Paused,
         None
     }
     public TaiserPanel PacketExaminerPanel;

@@ -16,12 +16,14 @@ public class AdminSliderPanelHandler : MonoBehaviour
         else
             FormatString = "0.00";
         SliderValueText.text = AdminSlider.value.ToString(FormatString);
+        VariableNameText.text = ParameterName.ToString();
     }
 
     public Text VariableNameText;
     public Slider AdminSlider;
     public Text SliderValueText;
     string FormatString;
+    public ParameterNames ParameterName;
 
     public bool isInt = false;
     //    public string VariableName;

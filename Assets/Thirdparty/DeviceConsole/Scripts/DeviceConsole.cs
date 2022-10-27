@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using UnityEngine.SceneManagement;
 
 public class DeviceConsole : MonoBehaviour
 {
@@ -457,7 +458,8 @@ public class DeviceConsole : MonoBehaviour
 			return;
 		}
 
-		Application.LoadLevel(args[1]);
+        //Application.LoadLevel(args[1]);
+		SceneManager.LoadScene(args[1]);
 	}
 
 	private static void CloseApp(string[] args)

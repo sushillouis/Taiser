@@ -2058,6 +2058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b06576c1aa6d86d4fac0ae2c94736a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Parameters: []
   difficulty: 0
   difficultyParamaters:
   - levelName: 0
@@ -2076,6 +2077,7 @@ MonoBehaviour:
   maxWaves: 3
   currentWaveNumber: 0
   CountdownLabel: {fileID: 1634617403}
+  endedSources: 0
   VictoryOrDefeatText: {fileID: 170557167}
   AnotherWaveAwaitsMessageText: {fileID: 500758845}
   blackhatBarPanel: {fileID: 1065389398}
@@ -2628,6 +2630,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 178892788}
   m_CullTransparentMesh: 1
+--- !u!1 &181712164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 181712165}
+  - component: {fileID: 181712166}
+  m_Layer: 0
+  m_Name: Utils
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &181712165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181712164}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1967780532}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &181712166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181712164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08581aead74e930469d0880e8b87b3ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FileContent: 
 --- !u!1 &188167836
 GameObject:
   m_ObjectHideFlags: 0
@@ -8092,7 +8138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 1, b: 0, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -13308,7 +13354,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1304270171
 Transform:
   m_ObjectHideFlags: 0
@@ -13823,7 +13869,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -15977,6 +16023,10 @@ PrefabInstance:
       value: Lower West Side
       objectReference: {fileID: 0}
     - target: {fileID: 1151949599990927772, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
+      propertyPath: initTime
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 1151949599990927772, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
       propertyPath: inGameName
       value: Lower West Side
       objectReference: {fileID: 0}
@@ -17754,6 +17804,7 @@ Transform:
   - {fileID: 1047629568}
   - {fileID: 1122375878}
   - {fileID: 605167042}
+  - {fileID: 181712165}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -35165,7 +35216,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8733745135914674705, guid: 0be4f8a4003322d4cbd9f87a37bc1552, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8733745135914674710, guid: 0be4f8a4003322d4cbd9f87a37bc1552, type: 3}
       propertyPath: m_RootOrder
@@ -35258,7 +35309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8749441224359507523, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8749441224359507524, guid: 3a578482d92edc14da073b9e64ff11c8, type: 3}
       propertyPath: m_RootOrder

@@ -120,7 +120,7 @@ public class TPacket : MonoBehaviour
     /// </summary>
     public void MoveTo()
     {
-        transform.position += speed * normalizedHeading * Time.deltaTime;
+        transform.position += speed * normalizedHeading * Time.deltaTime * Time.timeScale;
     }
 
     public List<Vector3> NextHeadings = new List<Vector3>();

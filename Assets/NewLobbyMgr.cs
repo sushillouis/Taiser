@@ -43,7 +43,7 @@ public class NewLobbyMgr : MonoBehaviour
         Admin,            // if Alias is Administrator
         CreateOrJoin,
         MissionObjective,
-        ChooseTeammateSpecies,
+        ChooseDifficulty,
         WaitingForPlayers,
         Play,
         None
@@ -62,7 +62,7 @@ public class NewLobbyMgr : MonoBehaviour
             CreateOrJoinGamePanel.isVisible = (_state == LobbyState.CreateOrJoin);
             WaitingForPlayersPanel.isVisible = (_state == LobbyState.WaitingForPlayers);
             MissionObjectivePanel.isVisible = (_state == LobbyState.MissionObjective);
-            ChooseTeammateSpeciesAndGameDifficultyPanel.isVisible = (_state == LobbyState.ChooseTeammateSpecies);
+            //ChooseGameDifficultyPanel.isVisible = (_state == LobbyState.ChooseDifficulty);
         }
     }
     public TaiserPanel AdminPanel;
@@ -71,7 +71,7 @@ public class NewLobbyMgr : MonoBehaviour
     public TaiserPanel CreateOrJoinGamePanel;
     public TaiserPanel WaitingForPlayersPanel;
     public TaiserPanel MissionObjectivePanel;
-    public TaiserPanel ChooseTeammateSpeciesAndGameDifficultyPanel;
+    public TaiserPanel ChooseGameDifficultyPanel;
     public RectTransform TeammateChoiceDropdownPanel;//Just the teammate Species choice label and dropdown
     public Text TeammateChoiceGameDifficultySubtitleText;
 
@@ -108,8 +108,8 @@ public class NewLobbyMgr : MonoBehaviour
         PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
         PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
         PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.CreateOrJoin);
-        PriorStateMap.Add(LobbyState.ChooseTeammateSpecies, LobbyState.MissionObjective);
-        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.ChooseTeammateSpecies);
+        //PriorStateMap.Add(LobbyState.ChooseDifficulty, LobbyState.MissionObjective);
+        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.MissionObjective);
         PriorStateMap.Add(LobbyState.Play, LobbyState.WaitingForPlayers);
         //PriorStateMap.Add(LobbyState.Play, LobbyState.Play);
     }
@@ -234,11 +234,12 @@ public class NewLobbyMgr : MonoBehaviour
 
     public void OnBriefingDoneButton()
     {
-        State = LobbyState.ChooseTeammateSpecies;
+        //State = LobbyState.ChooseDifficulty;
+        State = LobbyState.WaitingForPlayers;
         TTAnimator.Animate = false;
         if(!ChooseOnce)
             FixTeammateSpeciesUIElements();
-
+        CreateGameAndWaitForPlayers();
     }
 
     void FixTeammateSpeciesUIElements()
@@ -247,6 +248,9 @@ public class NewLobbyMgr : MonoBehaviour
         TeammateChoiceGameDifficultySubtitleText.text = "Novice, Intermediate, or Advanced?";
     }
 
+    /// <summary>
+    /// Deprecated
+    /// </summary>
     public void OnChooseTeammateDoneButton()
     {
         State = LobbyState.WaitingForPlayers;
@@ -497,12 +501,13 @@ public class NewLobbyMgr : MonoBehaviour
         PlayButton.interactable = true;
         SpinnerPanel.gameObject.SetActive(false);
         WaitingForPlayersText.text = PlayerName + " found teammate: " + teammateName;
-        Debug.Log("Creating Game");
+        //
     }
 
 
     public void OnStartButton()
     {
+        Debug.Log("Creating Game");
         State = LobbyState.Play;
         InstrumentMgr.isDebug = false;
         UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(1);
