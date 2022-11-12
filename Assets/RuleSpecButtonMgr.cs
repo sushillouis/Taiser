@@ -22,8 +22,9 @@ public class RuleSpecButtonMgr : MonoBehaviour
             HumanDecisionRandomizer = new System.Random(HumanRandomizerSeed);
         }
         ClearPacketInformation(ClickedPacketRuleTextList);
-        ClearPacketInformation(AdvisorRuleTextList);
+        ClearPacketInformation(AdvisorPacketRuleTextList);
     }
+
 
     // Update is called once per frame
     void Update()
@@ -37,6 +38,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
         public List<Button> buttons = new List<Button>();
     }
 
+    [Header("Other public variables")]
     public GameObject ButtonsRoot;
     public List<ButtonList> RuleButtons2d = new List<ButtonList>();
     public int nrows = 3;
@@ -120,28 +122,54 @@ public class RuleSpecButtonMgr : MonoBehaviour
     //-------------------------------------------------------------------------------------
     //--- For when a destination in the examining panel is clicked
 
+    public RectTransform MeRulePanel;
+    public RectTransform AdvicePanel;
+    /*
     public void OnAttackableDestinationClicked(TDestination destination)
     {
-        NewGameMgr.inst.State = GameState.PacketExamining; //To show panel
-
+        NewGameMgr.inst.State = GameState.ChooseAdvisorOrMe;
+        NewGameMgr.inst.SetButtonNamesAndState();
         CurrentDestination = destination;
+        CurrentDestination.isBeingExamined = true;
+    }
+    */
+    public void DoPacketExamining(AdvisingState AIHumanOrMe) 
+    {
+        advisingState = AIHumanOrMe;
         CurrentDestination.isBeingExamined = true;
         FilterRuleSpecTitle.text = CurrentDestination.inGameName;
         PacketButtonMgr.inst.SetupPacketButtonsForInspection(CurrentDestination); // Setup packet buttons on the top panel
         AcceptAdviceButton.interactable = false;
-        State = AdvisingState.Undecided;
+        //State = AdvisingState.Undecided;
+        switch(advisingState) {
+            case AdvisingState.Me:
+                AskMe();
+                break;
+            case AdvisingState.Human:
+                AskForHumanAdvice();
+                break;
+            case AdvisingState.AI:
+                AskForAIAdvice();
+                break;
+            default:
+                AskForAIAdvice();
+                break;
+        }
+
+        /*
         if(NewLobbyMgr.ChooseOnce)
             DoChooseOnce();
         else
             DoChooseEveryTime();
-
+        */
         ClearPacketInformation(ClickedPacketRuleTextList);
-        ClearPacketInformation(AdvisorRuleTextList);
+        ClearPacketInformation(AdvisorPacketRuleTextList);
 
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), destination.inGameName);
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), CurrentDestination.inGameName);
     }
 
     //-------------------------------------------------------------------------------------
+    /*
     public void DoChooseOnce()
     {
         AdviceSpeciesButtonPanel.gameObject.SetActive(false);
@@ -158,7 +186,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
         State = AdvisingState.Undecided;
 
     }
-
+    */
     //-------------------------------------------------------------------------------------
     //--- For When a packet button in the examining panel is clicked
 
@@ -166,7 +194,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     public List<Color> TextColors = new List<Color>();
 
     public List<Text> ClickedPacketRuleTextList = new List<Text>();
-    public List<Text> AdvisorRuleTextList = new List<Text>();
+    public List<Text> AdvisorPacketRuleTextList = new List<Text>();
 
     public GameObject PacketRuleTextListRoot;
     public GameObject AdvisorRuleTextListRoot;
@@ -177,9 +205,9 @@ public class RuleSpecButtonMgr : MonoBehaviour
         foreach(Text t in PacketRuleTextListRoot.GetComponentsInChildren<Text>()) {
             ClickedPacketRuleTextList.Add(t);
         }
-        AdvisorRuleTextList.Clear();
+        AdvisorPacketRuleTextList.Clear();
         foreach(Text t in AdvisorRuleTextListRoot.GetComponentsInChildren<Text>()) {
-            AdvisorRuleTextList.Add(t);
+            AdvisorPacketRuleTextList.Add(t);
         }
     }
     public void OnPacketClicked(LightWeightPacket packet)
@@ -207,26 +235,25 @@ public class RuleSpecButtonMgr : MonoBehaviour
     }
 
 
-
-
     /// <summary>
     /// Called from TaiserFilterRuleSpecPanel from SetFirewall button
     /// </summary>
     public void ApplyCurrentUserRule()
     {
         AcceptAdviceButton.interactable = false;
-        AdviceSpeciesButtonPanel.gameObject.SetActive(true);
+        //AdviceSpeciesButtonPanel.gameObject.SetActive(true);
         NewGameMgr.inst.ApplyFirewallRule(CurrentDestination, PlayerRuleSpec, false);
 
     }
 
     /// <summary>
+    /// Not used currently. Available for future use. 
     /// Called from TaiserFilterRuleSpecPanel from SetPacketRuleFirewall button
     /// </summary>
     public void ApplyClickedPacketRule()
     {
         AcceptAdviceButton.interactable = false;
-        AdviceSpeciesButtonPanel.gameObject.SetActive(true);
+        //AdviceSpeciesButtonPanel.gameObject.SetActive(true);
 
         NewGameMgr.inst.ApplyFirewallRule(CurrentDestination, ClickedPacketRuleSpec, false);
 
@@ -239,37 +266,43 @@ public class RuleSpecButtonMgr : MonoBehaviour
     public void ApplyAdvice()
     {
         AcceptAdviceButton.interactable = false;
-        AdviceSpeciesButtonPanel.gameObject.SetActive(true);
+        //AdviceSpeciesButtonPanel.gameObject.SetActive(true);
         NewGameMgr.inst.ApplyFirewallRule(CurrentDestination, AdvisorRuleSpec, true);
     }
 
     //--------------------------Picking human or AI advice every time-----------------
 
-    public RectTransform AdviceSpeciesButtonPanel;
+    //public RectTransform AdviceSpeciesButtonPanel;
     public Text TeammateNameText;
     public enum AdvisingState
     {
         Undecided = 0,
         Human,
-        AI
+        AI,
+        Me
     }
 
-    public AdvisingState State = AdvisingState.Undecided;
+    public AdvisingState advisingState = AdvisingState.Undecided;
     public void AskForHumanAdvice()
     {
         Debug.Log("Picked human");
-        State = AdvisingState.Human;
+        //State = AdvisingState.Human;
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "Human");
         StartCoroutine(ProvideAdviceWithDelay());
     }
     public void AskForAIAdvice()
     {
         Debug.Log("Picked AI");
-        State = AdvisingState.AI;
+        //State = AdvisingState.AI;
         //Show AI advice after interval
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "AI");
         StartCoroutine(ProvideAdviceWithDelay());
+    }
 
+    public void AskMe()
+    {
+        
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "Me");
     }
 
     public float MinHumanTime = 1f;
@@ -281,7 +314,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     IEnumerator ProvideAdviceWithDelay()
     {
         PreAdviceUISetup();
-        float delayInSeconds = (State == AdvisingState.Human ?
+        float delayInSeconds = (advisingState == AdvisingState.Human ?
             RandomRange(HumanDecisionRandomizer, MinHumanTime, MaxHumanTime) :
             RandomRange(AIDecisionRandomizer, MinAITime, MaxAITime));
         yield return  new WaitForSeconds(delayInSeconds);
@@ -291,7 +324,8 @@ public class RuleSpecButtonMgr : MonoBehaviour
 
     void PreAdviceUISetup()
     {
-        AdviceSpeciesButtonPanel.gameObject.SetActive(false);
+        //AdviceSpeciesButtonPanel.gameObject.SetActive(false);
+
         Spinner.gameObject.SetActive(true);
         TeammateNameText.text = "Getting advice";
     }
@@ -300,13 +334,14 @@ public class RuleSpecButtonMgr : MonoBehaviour
     {
         AcceptAdviceButton.interactable = true;
         Spinner.gameObject.SetActive(false);
-        TeammateNameText.text = NewLobbyMgr.teammateName + "'s advice";
+        //TeammateNameText.text = NewLobbyMgr.teammateName + "'s advice";
+        TeammateNameText.text = advisingState.ToString();
 
     }
 
     public void ProvideAdvice()
     {
-        bool isCorrect = (State == AdvisingState.Human ? 
+        bool isCorrect = (advisingState == AdvisingState.Human ? 
             AdviceRandomizerFlip(HumanDecisionRandomizer, HumanCorrectAdviceProbability) :
             AdviceRandomizerFlip(AIDecisionRandomizer, AICorrectAdviceProbability));
         if(isCorrect) {
@@ -314,7 +349,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
         } else {
             AdvisorRuleSpec = BlackhatAI.inst.CreateNonMaliciousPacketRuleForDestination(CurrentDestination);
         }
-        DisplayPacketInformation(AdvisorRuleSpec, AdvisorRuleTextList);
+        DisplayPacketInformation(AdvisorRuleSpec, AdvisorPacketRuleTextList);
 
     }
 

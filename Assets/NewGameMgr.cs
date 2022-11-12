@@ -136,7 +136,77 @@ public class NewGameMgr : MonoBehaviour
         StartWave();
 
     }
+
+    //-----------------------------------------------------------------------------
+    [Header("Choosing Advisor or Me")]
+    public Button LeftButton;
+    public Button RightButton;
+    public Button MeButton;
+
+    public bool isLeftHuman;
+
+    public void SetButtonNamesAndState()
+    {
+        isLeftHuman = NewGameMgr.inst.Flip(0.5f);
+        LeftButton.GetComponentInChildren<Text>().text = GetButtonName(isLeftHuman);
+        RightButton.GetComponentInChildren<Text>().text = GetButtonName(!isLeftHuman);
+        //Clear Delegates
+        LeftButton.onClick.RemoveAllListeners();
+        RightButton.onClick.RemoveAllListeners();
+        //
+        if(isLeftHuman) {
+            LeftButton.onClick.AddListener(OnHumanButtonClicked);
+            RightButton.onClick.AddListener(OnAIButtonClicked);
+        } else {
+            LeftButton.onClick.AddListener(OnAIButtonClicked);
+            RightButton.onClick.AddListener(OnHumanButtonClicked);
+        }
+    }
+
+    public string GetButtonName(bool isHuman)
+    {
+        if(isHuman) {
+            return "Choose Human Teammate";
+        } else {
+            return "Choose AI Teammate";
+        }
+    }
     
+    public void OnHumanButtonClicked()
+    {
+        State = GameState.PacketExamining;
+        RuleSpecButtonMgr.inst.DoPacketExamining(RuleSpecButtonMgr.AdvisingState.Human);
+    }
+
+    public void OnAIButtonClicked()
+    {
+        State = GameState.PacketExamining;
+        RuleSpecButtonMgr.inst.DoPacketExamining(RuleSpecButtonMgr.AdvisingState.AI);
+    }
+
+    public void OnMeButtonClicked()
+    {
+        State = GameState.PacketExamining;
+        RuleSpecButtonMgr.inst.DoPacketExamining(RuleSpecButtonMgr.AdvisingState.Me);
+    }
+
+    /// <summary>
+    /// 1. Set Game state
+    /// 2. Randomly shuffle advisor position buttons
+    /// 3. Set current destination in RuleSpecButtonMgr so we know which destination we are dealing with
+    /// </summary>
+    /// <param name="destination"></param>
+    public void OnAttackableDestinationClicked(TDestination destination)
+    {
+        State = GameState.ChooseAdvisorOrMe;
+        SetButtonNamesAndState();
+        RuleSpecButtonMgr.inst.CurrentDestination = destination;
+    }
+
+    //-----------------------------------------------------------------------------
+
+
+    [Header("Game Parameters handling")]
     public List<ParameterHolder> Parameters = new List<ParameterHolder>();
 
     public void ReadGameParametersFromServer()
@@ -285,7 +355,7 @@ public class NewGameMgr : MonoBehaviour
     */
     //-------------------------------------------------------------------------------------------------
 
-
+    public bool ShouldStopOnPacketExamining = false;
     public int RandomSeed = 1234;
     //public float AICorrectAdviceProbability = 0.8f;
     public System.Random TRandom;
@@ -630,13 +700,22 @@ public class NewGameMgr : MonoBehaviour
         InWave,
         FlushingSourcesToEndWave,
         WaveEnd,
+        ChooseAdvisorOrMe,
         PacketExamining,
         BeingAdvised,
         Menu,
         Paused,
         None
     }
+    [Header("Packet Examining Panel")]
     public TaiserPanel PacketExaminerPanel;
+    [Header("Panels for Choices")]
+    public RectTransform MyRulePanel;
+    public RectTransform HumanOrAIPanel1;
+    public RectTransform HumanOrAIPanel2;
+
+    [Header("Panels for GameUIs")]
+
     public TaiserPanel StartPanel;
     public TaiserPanel WatchingPanel;
     public TaiserPanel WaveStartPanel;
@@ -657,7 +736,7 @@ public class NewGameMgr : MonoBehaviour
             WaveEndPanel.isVisible = (_state == GameState.WaveEnd);
 
             PacketExaminerPanel.isVisible = (_state == GameState.PacketExamining);
-            StartPanel.isVisible = (_state == GameState.Start);
+            StartPanel.isVisible = (_state == GameState.ChooseAdvisorOrMe);
             WatchingPanel.isVisible = (_state == GameState.InWave || _state == GameState.FlushingSourcesToEndWave);
             ScorePanel.gameObject.SetActive(_state == GameState.WaveEnd
                 || _state == GameState.InWave
@@ -730,9 +809,18 @@ public class NewGameMgr : MonoBehaviour
     public void SetSliders()
     {
         WhitehatSlider.value = totalMaliciousFilteredCount;
-        WhitehatCountText.text = totalMaliciousFilteredCount.ToString("00");
+        int score = totalMaliciousFilteredCount - totalMaliciousUnFilteredCount;
+
+        WhitehatCountText.text = "$" + score.ToString("0");
+        if (score < 0) {
+            WhitehatCountText.color = Color.red;
+        } else {
+            WhitehatCountText.color = Color.green;
+        }
+        //WhitehatCountText.text = "$" + totalMaliciousFilteredCount.ToString("0");
+
         BlackhatSlider.value = (int) BlackhatScore; // totalMaliciousUnFilteredCount;
-        BlackhatCountText.text = ((int) BlackhatScore).ToString("00");//totalMaliciousUnFilteredCount.ToString("00");
+        //BlackhatCountText.text = "$" + ((int) BlackhatScore).ToString("0");//totalMaliciousUnFilteredCount.ToString("00");
         WaveProgressSlider.value = Sources[0].packetCount / (float) Sources[0].maxPackets;
 
     }
@@ -800,12 +888,14 @@ public class NewGameMgr : MonoBehaviour
             colorToggle = !colorToggle;
             yield return new WaitForSeconds(0.25f);
         }
+        BlackFillArea.GetComponent<Image>().color = Color.black;
     }
 
     //-------------------------------------------------------------------------------------
     public void OnMenuBackButton()
     {
-        State = PriorState;
+        //State = PriorState;
+        State = GameState.InWave;
     }
 
     public void QuitToWindows()

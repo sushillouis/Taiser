@@ -17,7 +17,8 @@ public class OnSelectCube : MonoBehaviour, IPointerClickHandler
     public TDestination destination;
     public void OnPointerClick(PointerEventData eventData)
     {
-        RuleSpecButtonMgr.inst.OnAttackableDestinationClicked(destination);
+        //RuleSpecButtonMgr.inst.OnAttackableDestinationClicked(destination);
+        NewGameMgr.inst.OnAttackableDestinationClicked(destination);
     }
    
 }
