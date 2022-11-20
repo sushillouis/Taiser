@@ -287,7 +287,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     {
         Debug.Log("Picked human");
         //State = AdvisingState.Human;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "Human");
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAIorMe.ToString(), "Human");
         StartCoroutine(ProvideAdviceWithDelay());
     }
     public void AskForAIAdvice()
@@ -295,14 +295,14 @@ public class RuleSpecButtonMgr : MonoBehaviour
         Debug.Log("Picked AI");
         //State = AdvisingState.AI;
         //Show AI advice after interval
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "AI");
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAIorMe.ToString(), "AI");
         StartCoroutine(ProvideAdviceWithDelay());
     }
 
     public void AskMe()
     {
         
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAI.ToString(), "Me");
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAIorMe.ToString(), "Me");
     }
 
     public float MinHumanTime = 1f;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using UnityEngine.XR;
 
 public class NewLobbyMgr : MonoBehaviour
 {
@@ -43,7 +44,7 @@ public class NewLobbyMgr : MonoBehaviour
         Admin,            // if Alias is Administrator
         CreateOrJoin,
         MissionObjective,
-        ChooseDifficulty,
+        ChooseGameMode, //Practice, Session
         WaitingForPlayers,
         Play,
         None
@@ -62,6 +63,7 @@ public class NewLobbyMgr : MonoBehaviour
             CreateOrJoinGamePanel.isVisible = (_state == LobbyState.CreateOrJoin);
             WaitingForPlayersPanel.isVisible = (_state == LobbyState.WaitingForPlayers);
             MissionObjectivePanel.isVisible = (_state == LobbyState.MissionObjective);
+            ChooseGameModePanel.isVisible = (_state == LobbyState.ChooseGameMode);
             //ChooseGameDifficultyPanel.isVisible = (_state == LobbyState.ChooseDifficulty);
         }
     }
@@ -71,7 +73,7 @@ public class NewLobbyMgr : MonoBehaviour
     public TaiserPanel CreateOrJoinGamePanel;
     public TaiserPanel WaitingForPlayersPanel;
     public TaiserPanel MissionObjectivePanel;
-    public TaiserPanel ChooseGameDifficultyPanel;
+    public TaiserPanel ChooseGameModePanel;
     public RectTransform TeammateChoiceDropdownPanel;//Just the teammate Species choice label and dropdown
     public Text TeammateChoiceGameDifficultySubtitleText;
 
@@ -108,8 +110,10 @@ public class NewLobbyMgr : MonoBehaviour
         PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
         PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
         PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.CreateOrJoin);
-        //PriorStateMap.Add(LobbyState.ChooseDifficulty, LobbyState.MissionObjective);
-        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.MissionObjective);
+
+        PriorStateMap.Add(LobbyState.ChooseGameMode, LobbyState.MissionObjective);
+
+        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.ChooseGameMode);
         PriorStateMap.Add(LobbyState.Play, LobbyState.WaitingForPlayers);
         //PriorStateMap.Add(LobbyState.Play, LobbyState.Play);
     }
@@ -127,7 +131,9 @@ public class NewLobbyMgr : MonoBehaviour
     public static string PlayerName = "sjl";
     public string PlayerNameForDebug;
     public static TaiserPlayer thisPlayer;
-    public static Difficulty gameDifficulty;
+    public static Difficulty gameDifficulty; //Not currently used but available
+    public static GameMode gameMode = GameMode.Session;
+
     public static PlayerSpecies teammateSpecies;
     public static string teammateName;
 
@@ -135,6 +141,7 @@ public class NewLobbyMgr : MonoBehaviour
     public PlayerSpecies opponentSpecies;
     public PlayerSpecies publicTeammateSpecies;
     public Difficulty publicGameDifficulty;
+    public GameMode publicGameMode;
 
     public RectTransform JoinGameSubPanel;
 
@@ -147,7 +154,10 @@ public class NewLobbyMgr : MonoBehaviour
         PlrSpecies = PlayerSpecies.Human;
 
         thisPlayer = new TaiserPlayer(PlayerName, PlayerRole, PlrSpecies);
-        gameDifficulty = Difficulty.Novice;
+        //gameDifficulty = Difficulty.Novice;
+        gameMode = GameMode.Session;
+        publicGameMode = GameMode.Session;
+
         teammateSpecies = PlayerSpecies.Human;
 
         GameName = PlayerName + "_Taiser";
@@ -234,11 +244,21 @@ public class NewLobbyMgr : MonoBehaviour
 
     public void OnBriefingDoneButton()
     {
-        //State = LobbyState.ChooseDifficulty;
-        State = LobbyState.WaitingForPlayers;
+        //State = LobbyState.WaitingForPlayers;
         TTAnimator.Animate = false;
         if(!ChooseOnce)
             FixTeammateSpeciesUIElements();
+        State = LobbyState.ChooseGameMode;
+        //
+    }
+
+    public void OnChoseGameMode(bool isPractice)
+    {
+        if(isPractice)
+            gameMode = GameMode.Practice;
+        else
+            gameMode = GameMode.Session;
+        publicGameMode = gameMode;
         CreateGameAndWaitForPlayers();
     }
 

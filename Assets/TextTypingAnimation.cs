@@ -13,7 +13,7 @@ public class TextTypingAnimation : MonoBehaviour
         ParentTaiserPanel = transform.gameObject.GetComponent<TaiserPanel>();
         Debug.Log(BriefingText);
         AnimatableText.text = "";
-        textAnimator = TextTypeSlowly(0.1f);
+        textAnimator = TextTypeSlowly(0.05f);
     }
 
     /*

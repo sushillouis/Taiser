@@ -1,4 +1,3 @@
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -71,6 +70,13 @@ public enum Difficulty
 }
 
 [System.Serializable]
+public enum GameMode
+{
+    Practice = 0,
+    Session
+}
+
+[System.Serializable]
 public class DifficultyParameters
 {
     public Difficulty levelName;
@@ -99,6 +105,8 @@ public enum ParameterNames
     //
     AIRandomSeed,
     HumanRandomSeed,
+    //
+    DifficultyRatio
 }
 
 [System.Serializable]
@@ -171,22 +179,29 @@ public class NewGameMgr : MonoBehaviour
             return "Choose AI Teammate";
         }
     }
+
+    public float AdvisorButtonClickTime = 0;
     
-    public void OnHumanButtonClicked()
+    public void OnAnyAdvisorButtonClicked()
     {
         State = GameState.PacketExamining;
+        AdvisorButtonClickTime = Time.time;
+    }
+    public void OnHumanButtonClicked()
+    {
+        OnAnyAdvisorButtonClicked();
         RuleSpecButtonMgr.inst.DoPacketExamining(RuleSpecButtonMgr.AdvisingState.Human);
     }
 
     public void OnAIButtonClicked()
     {
-        State = GameState.PacketExamining;
+        OnAnyAdvisorButtonClicked();
         RuleSpecButtonMgr.inst.DoPacketExamining(RuleSpecButtonMgr.AdvisingState.AI);
     }
 
     public void OnMeButtonClicked()
     {
-        State = GameState.PacketExamining;
+        OnAnyAdvisorButtonClicked();
         RuleSpecButtonMgr.inst.DoPacketExamining(RuleSpecButtonMgr.AdvisingState.Me);
     }
 
@@ -232,6 +247,10 @@ public class NewGameMgr : MonoBehaviour
         if(Parameters.Count > 0) 
             SetGameParameters();
     }
+
+    public float PacketSpeed = 10;
+    public float DefaultPacketSpeed = 10;
+
     
     public void SetGameParameters()
     {
@@ -294,7 +313,13 @@ public class NewGameMgr : MonoBehaviour
                 case ParameterNames.HumanRandomSeed:
                     RuleSpecButtonMgr.inst.HumanRandomizerSeed = (int) ph.parameterValue;//6789
                     break;
-
+                case ParameterNames.DifficultyRatio:
+                    Debug.Log("Game Mode: " + NewLobbyMgr.gameMode);
+                    if(NewLobbyMgr.gameMode == GameMode.Session)
+                        PacketSpeed = DefaultPacketSpeed;
+                    else
+                        PacketSpeed = DefaultPacketSpeed * ph.parameterValue;
+                    break;
                 default:
                     Debug.Log("Unknown game parameter name: " + ph.parameterName + ": " + ph.parameterValue);
                     break;
@@ -380,7 +405,6 @@ public class NewGameMgr : MonoBehaviour
     public void StartWave()
     {
         State = GameState.WaveStart;
-        //SetDifficulty(NewLobbyMgr.gameDifficulty);
 
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
@@ -765,19 +789,20 @@ public class NewGameMgr : MonoBehaviour
         if(packet == null) return; //------------------------------------------
 
         destination.FilterOnRule(packet);
+        float decisionTimeDelta = Time.time - AdvisorButtonClickTime;
 
         if(packet.isEqual(destination.MaliciousRule)) {
             if(isAdvice)
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallCorrectAndSet.ToString());
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallCorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
             else
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallCorrectAndSet.ToString());
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallCorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
             EffectsMgr.inst.GoodFilterApplied(destination, packet);
             //NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
         } else {
             if(isAdvice)
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallIncorrectAndSet.ToString());
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallIncorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
             else
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet.ToString());
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
             EffectsMgr.inst.BadFilterApplied(destination, packet);
             if(shouldApplyPenalty)
                 ApplyScorePenalty();
@@ -811,7 +836,7 @@ public class NewGameMgr : MonoBehaviour
         WhitehatSlider.value = totalMaliciousFilteredCount;
         int score = totalMaliciousFilteredCount - totalMaliciousUnFilteredCount;
 
-        WhitehatCountText.text = "$" + score.ToString("0");
+        WhitehatCountText.text = score.ToString("0");
         if (score < 0) {
             WhitehatCountText.color = Color.red;
         } else {

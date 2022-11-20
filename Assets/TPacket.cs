@@ -62,6 +62,7 @@ public class TPacket : MonoBehaviour
 
     public void ReInit(PacketColor color, PacketSize size)
     {
+        speed = NewGameMgr.inst.PacketSpeed; // so this is our one simple lever to control difficulty between practice and session game modes
         packet.color = color;
         packet.size = size;
         transform.localPosition = Vector3.zero;
@@ -77,7 +78,7 @@ public class TPacket : MonoBehaviour
     public void SetColor(PacketColor col)
     {
         transform.GetComponentInChildren<Renderer>().material.color = NewGameMgr.inst.ColorVector[col];
-        transform.GetComponentInChildren<Renderer>().material.SetColor("_EmissiveColor", NewGameMgr.inst.ColorVector[col] * 1.5f);
+        //transform.GetComponentInChildren<Renderer>().material.SetColor("_EmissiveColor", NewGameMgr.inst.ColorVector[col] * 1.5f);
 
     }
 
