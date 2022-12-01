@@ -11450,6 +11450,8 @@ MonoBehaviour:
   - {fileID: 136185234}
   - {fileID: 1128949579}
   SliderRoot: {fileID: 2705844184916031328}
+  shouldUseDefaultParameters: 0
+  defaultParameterFilename: DefaultParameters.csv
 --- !u!1 &1678718352
 GameObject:
   m_ObjectHideFlags: 0

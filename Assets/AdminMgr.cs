@@ -57,10 +57,18 @@ public class AdminMgr : MonoBehaviour
         Utils.inst.WriteFileToServer("Parameters.csv", sb.ToString());
     }
 
+    public bool shouldUseDefaultParameters = false;
+    public string defaultParameterFilename = "DefaultParameters.csv";
+    public static string parameterFilename = "Parameters.csv";
     [ContextMenu("ReadParamsFromServer")]
     public void ReadParamsFromServer()
     {
-        string tmp = Utils.inst.ReadFileFromServer("Parameters.csv");
+        if(shouldUseDefaultParameters) {
+            parameterFilename = defaultParameterFilename;
+        }
+        Debug.Log("----------------------->" + parameterFilename);
+        Debug.Log("Hmmm");
+        string tmp = Utils.inst.ReadFileFromServer(parameterFilename);
         StartCoroutine("ExtractParams");
     }
 

@@ -135,6 +135,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     */
     public void DoPacketExamining(AdvisingState AIHumanOrMe) 
     {
+        //InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked, CurrentDestination.inGameName);
         advisingState = AIHumanOrMe;
         CurrentDestination.isBeingExamined = true;
         FilterRuleSpecTitle.text = CurrentDestination.inGameName;
@@ -165,7 +166,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
         ClearPacketInformation(ClickedPacketRuleTextList);
         ClearPacketInformation(AdvisorPacketRuleTextList);
 
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked.ToString(), CurrentDestination.inGameName);
+
     }
 
     //-------------------------------------------------------------------------------------
@@ -287,7 +288,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     {
         Debug.Log("Picked human");
         //State = AdvisingState.Human;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAIorMe.ToString(), "Human");
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PickedAdvisorType, "Human");
         StartCoroutine(ProvideAdviceWithDelay());
     }
     public void AskForAIAdvice()
@@ -295,14 +296,14 @@ public class RuleSpecButtonMgr : MonoBehaviour
         Debug.Log("Picked AI");
         //State = AdvisingState.AI;
         //Show AI advice after interval
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAIorMe.ToString(), "AI");
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PickedAdvisorType, "AI");
         StartCoroutine(ProvideAdviceWithDelay());
     }
 
     public void AskMe()
     {
         
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdviseFromHumanOrAIorMe.ToString(), "Me");
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PickedAdvisorType, "Me");
     }
 
     public float MinHumanTime = 1f;

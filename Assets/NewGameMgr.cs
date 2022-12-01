@@ -119,7 +119,6 @@ public class ParameterHolder
 //-------------------------------------------------------------------------------------------
 public class NewGameMgr : MonoBehaviour
 {
-
     public static NewGameMgr inst;
     private void Awake()
     {
@@ -213,9 +212,11 @@ public class NewGameMgr : MonoBehaviour
     /// <param name="destination"></param>
     public void OnAttackableDestinationClicked(TDestination destination)
     {
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked, destination.inGameName);
         State = GameState.ChooseAdvisorOrMe;
         SetButtonNamesAndState();
         RuleSpecButtonMgr.inst.CurrentDestination = destination;
+
     }
 
     //-----------------------------------------------------------------------------
@@ -226,7 +227,7 @@ public class NewGameMgr : MonoBehaviour
 
     public void ReadGameParametersFromServer()
     {
-        string content = Utils.inst.ReadFileFromServer("Parameters.csv");
+        string content = Utils.inst.ReadFileFromServer(AdminMgr.parameterFilename);
         StartCoroutine("WaitAndExtractParamsFromString");
     }
 
@@ -408,7 +409,8 @@ public class NewGameMgr : MonoBehaviour
 
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
-        SetWaveNumberEffect(Color.green);
+        //SetWaveNumberEffect(Color.green);
+        WaveNumberIndicatorText.text = (currentWaveNumber+1).ToString("0") + "/" + maxWaves.ToString("0");
         CountdownLabel.text = timerSecs.ToString("0");
         InvokeRepeating("CountdownLabeller", 0.1f, 1.1f);
     }
@@ -545,9 +547,9 @@ public class NewGameMgr : MonoBehaviour
 
     }
 
-    public List<RectTransform> WaveNumberIndicatorCirclePanels = new List<RectTransform>();
-    public RectTransform WaveNumberIndicatorRoot;
+    public Text WaveNumberIndicatorText;
 
+    /*
     [ContextMenu("FindWaveNumberIndicators")]
     public void FindWaveNumberIndicators()
     {
@@ -561,7 +563,7 @@ public class NewGameMgr : MonoBehaviour
     {
         WaveNumberIndicatorCirclePanels[currentWaveNumber].GetComponent<Image>().color = col;
     }
-
+    */
     void WaitToStartNextWave()
     {
         EndWaveAtDestinations(); //Give a chance for all packets to get to destinations
@@ -793,16 +795,16 @@ public class NewGameMgr : MonoBehaviour
 
         if(packet.isEqual(destination.MaliciousRule)) {
             if(isAdvice)
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallCorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallCorrectAndSet, decisionTimeDelta.ToString("0.00"));
             else
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallCorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallCorrectAndSet, decisionTimeDelta.ToString("0.00"));
             EffectsMgr.inst.GoodFilterApplied(destination, packet);
             //NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
         } else {
             if(isAdvice)
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallIncorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallIncorrectAndSet, decisionTimeDelta.ToString("0.00"));
             else
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet.ToString(), decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet, decisionTimeDelta.ToString("0.00"));
             EffectsMgr.inst.BadFilterApplied(destination, packet);
             if(shouldApplyPenalty)
                 ApplyScorePenalty();
@@ -920,6 +922,7 @@ public class NewGameMgr : MonoBehaviour
     public void OnMenuBackButton()
     {
         //State = PriorState;
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.BackButtonNoFirewallSet);
         State = GameState.InWave;
     }
 

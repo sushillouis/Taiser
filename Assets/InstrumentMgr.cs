@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using System.IO;
 using System.Text;
 using System.Xml;
+using System;
 
 //----------------------------------------------------
 //Could use csv helper, but seems too much for our 
@@ -34,7 +35,16 @@ public class TaiserRecord
     /// </summary>
     public float secondsFromStart;
     public string eventName; //Is the .ToString() of TaiserEventTypes below
-    public List<string> eventModifiers; // Only one event type has event modifiers right now
+    public List<string> eventModifiers; 
+}
+
+[Serializable]
+public class EventLatencyTracker
+{
+    public List<TaiserEventTypes> startEventTypes;
+    public List<TaiserEventTypes> endEventTypes;
+    public float startEventTime;
+    public float endEventTime;
 }
 
 [System.Serializable]
@@ -54,8 +64,8 @@ public enum TaiserEventTypes
     AdvisedFirewallIncorrectAndSet,
     MaliciousPacketFiltered_GoodForUs,
     MaliciousPacketUnfiltered_BadForUs,
-    AdviseTaken,
-    AdviseFromHumanOrAIorMe,
+    PickedAdvisorType,
+    BackButtonNoFirewallSet
 }
 
 public class InstrumentMgr : MonoBehaviour
@@ -70,6 +80,8 @@ public class InstrumentMgr : MonoBehaviour
     void Start()
     {
         CreateOrFindTaiserFolder();
+        session.records.Clear();
+
     }
 
     // Update is called once per frame
@@ -79,6 +91,9 @@ public class InstrumentMgr : MonoBehaviour
             WriteSession();
         }
     }
+    public TaiserEventTypes testEvent = TaiserEventTypes.MaliciousDestinationClicked;
+
+    public List<EventLatencyTracker> eventLatencyIntervals = new List<EventLatencyTracker>();
 
     public string TaiserFolder;
 
@@ -115,6 +130,33 @@ public class InstrumentMgr : MonoBehaviour
         record.eventModifiers = mods;
         record.secondsFromStart = Time.time; // Time.realtimeSinceStartup;
         session.records.Add(record);
+    }
+
+
+    [ContextMenu("TestAddRecord")]
+    public void TestAddRecord()
+    {
+        AddRecord(testEvent);
+    }
+
+    public void AddRecord(TaiserEventTypes tEventType, string modifier = "")
+    {
+        EventLatencyTracker elt = eventLatencyIntervals.Find(x => x.startEventTypes.Contains(tEventType));
+        if(elt != null) {
+            elt.startEventTime = Time.time;
+            AddRecord(tEventType.ToString(), modifier);
+        } 
+
+        EventLatencyTracker elt2 = eventLatencyIntervals.Find(x => x.endEventTypes.Contains(tEventType));
+        if( elt2 != null) {
+            elt2.endEventTime = Time.time;
+            float delta = elt2.endEventTime - elt2.startEventTime;
+            AddRecord(tEventType.ToString(), modifier + ", " + delta.ToString("0.00"));
+        }
+
+        if(elt == null && elt2 == null) {
+            AddRecord(tEventType.ToString(), modifier);
+        }
     }
     //-----------------------------------------------------------------
 
