@@ -42,7 +42,7 @@ public class BlackhatAI : MonoBehaviour
     public LightWeightPacket CreateMaliciousPacketRuleForDestination(TDestination destination = null)
     {
         LightWeightPacket lwp = CreateRandomRuleForDestination(destination);
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.SetNewMaliciousRule.ToString(), destination.inGameName); // For each destination
+        InstrumentMgr.inst.AddRecord(TaiserEventTypes.SetNewMaliciousRule.ToString(), destination.inGameName + ", " + lwp.ToString()); // For each destination
         EffectsMgr.inst.NewRule(destination, lwp);
         //NewAudioMgr.inst.source.PlayOneShot(NewAudioMgr.inst.MaliciousRuleChanged);
         return lwp;

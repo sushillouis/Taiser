@@ -27,7 +27,7 @@ public class AdminMgr : MonoBehaviour
             AdminSliderPanelHandlers.Add(aspl);
             aspl.ParameterName = (ParameterNames) i;
             aspl.VariableNameText.text = aspl.ParameterName.ToString();
-            Debug.Log(aspl.VariableNameText.text);
+            //Debug.Log(aspl.VariableNameText.text);
             i = i + 1;
         }
     }
@@ -66,8 +66,8 @@ public class AdminMgr : MonoBehaviour
         if(shouldUseDefaultParameters) {
             parameterFilename = defaultParameterFilename;
         }
-        Debug.Log("----------------------->" + parameterFilename);
-        Debug.Log("Hmmm");
+        //Debug.Log("----------------------->" + parameterFilename);
+        //Debug.Log("Hmmm");
         string tmp = Utils.inst.ReadFileFromServer(parameterFilename);
         StartCoroutine("ExtractParams");
     }

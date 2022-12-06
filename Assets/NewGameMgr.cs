@@ -173,18 +173,16 @@ public class NewGameMgr : MonoBehaviour
     public string GetButtonName(bool isHuman)
     {
         if(isHuman) {
-            return "Choose Human Teammate";
+            return "Human";
         } else {
-            return "Choose AI Teammate";
+            return "AI";
         }
     }
 
-    public float AdvisorButtonClickTime = 0;
     
     public void OnAnyAdvisorButtonClicked()
     {
         State = GameState.PacketExamining;
-        AdvisorButtonClickTime = Time.time;
     }
     public void OnHumanButtonClicked()
     {
@@ -212,7 +210,7 @@ public class NewGameMgr : MonoBehaviour
     /// <param name="destination"></param>
     public void OnAttackableDestinationClicked(TDestination destination)
     {
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.MaliciousDestinationClicked, destination.inGameName);
+        InstrumentMgr.inst.AddRecord2(TaiserEventTypes.MaliciousDestinationClicked, destination.inGameName);
         State = GameState.ChooseAdvisorOrMe;
         SetButtonNamesAndState();
         RuleSpecButtonMgr.inst.CurrentDestination = destination;
@@ -410,7 +408,7 @@ public class NewGameMgr : MonoBehaviour
         Debug.Log("Startwave: " + currentWaveNumber);
         InstrumentMgr.inst.AddRecord(TaiserEventTypes.StartWave.ToString());
         //SetWaveNumberEffect(Color.green);
-        WaveNumberIndicatorText.text = (currentWaveNumber+1).ToString("0") + "/" + maxWaves.ToString("0");
+
         CountdownLabel.text = timerSecs.ToString("0");
         InvokeRepeating("CountdownLabeller", 0.1f, 1.1f);
     }
@@ -427,6 +425,7 @@ public class NewGameMgr : MonoBehaviour
             StartWaveAtSources();
             StartWaveAtDestinations();
             timerSecs = 5;
+            WaveNumberIndicatorText.text = (currentWaveNumber + 1).ToString("0") + "/" + maxWaves.ToString("0");
         } else {
             NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.Countdown);
             timerSecs -= 1;
@@ -791,20 +790,19 @@ public class NewGameMgr : MonoBehaviour
         if(packet == null) return; //------------------------------------------
 
         destination.FilterOnRule(packet);
-        float decisionTimeDelta = Time.time - AdvisorButtonClickTime;
 
         if(packet.isEqual(destination.MaliciousRule)) {
             if(isAdvice)
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallCorrectAndSet, decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord2(TaiserEventTypes.AdvisedFirewallCorrectAndSet);
             else
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallCorrectAndSet, decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord2(TaiserEventTypes.UserBuiltFirewallCorrectAndSet);
             EffectsMgr.inst.GoodFilterApplied(destination, packet);
             //NewAudioMgr.inst.PlayOneShot(NewAudioMgr.inst.GoodFilterRule);
         } else {
             if(isAdvice)
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.AdvisedFirewallIncorrectAndSet, decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord2(TaiserEventTypes.AdvisedFirewallIncorrectAndSet);
             else
-                InstrumentMgr.inst.AddRecord(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet, decisionTimeDelta.ToString("0.00"));
+                InstrumentMgr.inst.AddRecord2(TaiserEventTypes.UserBuiltFirewallIncorrectAndSet);
             EffectsMgr.inst.BadFilterApplied(destination, packet);
             if(shouldApplyPenalty)
                 ApplyScorePenalty();
@@ -922,7 +920,7 @@ public class NewGameMgr : MonoBehaviour
     public void OnMenuBackButton()
     {
         //State = PriorState;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.BackButtonNoFirewallSet);
+        InstrumentMgr.inst.AddRecord2(TaiserEventTypes.BackButtonNoFirewallSet);
         State = GameState.InWave;
     }
 

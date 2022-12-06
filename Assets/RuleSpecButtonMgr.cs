@@ -288,7 +288,7 @@ public class RuleSpecButtonMgr : MonoBehaviour
     {
         Debug.Log("Picked human");
         //State = AdvisingState.Human;
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PickedAdvisorType, "Human");
+        InstrumentMgr.inst.AddRecord2(TaiserEventTypes.PickedAdvisorType, "Human");
         StartCoroutine(ProvideAdviceWithDelay());
     }
     public void AskForAIAdvice()
@@ -296,14 +296,14 @@ public class RuleSpecButtonMgr : MonoBehaviour
         Debug.Log("Picked AI");
         //State = AdvisingState.AI;
         //Show AI advice after interval
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PickedAdvisorType, "AI");
+        InstrumentMgr.inst.AddRecord2(TaiserEventTypes.PickedAdvisorType, "AI");
         StartCoroutine(ProvideAdviceWithDelay());
     }
 
     public void AskMe()
     {
         
-        InstrumentMgr.inst.AddRecord(TaiserEventTypes.PickedAdvisorType, "Me");
+        InstrumentMgr.inst.AddRecord2(TaiserEventTypes.PickedAdvisorType, "Me");
     }
 
     public float MinHumanTime = 1f;
@@ -340,17 +340,29 @@ public class RuleSpecButtonMgr : MonoBehaviour
 
     }
 
+    public bool isFirstHumanAdvice = true;
+    public bool isFirstAIAdvice = true;
     public void ProvideAdvice()
     {
         bool isCorrect = (advisingState == AdvisingState.Human ? 
             AdviceRandomizerFlip(HumanDecisionRandomizer, HumanCorrectAdviceProbability) :
             AdviceRandomizerFlip(AIDecisionRandomizer, AICorrectAdviceProbability));
+        if(isFirstAIAdvice && advisingState == AdvisingState.AI) {
+            isCorrect = true;
+            isFirstAIAdvice = false;
+        }
+        if(isFirstHumanAdvice && advisingState == AdvisingState.Human) {
+            isCorrect = true;
+            isFirstHumanAdvice = false;
+        }
+
         if(isCorrect) {
             AdvisorRuleSpec = CurrentDestination.MaliciousRule;
         } else {
             AdvisorRuleSpec = BlackhatAI.inst.CreateNonMaliciousPacketRuleForDestination(CurrentDestination);
         }
         DisplayPacketInformation(AdvisorRuleSpec, AdvisorPacketRuleTextList);
+        InstrumentMgr.inst.AddRecord2(TaiserEventTypes.AdviceAppeared);
 
     }
 

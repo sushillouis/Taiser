@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using UnityEngine.XR;
+
 
 public class NewLobbyMgr : MonoBehaviour
 {
@@ -60,13 +60,30 @@ public class NewLobbyMgr : MonoBehaviour
             StartPanel.isVisible = (_state == LobbyState.StartOrQuit);
             AdminPanel.isVisible = (_state == LobbyState.Admin);
             EnterAliasPanel.isVisible = (_state == LobbyState.EnterAlias);
-            CreateOrJoinGamePanel.isVisible = (_state == LobbyState.CreateOrJoin);
+            //CreateOrJoinGamePanel.isVisible = (_state == LobbyState.CreateOrJoin);
             WaitingForPlayersPanel.isVisible = (_state == LobbyState.WaitingForPlayers);
             MissionObjectivePanel.isVisible = (_state == LobbyState.MissionObjective);
             ChooseGameModePanel.isVisible = (_state == LobbyState.ChooseGameMode);
             //ChooseGameDifficultyPanel.isVisible = (_state == LobbyState.ChooseDifficulty);
         }
     }
+
+    public Dictionary<LobbyState, LobbyState> PriorStateMap = new Dictionary<LobbyState, LobbyState>();
+    public void SetPriorStateMap()
+    {
+        PriorStateMap.Add(LobbyState.StartOrQuit, LobbyState.StartOrQuit);
+        PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
+        //PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
+        //PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.CreateOrJoin);
+        PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.StartOrQuit);
+
+        PriorStateMap.Add(LobbyState.ChooseGameMode, LobbyState.MissionObjective);
+
+        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.ChooseGameMode);
+        PriorStateMap.Add(LobbyState.Play, LobbyState.WaitingForPlayers);
+        //PriorStateMap.Add(LobbyState.Play, LobbyState.Play);
+    }
+
     public TaiserPanel AdminPanel;
     public TaiserPanel StartPanel;
     public TaiserPanel EnterAliasPanel;
@@ -103,21 +120,7 @@ public class NewLobbyMgr : MonoBehaviour
     {
         State = PriorStateMap[State];
     }
-    public Dictionary<LobbyState, LobbyState> PriorStateMap = new Dictionary<LobbyState, LobbyState>();
-    public void SetPriorStateMap()
-    {
-        PriorStateMap.Add(LobbyState.StartOrQuit, LobbyState.StartOrQuit);
-        PriorStateMap.Add(LobbyState.EnterAlias, LobbyState.StartOrQuit);
-        PriorStateMap.Add(LobbyState.CreateOrJoin, LobbyState.EnterAlias);
-        PriorStateMap.Add(LobbyState.MissionObjective, LobbyState.CreateOrJoin);
-
-        PriorStateMap.Add(LobbyState.ChooseGameMode, LobbyState.MissionObjective);
-
-        PriorStateMap.Add(LobbyState.WaitingForPlayers, LobbyState.ChooseGameMode);
-        PriorStateMap.Add(LobbyState.Play, LobbyState.WaitingForPlayers);
-        //PriorStateMap.Add(LobbyState.Play, LobbyState.Play);
-    }
-
+ 
 
     public InputField AliasInputFieldText;
     public Text PlayerNameText;
@@ -135,7 +138,7 @@ public class NewLobbyMgr : MonoBehaviour
     public static GameMode gameMode = GameMode.Session;
 
     public static PlayerSpecies teammateSpecies;
-    public static string teammateName;
+    public static List<string> teammateNames = new List<string>();
 
     //-----------------------------------------------------------
     public PlayerSpecies opponentSpecies;
@@ -168,7 +171,8 @@ public class NewLobbyMgr : MonoBehaviour
         if(PlayerName.Trim().ToLower().Contains("admin")) {
             State = LobbyState.Admin;
         } else {
-            State = LobbyState.CreateOrJoin;
+            ShowBriefing(); //sets LobbyState to LobbyState.MissionObjective
+
         }
 
     }
@@ -211,7 +215,19 @@ public class NewLobbyMgr : MonoBehaviour
                 break;
         }
 
+        //Make two players, one human one AI
+        teammateNames.Clear();
+        string teammateName;
+        int x = Random.Range(20, 99);
+        teammateName = "CyberAI " + x.ToString("00");
+        MakePlayerAndActivatePlayButton(teammateName, PlayerRoles.Whitehat, PlayerSpecies.AI, false);
+        teammateNames.Add(teammateName);
 
+        teammateName = GeneratePlayerName();
+        MakePlayerAndActivatePlayButton(teammateName, PlayerRoles.Whitehat, PlayerSpecies.Human, false);
+        teammateNames.Add(teammateName);
+
+        /*
         switch(teammateSpecies) {
             case PlayerSpecies.AI:
                 int x = Random.Range(20, 99);
@@ -229,6 +245,7 @@ public class NewLobbyMgr : MonoBehaviour
                 break;
 
         }
+        */
 
         WaitForPlayers(GameName);
 
@@ -239,13 +256,11 @@ public class NewLobbyMgr : MonoBehaviour
     public void ShowBriefing()
     {
         State = LobbyState.MissionObjective;
-        TTAnimator.Animate = true;
     }
 
     public void OnBriefingDoneButton()
     {
         //State = LobbyState.WaitingForPlayers;
-        TTAnimator.Animate = false;
         if(!ChooseOnce)
             FixTeammateSpeciesUIElements();
         State = LobbyState.ChooseGameMode;
@@ -367,7 +382,8 @@ public class NewLobbyMgr : MonoBehaviour
     {
         TaiserPlayer player = new TaiserPlayer(name, role, species);
         TaiserPlayerList.Add(player);
-        Invoke("SetWaitingForPlayersLists", 5.0f);//this does not work right because SetWaitingForPlayerLists will add all current players
+        Invoke("SetWaitingForPlayersLists", 5.0f);
+        //this does not work right because SetWaitingForPlayerLists will add all current players
         //the first time it is called though an Invoke or otherwise. So opponent's Invoke is the limiting factor 
         //SetWaitingForPlayersLists();
     }
@@ -520,7 +536,13 @@ public class NewLobbyMgr : MonoBehaviour
  
         PlayButton.interactable = true;
         SpinnerPanel.gameObject.SetActive(false);
-        WaitingForPlayersText.text = PlayerName + " found teammate: " + teammateName;
+        string tmp = "";
+        foreach(string teammateName in teammateNames) {
+            tmp += teammateName + ", ";
+        }
+        char[] charsToTrim = { ',', ' '};
+        WaitingForPlayersText.text = PlayerName + " found teammates: " + tmp.TrimEnd(charsToTrim);
+
         //
     }
 

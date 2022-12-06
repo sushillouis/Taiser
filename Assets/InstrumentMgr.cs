@@ -41,7 +41,7 @@ public class TaiserRecord
 [Serializable]
 public class EventLatencyTracker
 {
-    public List<TaiserEventTypes> startEventTypes;
+    public TaiserEventTypes startEventType;
     public List<TaiserEventTypes> endEventTypes;
     public float startEventTime;
     public float endEventTime;
@@ -65,6 +65,7 @@ public enum TaiserEventTypes
     MaliciousPacketFiltered_GoodForUs,
     MaliciousPacketUnfiltered_BadForUs,
     PickedAdvisorType,
+    AdviceAppeared,
     BackButtonNoFirewallSet
 }
 
@@ -141,10 +142,10 @@ public class InstrumentMgr : MonoBehaviour
 
     public void AddRecord(TaiserEventTypes tEventType, string modifier = "")
     {
-        EventLatencyTracker elt = eventLatencyIntervals.Find(x => x.startEventTypes.Contains(tEventType));
+        EventLatencyTracker elt = eventLatencyIntervals.Find(x => x.startEventType == tEventType);
         if(elt != null) {
             elt.startEventTime = Time.time;
-            AddRecord(tEventType.ToString(), modifier);
+            AddRecord(tEventType.ToString(), modifier);//this will be added multiple times, once for each latency tracked
         } 
 
         EventLatencyTracker elt2 = eventLatencyIntervals.Find(x => x.endEventTypes.Contains(tEventType));
@@ -158,6 +159,27 @@ public class InstrumentMgr : MonoBehaviour
             AddRecord(tEventType.ToString(), modifier);
         }
     }
+
+    public void AddRecord2(TaiserEventTypes tEventType, string modifier = "")
+    {
+        List<EventLatencyTracker> startTrackers = eventLatencyIntervals.FindAll(x => x.startEventType == tEventType);
+        foreach(EventLatencyTracker starter in startTrackers) {
+            starter.startEventTime = Time.time;
+            AddRecord(tEventType.ToString(), modifier);
+        }
+
+        List<EventLatencyTracker> endTrackers = eventLatencyIntervals.FindAll(x => x.endEventTypes.Contains(tEventType));
+        foreach(EventLatencyTracker ender in endTrackers) {
+            ender.endEventTime = Time.time;
+            float delta = ender.endEventTime - ender.startEventTime;
+            string output = ender.startEventType.ToString() + " latency, " + delta.ToString("0.00");
+            AddRecord(tEventType.ToString(), modifier + ", " + output);
+        }
+
+    }
+
+
+
     //-----------------------------------------------------------------
 
     //public string csvString;
